@@ -170,22 +170,6 @@ describe("auditWorkspace determinism over a changing worktree", () => {
 });
 
 describe("auditWorkspace over unsupported and excluded source", () => {
-	test("reports non-TS languages as unsupported coverage, never cleanliness", async () => {
-		await seedClean();
-		const baseline = await auditWorkspace(repo);
-		await put("lib/tool.py", "def tool():\n    return 1\n");
-		await put("lib/tool.go", "package main\n\nfunc tool() int {\n\treturn 1\n}\n");
-		const report = await auditWorkspace(repo);
-		expect(report.sourceCoverage.unsupported).toEqual({
-			files: 2,
-			note: "non-TS sources, not analyzed",
-		});
-		expect(report.completeness).toBe("complete");
-		// Unsupported surface never changes the measurement (§3.3).
-		expect(report.score).toEqual(baseline.score);
-		expect(report.metrics).toEqual(baseline.metrics);
-	});
-
 	test("honors source.exclude from the declarative audit configuration", async () => {
 		await seedClean();
 		await put("src/skipped/noisy.ts", tangledFunction("noisy"));

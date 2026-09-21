@@ -5,6 +5,7 @@ import { join } from "node:path";
 import ts from "typescript";
 import { discoverSourceInventory } from "../discovery/index.ts";
 import { buildSyntaxInventory } from "./inventory.ts";
+import { isTypeScriptFile } from "./types.ts";
 
 let repo: string;
 
@@ -36,10 +37,14 @@ describe("buildSyntaxInventory", () => {
 		await put("src/math.test.ts", "test('add', () => {});\n");
 
 		const inventory = await build();
-		expect(inventory.compilerVersion).toBe(ts.version);
+		expect(inventory.compilerVersion).toBe(`${ts.version}-python.1.1.18`);
 		expect(inventory.completeness).toBe("complete");
 		expect(inventory.diagnostics).toEqual([]);
-		expect(inventory.files.map((file) => [file.path, file.sourceSet, file.scriptKind])).toEqual([
+		expect(
+			inventory.files
+				.filter(isTypeScriptFile)
+				.map((file) => [file.path, file.sourceSet, file.scriptKind]),
+		).toEqual([
 			["src/math.test.ts", "test", "ts"],
 			["src/math.ts", "production", "ts"],
 			["src/view.tsx", "production", "tsx"],
@@ -56,12 +61,14 @@ describe("buildSyntaxInventory", () => {
 		// Every function fact points into the file's single SourceFile: an
 		// analyzer consuming `functions` and one consuming `sourceFile` walk
 		// the same tree — no re-parse anywhere in the audit.
-		if (file) {
+		if (file && isTypeScriptFile(file)) {
 			for (const fn of file.functions) {
 				expect(fn.node.getSourceFile()).toBe(file.sourceFile);
 			}
 		}
-		expect(file?.sourceFile.fileName).toBe("src/shared.ts");
+		expect(file && isTypeScriptFile(file) ? file.sourceFile.fileName : undefined).toBe(
+			"src/shared.ts",
+		);
 	});
 
 	test("maps function positions to the real lines of the file", async () => {

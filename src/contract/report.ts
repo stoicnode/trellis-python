@@ -55,6 +55,7 @@ import {
 	type ScoringRole,
 } from "./evidence.ts";
 import { findingSchema, historicalFindingSchema } from "./finding.ts";
+import { languageCoverageRowSchema } from "./language-coverage.ts";
 import { type MetricValue, metricValueSchema } from "./metric.ts";
 import { dottedIdSchema, finiteNumberSchema, versionStringSchema } from "./primitives.ts";
 import { safeguardResultSchema } from "./safeguard.ts";
@@ -63,6 +64,7 @@ import {
 	PRE_IDENTITY_SCHEMA_VERSION,
 	PRE_PROVIDER_SCHEMA_VERSION,
 	SCHEMA_VERSION,
+	SCOPED_IDENTITY_SCHEMA_VERSION,
 } from "./version.ts";
 
 /** Per-dimension points, traceable to the raw metrics that produced them (SPEC §7). */
@@ -108,6 +110,7 @@ const reportBody = {
 	scoringVersion: versionStringSchema,
 	repo: repoMetadataSchema,
 	sourceCoverage: sourceCoverageSchema,
+	languageCoverage: z.array(languageCoverageRowSchema).optional(),
 	completeness: z.enum(["complete", "incomplete"]),
 	metrics: z.record(dottedIdSchema, metricValueSchema),
 	score: scoreSchema,
@@ -310,7 +313,11 @@ function validateCompletenessIndependence(
  */
 export const evidenceAuditReportSchema = z
 	.strictObject({
-		schemaVersion: z.enum([PRE_IDENTITY_SCHEMA_VERSION, SCHEMA_VERSION]),
+		schemaVersion: z.enum([
+			PRE_IDENTITY_SCHEMA_VERSION,
+			SCOPED_IDENTITY_SCHEMA_VERSION,
+			SCHEMA_VERSION,
+		]),
 		...reportBody,
 		findings: z.array(findingSchema),
 		evidence: evidenceAreaSchema,
@@ -323,7 +330,8 @@ export const evidenceAuditReportSchema = z
 		for (const [index, finding] of report.findings.entries()) {
 			const hasIdentity = finding.identity !== undefined;
 			const needsIdentity =
-				report.schemaVersion === SCHEMA_VERSION && finding.kind === "complexity.hotspot";
+				report.schemaVersion !== PRE_IDENTITY_SCHEMA_VERSION &&
+				finding.kind === "complexity.hotspot";
 			if (hasIdentity !== needsIdentity) {
 				ctx.addIssue({
 					code: "custom",

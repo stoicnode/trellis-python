@@ -27,6 +27,12 @@ trellis standards                  # canonical-config drift manifest (separate c
 trellis guide cleanup              # print bundled, read-only cleanup guidance
 ```
 
+`audit` discovers TypeScript/TSX and Python by default. A Python-only project
+needs no configuration or Python interpreter; mixed projects produce one report
+and one score, with a per-language coverage section. `--json`, `--md`,
+`--baseline`, `--history`, `compare`, policy and fleet use that same report.
+`source.exclude` can omit Python paths such as `migrations/**` when desired.
+
 The default `audit` run is **stateless** — no database, no report files —
 unless `--history` / `--out` ask. History lives centrally at
 `~/.trellis/trellis.db` (`$TRELLIS_DB` or `--db` overrides), never inside the
@@ -37,6 +43,8 @@ audited repo.
 `--provider <id[:mode]>` selects an optional quality-evidence provider —
 repeatable, and advisory/unscored: it adds namespaced evidence alongside the
 authoritative native measurement and never changes the sloppiness index.
+The delivered external adapters stage TypeScript files only; Python metrics
+come from native analysis.
 Today the supported ids are `jscpd` (needs a match mode:
 `--provider jscpd:exact|normalized|near`), `dependency-cruiser`, `knip` and
 `sonarjs` (the latter three resolve to located `unsupported` evidence until

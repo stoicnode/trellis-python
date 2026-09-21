@@ -27,7 +27,8 @@ function coveredLines(file: FileSyntax, intervals: LineInterval[], work: Duplica
 		work.charge();
 		return a.start - b.start || b.end - a.end;
 	});
-	const kinds = classifyLines(file.sourceFile, work);
+	const kinds = file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : []);
+	work.reserve(kinds.length);
 	let last = 0;
 	let count = 0;
 	for (const interval of intervals) {

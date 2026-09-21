@@ -1,7 +1,7 @@
 /** Experimental evidence only (trellis-2d45); deliberately outside audit/scoring. */
 import ts from "typescript";
 import type { Range } from "../contract/index.ts";
-import { type FileSyntax, type FunctionFacts, rangeAt } from "../syntax/index.ts";
+import { type FunctionFacts, rangeAt, type TypeScriptFileSyntax } from "../syntax/index.ts";
 
 export interface Site {
 	path: string;
@@ -46,7 +46,7 @@ function forwardsParameter(parameter: ts.ParameterDeclaration, argument: ts.Expr
 }
 
 /** Syntactic argument preservation, NOT semantic redundancy or a resolved call edge. */
-export function forwarderAt(file: FileSyntax, fn: FunctionFacts): Forwarder | undefined {
+export function forwarderAt(file: TypeScriptFileSyntax, fn: FunctionFacts): Forwarder | undefined {
 	const node = fn.node;
 	if (!ts.isFunctionLike(node) || !("body" in node) || !node.body) return undefined;
 	const call = returnedCall(node.body);
@@ -76,7 +76,7 @@ function caseValue(expression: ts.Expression): string | undefined {
 	return undefined;
 }
 
-function dispatchAt(file: FileSyntax, node: ts.SwitchStatement): Dispatch | undefined {
+function dispatchAt(file: TypeScriptFileSyntax, node: ts.SwitchStatement): Dispatch | undefined {
 	const cases: string[] = [];
 	for (const clause of node.caseBlock.clauses) {
 		if (!ts.isCaseClause(clause)) continue;
@@ -96,7 +96,7 @@ function dispatchAt(file: FileSyntax, node: ts.SwitchStatement): Dispatch | unde
 }
 
 /** Walk the AST once, including top-level switches and nested functions exactly once. */
-export function dispatchesIn(file: FileSyntax): Dispatch[] {
+export function dispatchesIn(file: TypeScriptFileSyntax): Dispatch[] {
 	const result: Dispatch[] = [];
 	const visit = (node: ts.Node): void => {
 		if (ts.isSwitchStatement(node)) {

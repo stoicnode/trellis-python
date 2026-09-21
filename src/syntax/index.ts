@@ -27,8 +27,10 @@ export {
 	FUNCTION_KINDS,
 	type FunctionFacts,
 	type FunctionKind,
+	isTypeScriptFile,
 	type LineCounts,
 	type ParseDiagnostic,
 	type ScriptVariant,
 	type SyntaxInventory,
+	type TypeScriptFileSyntax,
 } from "./types.ts";

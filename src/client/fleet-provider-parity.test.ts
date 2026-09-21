@@ -24,7 +24,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { providerEntry, seedClonePair, TOOL_AVAILABLE } from "../audit/provider-fixtures.ts";
 import * as client from "./index.ts";
@@ -74,7 +74,14 @@ function comparableFleet(report: client.FleetReport) {
 }
 
 /** The runtime packages a trellis install needs to boot (never the pinned tools). */
-const RUNTIME_PACKAGES = ["commander", "js-yaml", "typescript", "yaml", "zod"] as const;
+const RUNTIME_PACKAGES = [
+	"@lezer/python",
+	"commander",
+	"js-yaml",
+	"typescript",
+	"yaml",
+	"zod",
+] as const;
 
 /**
  * A real trellis install whose operator did not prepare the pinned provider
@@ -87,7 +94,9 @@ function installWithoutPinnedTool(): string {
 	cpSync(join(REPO, "src"), join(install, "src"), { recursive: true });
 	mkdirSync(join(install, "node_modules"));
 	for (const name of RUNTIME_PACKAGES) {
-		symlinkSync(join(REPO, "node_modules", name), join(install, "node_modules", name));
+		const target = join(install, "node_modules", name);
+		mkdirSync(dirname(target), { recursive: true });
+		symlinkSync(join(REPO, "node_modules", name), target);
 	}
 	return install;
 }

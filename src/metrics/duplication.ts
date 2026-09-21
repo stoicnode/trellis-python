@@ -46,6 +46,7 @@
  */
 import ts from "typescript";
 import type { Range, SourceSet } from "../contract/index.ts";
+import { pythonTokens } from "../python/parser.ts";
 import { type FileSyntax, positionAt } from "../syntax/index.ts";
 import type { SyntaxWork } from "../syntax/work.ts";
 import type { DuplicationPhase, DuplicationStop } from "./duplication-work.ts";
@@ -102,7 +103,7 @@ export interface TokenStream {
 	packagePath: string;
 	sourceSet: SourceSet;
 	/** Normalized token kinds in document order. */
-	kinds: ts.SyntaxKind[];
+	kinds: number[];
 	/** 1-based line of each token's start. */
 	startLines: number[];
 	/** 1-based line of each token's end. */
@@ -174,6 +175,20 @@ export interface TokenCollectionWork extends SyntaxWork {
 }
 
 function collectTokens(file: FileSyntax, work: TokenCollectionWork): TokenStream {
+	if (file.language === "python") {
+		const tokens = pythonTokens(file.parserTree, file.text ?? "", () => {
+			work.token();
+			work.charge(2 + 2 * Math.ceil(Math.log2(file.lines.total + 1)));
+		});
+		return {
+			path: file.path,
+			packagePath: file.packagePath,
+			sourceSet: file.sourceSet,
+			kinds: tokens.map((token) => token.kind),
+			startLines: tokens.map((token) => token.startLine),
+			endLines: tokens.map((token) => token.endLine),
+		};
+	}
 	const sourceFile = file.sourceFile;
 	const kinds: ts.SyntaxKind[] = [];
 	const startLines: number[] = [];

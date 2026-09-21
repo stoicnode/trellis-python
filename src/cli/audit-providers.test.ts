@@ -9,7 +9,7 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { seedClonePair, TOOL_AVAILABLE } from "../audit/provider-fixtures.ts";
 
 /**
@@ -57,7 +57,14 @@ async function runCli(
 }
 
 /** The runtime packages a trellis CLI install needs to boot (never the pinned tools). */
-const RUNTIME_PACKAGES = ["commander", "js-yaml", "typescript", "yaml", "zod"] as const;
+const RUNTIME_PACKAGES = [
+	"@lezer/python",
+	"commander",
+	"js-yaml",
+	"typescript",
+	"yaml",
+	"zod",
+] as const;
 
 /**
  * A real trellis CLI install whose operator did not prepare the pinned
@@ -70,7 +77,9 @@ function installCliWithoutPinnedTool(): string {
 	cpSync(join(REPO, "src"), join(install, "src"), { recursive: true });
 	mkdirSync(join(install, "node_modules"));
 	for (const name of RUNTIME_PACKAGES) {
-		symlinkSync(join(REPO, "node_modules", name), join(install, "node_modules", name));
+		const target = join(install, "node_modules", name);
+		mkdirSync(dirname(target), { recursive: true });
+		symlinkSync(join(REPO, "node_modules", name), target);
 	}
 	return install;
 }

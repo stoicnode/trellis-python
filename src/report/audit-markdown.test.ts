@@ -89,7 +89,8 @@ describe("renderAuditMarkdown per-fixture content", () => {
 
 	test("renders mixed-language surface as unsupported coverage, never cleanliness", () => {
 		const output = render("mixed-language");
-		expect(output).toContain("| unsupported | 2 |  | non-TS sources, not analyzed |");
+		expect(output).toContain("| unsupported | 1 |  | non-TS sources, not analyzed |");
+		expect(output).toContain("| python | 1 / 1 | 0 | 0 | 0 |");
 		expect(output).toContain("sloppiness index 0/100");
 	});
 

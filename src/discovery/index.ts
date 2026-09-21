@@ -1,4 +1,4 @@
-/** TypeScript/TSX source discovery and classification. */
+/** TypeScript/TSX and Python source discovery and classification. */
 export {
 	type Classification,
 	classifyTsFile,

@@ -20,7 +20,7 @@ describe("isTypeScriptSource", () => {
 
 describe("isUnsupportedSource", () => {
 	test("counts known non-TS source extensions, case-insensitively", () => {
-		expect(isUnsupportedSource("main.py")).toBe(true);
+		expect(isUnsupportedSource("main.py")).toBe(false);
 		expect(isUnsupportedSource("App.SWIFT")).toBe(true);
 		expect(isUnsupportedSource("component.jsx")).toBe(true);
 		expect(isUnsupportedSource("README.md")).toBe(false);

@@ -171,11 +171,17 @@ function versionFacts(
 		return;
 	}
 	if (baseline.schemaVersion !== current.schemaVersion) {
-		if (baseline.schemaVersion === "1.2.0" || current.schemaVersion === "1.2.0") {
+		const hasIdentity = (version: string): boolean => version === "1.2.0" || version === "1.3.0";
+		if (hasIdentity(baseline.schemaVersion) !== hasIdentity(current.schemaVersion)) {
 			issues.push({
 				code: "schema-version",
 				message:
 					"scoped hotspot identity requires a fresh schema 1.2.0 baseline; historical schemas lack identity provenance",
+			});
+		} else if (hasIdentity(baseline.schemaVersion)) {
+			caveats.push({
+				code: "schema-span",
+				message: `schema versions differ (${baseline.schemaVersion} vs ${current.schemaVersion}): language coverage is additive and the scored measurement body is unchanged`,
 			});
 		} else
 			caveats.push({

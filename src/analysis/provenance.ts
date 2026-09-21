@@ -43,7 +43,7 @@ export const MEASURED_SOURCE_SETS = ["production", "test"] as const;
 export const ALL_SOURCE_SETS: readonly SourceSet[] = SOURCE_SETS;
 
 /** The shared-parse engine identity every native analysis records (§16.2). */
-const SHARED_PARSE_ENGINE = "trellis.typescript";
+const SHARED_PARSE_ENGINE = "trellis.typescript-python";
 
 /**
  * The native provider identity of one analyzer: kind `native`, the trellis
@@ -111,7 +111,9 @@ export function nativeScope(
 		files: files
 			.map((file) => ({
 				path: file.path,
-				fingerprint: contentFingerprint(file.sourceFile.text),
+				fingerprint: contentFingerprint(
+					file.text ?? ("sourceFile" in file ? file.sourceFile.text : ""),
+				),
 			}))
 			.sort((a, b) => (a.path < b.path ? -1 : 1)),
 	};

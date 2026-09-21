@@ -1,7 +1,7 @@
 /** Research protocol v1: three uncalibrated signals, never a sloppiness score. */
 import { loadAuditConfig } from "../config/index.ts";
 import { discoverSourceInventory } from "../discovery/index.ts";
-import { buildSyntaxInventory, type SyntaxInventory } from "../syntax/index.ts";
+import { buildSyntaxInventory, isTypeScriptFile, type SyntaxInventory } from "../syntax/index.ts";
 import { type Dispatch, dispatchesIn, type Forwarder, forwarderAt } from "./slop-signals.ts";
 
 function dispatchFamilies(dispatches: Dispatch[]) {
@@ -51,6 +51,7 @@ function dispatchDisagreements(dispatches: Dispatch[]) {
 /** Production scope only; malformed files are omitted explicitly, never counted as clean. */
 export function measureSlopHypotheses(inventory: SyntaxInventory) {
 	const production = inventory.files
+		.filter(isTypeScriptFile)
 		.filter((file) => file.sourceSet === "production")
 		.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 	const files = production.filter((file) => file.diagnostics.length === 0);

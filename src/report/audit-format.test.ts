@@ -215,7 +215,7 @@ describe("coverageRows", () => {
 			const rows = coverageRows(mixed.report.sourceCoverage);
 			expect(rows.map((row) => row.scope)).toEqual(["production", "test", "unsupported"]);
 			const unsupported = rows.find((row) => row.scope === "unsupported");
-			expect(unsupported).toMatchObject({ files: 2, note: "non-TS sources, not analyzed" });
+			expect(unsupported).toMatchObject({ files: 1, note: "non-TS sources, not analyzed" });
 			expect(rows[0]?.sloc).toBeGreaterThan(0);
 		} finally {
 			await mixed.cleanup();

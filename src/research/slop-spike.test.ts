@@ -7,6 +7,7 @@ import {
 	collectFunctions,
 	countLines,
 	type FileSyntax,
+	isTypeScriptFile,
 	parseSource,
 	type SyntaxInventory,
 } from "../syntax/index.ts";
@@ -55,7 +56,9 @@ describe("measureSlopHypotheses", () => {
 		const maxCc = (source: string) =>
 			Math.max(
 				...inventory({ "a.ts": source }).files.flatMap((file) =>
-					file.functions.map((fn) => measureFunctionComplexity(fn).cc),
+					isTypeScriptFile(file)
+						? file.functions.map((fn) => measureFunctionComplexity(fn).cc)
+						: [],
 				),
 			);
 		expect(maxCc(direct)).toBe(maxCc(layered));
@@ -100,7 +103,8 @@ describe("measureSlopHypotheses", () => {
 	test("guards a non-function passed through the internal facts boundary", () => {
 		const file = inventory({ "a.ts": "const f = () => g();" }).files[0];
 		const fn = file?.functions[0];
-		if (!file || !fn) throw new Error("missing fixture");
+		if (!file || !isTypeScriptFile(file) || !fn || !("node" in fn))
+			throw new Error("missing TypeScript fixture");
 		expect(forwarderAt(file, { ...fn, node: file.sourceFile })).toBeUndefined();
 	});
 

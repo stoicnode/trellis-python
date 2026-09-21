@@ -1,12 +1,13 @@
-# trellis — deterministic TypeScript sloppiness audit
+# trellis — deterministic TypeScript and Python sloppiness audit
 
 ---
 
 ## 1. What trellis is
 
 trellis is a **deterministic, offline-by-default sloppiness audit** for
-TypeScript/TSX workspaces. It parses source with the TypeScript compiler API
-and measures structural debt — complexity, structural erosion, duplication,
+TypeScript/TSX and Python workspaces. It parses source with the TypeScript
+compiler API or a pinned in-process Python grammar and measures structural
+debt — complexity, structural erosion, duplication,
 and import cycles — plus a separate, non-scoring inspection of safeguard
 configuration (hooks and check wiring). It emits a versioned report with a
 **0–100 sloppiness index where lower is better**, raw metrics, score
@@ -36,7 +37,7 @@ Three invariants define the product:
    the same measurement, scoring, and policy code path. Parity is mechanical
    (deep-equal tests), not aspirational.
 
-trellis answers one question: *how sloppy is this TypeScript tree, where
+trellis answers one question: *how sloppy is this source tree, where
 exactly, and is it getting worse?* It does not grade documentation or process, and it does not execute or verify the project's own
 checks.
 
@@ -82,8 +83,8 @@ checks.
   executes them and never claims they pass.
 - **AI features** of any kind — no model calls, agent passes, embeddings, or
   LLM-assisted grading, per the §1 invariant.
-- **New language adapters** — TypeScript/TSX only. Other languages are reported as
-  unsupported coverage (§3.3), never analyzed.
+- **Additional language adapters** beyond TypeScript/TSX and Python. Other
+  languages are reported as unsupported coverage (§3.3), never analyzed.
 - Also deferred: a web UI, automatic remediation / fix fan-out, hosted or
   scheduled services, README badges, and any rewrite in another language.
 
@@ -130,10 +131,9 @@ Every measurement and every report carries an explicit state:
   unresolved imports, resource exhaustion). The report says what and where;
   an incomplete required dimension prevents publishing an apparently
   complete headline score (§7).
-- `unsupported` — the source is outside the analyzed language set (non-TS/TSX
-  files, whole non-TS packages). Unsupported surface is **coverage**, never
-  cleanliness: a repo that is 60% Python shows 60% unsupported coverage, not
-  a clean bill.
+- `unsupported` — the source is outside the TypeScript/TSX/Python analyzed
+  language set. Unsupported surface is **coverage**, never cleanliness: a
+  repository with unrecognized languages does not get a clean bill for them.
 - `not-applicable` — the measurement is genuinely meaningless for the scope
   (e.g. complexity of a function-free declaration-only package). Documented
   per metric; never used to hide an analysis failure.
@@ -383,7 +383,7 @@ resources; [executed acceptance](docs/research/native-duplication/acceptance.md)
 covers fourteen fingerprinted corpus entries plus 2/10/40-copy controls.
 Work v2 counts the whole pipeline rather than historical extension comparisons;
 analyzer/native tool+adapter 0.2.3 and recorded analysis options distinguish the
-semantics. Report schema stays 1.2.0 and scoring stays 0.2.0-provisional. Older
+  semantics. At that cutover, report schema stayed 1.2.0 and scoring stayed 0.2.0-provisional. Older
 artifacts remain readable; crossing analyzer/resource semantics requires a fresh
 baseline. Formerly complete metrics/scores retain parity; newly complete
 measurements are improved observability, not source cleanup.
@@ -563,7 +563,7 @@ version data, and misleading `complete` states.
 
 Scoped native hotspot identity v1 is defined in
 [`docs/hotspot-identity.md`](docs/hotspot-identity.md), including the function-form
-and historical compatibility matrices. Schema 1.2.0 requires identified or
+and historical compatibility matrices. Schemas 1.2.0 and 1.3.0 require identified or
 explicitly ambiguous provenance on native hotspots. Analyzer 0.2.2 derives
 that provenance from the shared AST; historical 1.0.0/1.1.0 artifacts retain
 their original interpretation.
@@ -1011,8 +1011,9 @@ Unchanged from the warren/burrow stack:
 
 - **Runtime:** Bun (runs TS directly, no build step for the CLI).
 - **Language:** TypeScript strict (`noUncheckedIndexedAccess`, no `any`).
-- **Parsing:** the pinned TypeScript compiler API — one shared parse layer
-  reused by all **native** metrics within an audit. *(Optional providers,
+- **Parsing:** the pinned TypeScript compiler API and pinned in-process Lezer
+  Python grammar — one shared parse per file reused by all **native** metrics
+  within an audit. *(Optional providers,
   per the §16 contract, may run their own pinned engines behind the §16.4
   execution boundary, with their parser recorded in analysis identity
   — the shared-parse rule governs native measurement and is never weakened
@@ -1063,7 +1064,7 @@ real failure; safeguards and optional provider evidence never offset the score.
   §16; native enforcement stays deferred).
 - **Project verification execution** — actually running checks; trellis stays
   an inspector, not a runner.
-- **New language adapters** — Swift/Python and others; the contracts keep
+- **New language adapters** — Swift and others; the contracts keep
   `unsupported` coverage honest so this can land later without a schema
   break.
 - **Web dashboard, hosted/scheduled service, auto-remediation fan-out,

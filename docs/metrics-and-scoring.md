@@ -47,9 +47,9 @@ is never published from partial analysis.
 
 ## Known limitations
 
-- **TypeScript/TSX only.** Other languages are never analyzed; they surface
-  as explicit `unsupported` coverage (a repo that is 60% Python shows 60%
-  unsupported — not a clean bill).
+- **TypeScript/TSX and Python.** Both contribute to the same production
+  metrics and index; other languages surface as explicit `unsupported`
+  coverage. Per-language coverage reports parse failures and import gaps.
 - **Type-3 near clones are out of scope.** A divergence splits a clone into
   its maximal exact-normalized runs, each reported independently if above
   the 100-token minimum.
@@ -58,9 +58,17 @@ is never published from partial analysis.
   `structurally-wired` safeguard means "verifiably connected to an
   enforcement point," nothing more. Unsupported shell constructs stay
   `unknown`, never guessed.
-- **Resolution is local-only.** Absent `node_modules` degrades import
-  resolution to documented `unresolved` edges — never a network fetch — and
-  incomplete graph coverage rolls cycle metrics up `incomplete`.
+- **Resolution is local-only.** TypeScript uses its existing workspace/config
+  rules. Python resolves discovered root and `src/` modules, package
+  `__init__.py` files and relative imports. It does not evaluate `sys.path`,
+  installed packages or arbitrary import aliases. Dynamic imports are located
+  unresolved edges. Incomplete graph coverage rolls cycle metrics up
+  `incomplete`; Trellis never fetches or executes dependencies.
+- **Python syntax coverage.** The pinned Lezer grammar handles the Python 3
+  forms exercised by the corpus, including `async`, comprehensions and
+  `match`. Parse recovery and indentation errors make affected dimensions
+  incomplete. Interpreter-specific semantic validity is outside this static
+  parser's scope; see [Python support](python-support.md).
 - **Provisional calibration and evidence gaps.** The count curve preserves
   sensitivity at large counts, but weights still need broader validation.
   Indirect budget references can remain only `configured` (`trellis-b412`). See the

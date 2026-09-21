@@ -176,7 +176,7 @@ describe("audit orchestration through the registry", () => {
 		// inputs; measurement cannot re-discover or re-parse).
 		for (const run of runs) {
 			expect(run.result.analysis?.parser).toEqual({
-				engine: "trellis.typescript",
+				engine: "trellis.typescript-python",
 				version: syntax.compilerVersion,
 			});
 		}
@@ -240,6 +240,7 @@ describe("audit orchestration through the registry", () => {
 			"completeness",
 			"evidence",
 			"findings",
+			"languageCoverage",
 			"metrics",
 			"repo",
 			"run",

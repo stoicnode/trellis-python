@@ -38,7 +38,10 @@ export const SCORING_VERSION = "0.2.0-provisional";
  * from the report's declared scored inputs. Native metric values and the
  * scoring formula are unchanged.
  */
-export const SCHEMA_VERSION = "1.2.0";
+export const SCHEMA_VERSION = "1.3.0";
+
+/** The first schema requiring scoped hotspot identity. */
+export const SCOPED_IDENTITY_SCHEMA_VERSION = "1.2.0";
 
 /** Evidence-carrying reports before scoped hotspot identity. */
 export const PRE_IDENTITY_SCHEMA_VERSION = "1.1.0";
@@ -55,6 +58,7 @@ export const PRE_PROVIDER_SCHEMA_VERSION = "1.0.0";
 export const SUPPORTED_SCHEMA_VERSIONS = [
 	PRE_PROVIDER_SCHEMA_VERSION,
 	PRE_IDENTITY_SCHEMA_VERSION,
+	SCOPED_IDENTITY_SCHEMA_VERSION,
 	SCHEMA_VERSION,
 ] as const;
 

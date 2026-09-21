@@ -8,8 +8,9 @@ full design record see [`SPEC.md`](SPEC.md); for ecosystem context see
 ## Mission
 
 `trellis` — a **deterministic, offline-by-default sloppiness audit** for
-TypeScript/TSX workspaces. It parses source with the TypeScript compiler API
-and measures structural debt — **complexity, structural erosion, duplication,
+TypeScript/TSX and Python workspaces. It parses source with the TypeScript
+compiler API or a pinned in-process Python grammar and measures structural
+debt — **complexity, structural erosion, duplication,
 and import cycles** — plus a separate, non-scoring inspection of safeguard
 configuration (hooks and check wiring). Each run emits a versioned report
 with a **0–100 sloppiness index where lower is better** (not a percentage of
@@ -161,7 +162,7 @@ Enforced by Biome's `style.useFilenamingConvention` rule in `biome.json`.
 
 - All behavior lives in the **core** modules under `src/` (current core:
   `src/audit/`, `src/config/`, `src/contract/`, `src/discovery/`, `src/syntax/`,
-  `src/metrics/`, `src/safeguards/`, `src/scoring/`, `src/compare/`,
+  `src/metrics/`, `src/python/`, `src/safeguards/`, `src/scoring/`, `src/compare/`,
   `src/standards/`, `src/fleet/`, `src/store/`, `src/history/`, `src/report/`,
   `src/providers/`, `src/guides/`; see SPEC §4). No business logic anywhere else.
   `src/audit/` is the deterministic audit core (trellis-ef85):

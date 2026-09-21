@@ -64,6 +64,15 @@ function coverageLines(report: AuditReport): string[] {
 			if (row.note !== undefined) parts.push(row.note);
 			return `  ${pad(row.scope, scopeWidth)}  ${parts.join(" · ")}`;
 		}),
+		...(report.languageCoverage === undefined || report.languageCoverage.length === 0
+			? []
+			: [
+					"language coverage",
+					...report.languageCoverage.map(
+						(row) =>
+							`  ${pad(row.language, 10)}  ${row.analyzedFiles}/${row.discoveredFiles} files analyzed · ${row.parseFailureFiles} parse failures · ${row.unresolvedImports} unresolved imports · ${row.dynamicImports} dynamic imports`,
+					),
+				]),
 	];
 }
 

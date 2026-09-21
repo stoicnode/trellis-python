@@ -39,6 +39,21 @@ function findingRows(findings: readonly Finding[]): string[] {
 	);
 }
 
+function languageCoverageLines(report: AuditReport): string[] {
+	if (report.languageCoverage === undefined || report.languageCoverage.length === 0) return [];
+	return [
+		"",
+		"## Language coverage",
+		"",
+		"| language | analyzed / discovered files | parse failures | unresolved imports | dynamic imports |",
+		"|---|---:|---:|---:|---:|",
+		...report.languageCoverage.map(
+			(row) =>
+				`| ${row.language} | ${row.analyzedFiles} / ${row.discoveredFiles} | ${row.parseFailureFiles} | ${row.unresolvedImports} | ${row.dynamicImports} |`,
+		),
+	];
+}
+
 /** Render a §6.4 audit report as a bounded Markdown summary. */
 export function renderAuditMarkdown(
 	report: AuditReport,
@@ -60,6 +75,7 @@ export function renderAuditMarkdown(
 	for (const row of coverageRows(report.sourceCoverage)) {
 		lines.push(`| ${row.scope} | ${row.files} | ${row.sloc ?? ""} | ${cell(row.note ?? "")} |`);
 	}
+	lines.push(...languageCoverageLines(report));
 
 	lines.push(
 		"",

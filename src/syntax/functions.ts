@@ -24,10 +24,10 @@
 import ts from "typescript";
 import { collectFunctionIdentities } from "./identity.ts";
 import { rangeAt } from "./parse.ts";
-import type { FunctionFacts, FunctionKind } from "./types.ts";
+import type { FunctionFacts, TypeScriptFunctionKind } from "./types.ts";
 
 /** The `ts.SyntaxKind` → inventory-kind mapping for body-bearing function-likes. */
-const FUNCTION_LIKE_KINDS: ReadonlyMap<ts.SyntaxKind, FunctionKind> = new Map([
+const FUNCTION_LIKE_KINDS: ReadonlyMap<ts.SyntaxKind, TypeScriptFunctionKind> = new Map([
 	[ts.SyntaxKind.FunctionDeclaration, "function-declaration"],
 	[ts.SyntaxKind.FunctionExpression, "function-expression"],
 	[ts.SyntaxKind.ArrowFunction, "arrow-function"],
@@ -48,7 +48,9 @@ type FunctionLikeNode =
 	| ts.SetAccessorDeclaration;
 
 /** Narrow `node` to a function-like kind the inventory recognizes. */
-function asFunctionLike(node: ts.Node): { kind: FunctionKind; fn: FunctionLikeNode } | null {
+function asFunctionLike(
+	node: ts.Node,
+): { kind: TypeScriptFunctionKind; fn: FunctionLikeNode } | null {
 	const kind = FUNCTION_LIKE_KINDS.get(node.kind);
 	return kind === undefined ? null : { kind, fn: node as FunctionLikeNode };
 }
@@ -71,7 +73,7 @@ function contextualName(node: ts.Node): string | undefined {
 
 /** Name + origin for one inventoried function, per the documented naming rule. */
 function nameOf(
-	kind: FunctionKind,
+	kind: TypeScriptFunctionKind,
 	fn: FunctionLikeNode,
 ): { name: string; nameOrigin: FunctionFacts["nameOrigin"] } {
 	if (kind === "constructor") return { name: "constructor", nameOrigin: "declared" };
@@ -97,7 +99,7 @@ interface CollectState {
 function addFunction(
 	state: CollectState,
 	pending: ReadonlyMap<string, number>,
-	kind: FunctionKind,
+	kind: TypeScriptFunctionKind,
 	fn: FunctionLikeNode,
 	body: ts.Node,
 ): void {

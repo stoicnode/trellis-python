@@ -25,11 +25,25 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import yaml from "js-yaml";
 import type { SourceConfig, SourceCoverage, SourceSet } from "../contract/index.ts";
-import { classifyTsFile, isTypeScriptSource, isUnsupportedSource } from "./classify.ts";
+import { classifySourceFile, isSupportedSource, isUnsupportedSource } from "./classify.ts";
 import { matchAnyGlob } from "./glob.ts";
 
 /** Dependency/install dirs never descended into (install-state dependent — not the repo's source). */
 const DEPENDENCY_DIRS = new Set(["node_modules"]);
+
+/** Python environments and tool caches are never project source. */
+const PYTHON_IGNORED_DIRS = new Set([
+	".venv",
+	"venv",
+	"__pycache__",
+	".pytest_cache",
+	".mypy_cache",
+	".ruff_cache",
+	"env",
+	"virtualenv",
+	"site-packages",
+	"__pypackages__",
+]);
 
 /**
  * Build-output dirs whose TS/TSX content is counted as `excluded` coverage —
@@ -59,10 +73,12 @@ export interface WorkspacePackage {
 	declared: boolean;
 }
 
-/** One TS/TSX file assigned to exactly one source set. */
+/** One supported source file assigned to exactly one source set. */
 export interface ClassifiedFile {
 	/** Repo-relative POSIX path. */
 	path: string;
+	/** Native language adapter selected from the file extension. */
+	language: "typescript" | "python";
 	sourceSet: SourceSet;
 	/** Repo-relative root of the owning (nearest ancestor) package. */
 	packagePath: string;
@@ -70,7 +86,7 @@ export interface ClassifiedFile {
 	rule: string;
 }
 
-/** A TS/TSX file in excluded scope — counted, never classified. */
+/** A supported file in excluded scope — counted, never classified. */
 export interface ExcludedFile {
 	path: string;
 	reason: "build-output" | "config-exclude";
@@ -102,7 +118,7 @@ export interface DiscoverInventoryOptions {
 
 /** Mutable walk state threaded through the recursion. */
 interface WalkState {
-	tsFiles: string[];
+	sourceFiles: string[];
 	excluded: ExcludedFile[];
 	unsupportedByExt: Map<string, number>;
 	ignored: IgnoredEntry[];
@@ -118,22 +134,38 @@ function handleFile(
 	inBuildOutput: boolean,
 	exclude: readonly string[],
 ): void {
-	if (name === "package.json") {
+	if (name === "package.json" || name === "pyproject.toml") {
 		const dir = rel === name ? "" : rel.slice(0, -(name.length + 1));
 		state.manifestDirs.push(dir);
 		return;
 	}
-	if (isTypeScriptSource(rel)) {
-		if (inBuildOutput) state.excluded.push({ path: rel, reason: "build-output" });
-		else if (matchAnyGlob(exclude, rel))
-			state.excluded.push({ path: rel, reason: "config-exclude" });
-		else state.tsFiles.push(rel);
+	if (isSupportedSource(rel)) {
+		recordSupportedFile(state, rel, inBuildOutput, exclude);
 		return;
 	}
-	if (!inBuildOutput && !matchAnyGlob(exclude, rel) && isUnsupportedSource(rel)) {
-		const ext = rel.slice(rel.lastIndexOf(".")).toLowerCase();
-		state.unsupportedByExt.set(ext, (state.unsupportedByExt.get(ext) ?? 0) + 1);
-	}
+	recordUnsupportedFile(state, rel, inBuildOutput, exclude);
+}
+
+function recordSupportedFile(
+	state: WalkState,
+	rel: string,
+	inBuildOutput: boolean,
+	exclude: readonly string[],
+): void {
+	if (inBuildOutput) state.excluded.push({ path: rel, reason: "build-output" });
+	else if (matchAnyGlob(exclude, rel)) state.excluded.push({ path: rel, reason: "config-exclude" });
+	else state.sourceFiles.push(rel);
+}
+
+function recordUnsupportedFile(
+	state: WalkState,
+	rel: string,
+	inBuildOutput: boolean,
+	exclude: readonly string[],
+): void {
+	if (inBuildOutput || matchAnyGlob(exclude, rel) || !isUnsupportedSource(rel)) return;
+	const ext = rel.slice(rel.lastIndexOf(".")).toLowerCase();
+	state.unsupportedByExt.set(ext, (state.unsupportedByExt.get(ext) ?? 0) + 1);
 }
 
 /** Walk arguments bundled so per-entry helpers stay small. */
@@ -147,11 +179,11 @@ interface WalkContext {
 
 /** Handle one directory entry: ignore dot/dependency dirs, descend otherwise. */
 async function handleDirectory(ctx: WalkContext, name: string, rel: string): Promise<void> {
-	if (name.startsWith(".")) {
+	if (name.startsWith(".") && !PYTHON_IGNORED_DIRS.has(name)) {
 		ctx.state.ignored.push({ path: rel, reason: "dot-dir" });
 		return;
 	}
-	if (DEPENDENCY_DIRS.has(name)) {
+	if (DEPENDENCY_DIRS.has(name) || PYTHON_IGNORED_DIRS.has(name)) {
 		ctx.state.ignored.push({ path: rel, reason: "dependency-dir" });
 		return;
 	}
@@ -173,6 +205,10 @@ async function handleSymlink(ctx: WalkContext, name: string, rel: string): Promi
 /** Recursive walk; never follows directory symlinks, never scans ignored dirs. */
 async function walk(ctx: WalkContext): Promise<void> {
 	const entries = await readdir(ctx.absDir, { withFileTypes: true });
+	if (ctx.relDir !== "" && entries.some((entry) => entry.isFile() && entry.name === "pyvenv.cfg")) {
+		ctx.state.ignored.push({ path: ctx.relDir, reason: "dependency-dir" });
+		return;
+	}
 	const sorted = [...entries].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 	for (const entry of sorted) {
 		const rel = ctx.relDir === "" ? entry.name : `${ctx.relDir}/${entry.name}`;
@@ -269,7 +305,7 @@ export async function discoverSourceInventory(
 	const exclude = opts.source?.exclude ?? [];
 
 	const state: WalkState = {
-		tsFiles: [],
+		sourceFiles: [],
 		excluded: [],
 		unsupportedByExt: new Map(),
 		ignored: [],
@@ -298,9 +334,15 @@ export async function discoverSourceInventory(
 		packages.push({ path: ".", hasManifest: false, declared: false });
 	}
 
-	const files: ClassifiedFile[] = state.tsFiles.map((rel) => {
-		const { sourceSet, rule } = classifyTsFile(rel, opts.source);
-		return { path: rel, sourceSet, packagePath: ownerOf(rel, manifestDirs), rule };
+	const files: ClassifiedFile[] = state.sourceFiles.map((rel) => {
+		const { sourceSet, rule } = classifySourceFile(rel, opts.source);
+		return {
+			path: rel,
+			language: rel.endsWith(".py") ? "python" : "typescript",
+			sourceSet,
+			packagePath: ownerOf(rel, manifestDirs),
+			rule,
+		};
 	});
 
 	const ownedTs = new Set(files.map((file) => file.packagePath));

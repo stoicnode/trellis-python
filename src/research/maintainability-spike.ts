@@ -8,6 +8,7 @@ import {
 	buildSyntaxInventory,
 	collectFunctions,
 	countLines,
+	isTypeScriptFile,
 	parseSource,
 	type SyntaxInventory,
 } from "../syntax/index.ts";
@@ -16,6 +17,7 @@ import { measureFlow } from "./maintainability-flow.ts";
 
 export function measureMaintainability(inventory: SyntaxInventory) {
 	const files = inventory.files
+		.filter(isTypeScriptFile)
 		.filter((file) => file.sourceSet === "production")
 		.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 	const functions = files
@@ -110,6 +112,8 @@ export function measureMaintainabilityPairs() {
 					...parsed,
 					...facts,
 					path: "pair.ts",
+					language: "typescript",
+					text: source,
 					packagePath: ".",
 					sourceSet: "production",
 					lines: countLines(parsed.sourceFile),

@@ -2,7 +2,7 @@
 
 ## Keep growing codebases maintainable.
 
-Trellis measures structural debt in TypeScript codebases. It finds complex
+Trellis measures structural debt in TypeScript and Python codebases. It finds complex
 functions, duplicated code, and import cycles, shows where they accumulate,
 and tracks what changes between audits.
 
@@ -51,20 +51,21 @@ Requires [Bun](https://bun.sh) 1.1 or later.
 Install from source:
 
 ```bash
-git clone https://github.com/jayminwest/trellis
-cd trellis
+git clone https://github.com/stoicnode/trellis-python
+cd trellis-python
 bun install
 bun link
 ```
 
-Audit a TypeScript workspace:
+Audit a TypeScript, Python, or mixed workspace:
 
 ```bash
 trellis audit /path/to/project
 ```
 
-The audited project needs no configuration, credentials, Git repository, or
-installed dependencies. A default audit prints its report and writes nothing.
+The audited project needs no configuration, credentials, Git repository, Python
+interpreter, or installed dependencies. A default audit prints its report and
+writes nothing. The report includes per-language file and import coverage.
 
 Choose JSON or Markdown when you need to keep or share the result:
 
@@ -100,9 +101,9 @@ trellis compare /tmp/before.json /tmp/after.json
 Named hotspots keep their identity across comment and line shifts; replacing
 a function or adding the same method name in another class creates a new
 hotspot. Anonymous or duplicate identities remain conservative new/resolved
-pairs. Analyzers 0.2.3 and later emit schema 1.2.0 and use bounded suffix-array
-duplication analysis. Historical reports remain readable; crossing either the identity or
-native-engine transition requires a fresh baseline. Scoring and the 100-token /
+pairs. The current analyzer emits schema 1.3.0 and uses bounded suffix-array
+duplication analysis. Historical reports remain readable; crossing an analyzer
+transition requires a fresh baseline. Scoring and the 100-token /
 3-line clone thresholds are unchanged. See the
 [identity and compatibility rules](docs/hotspot-identity.md) and
 [native engine acceptance](docs/research/native-duplication/acceptance.md).
@@ -186,8 +187,16 @@ policy logic.
 
 ## Scope and limits
 
-Trellis currently analyzes TypeScript and TSX. Other languages and excluded
+Trellis analyzes TypeScript, TSX, and Python (`.py`). Other languages and excluded
 files are reported as coverage boundaries.
+
+Python analysis uses a pinned in-process Lezer parser. It handles Python 3
+functions, methods, comprehensions, `match` cases, and ordinary imports without
+executing target code. Absolute and relative imports resolve against discovered
+root and `src/` modules. Dynamic imports and missing local targets are reported
+as graph limitations; cross-language imports are not resolved. Optional external
+evidence providers currently inspect TypeScript files only. See
+[Python support and limits](docs/python-support.md).
 
 Audits never execute the project's tests, builds, linters, or hooks.
 Safeguard findings describe configuration and wiring; they do not establish
@@ -205,6 +214,7 @@ compatible analyzer, scoring, and configuration identities.
 
 - [CLI reference, configuration, and CI workflows](docs/cli-reference.md)
 - [Metrics, scoring, and known limitations](docs/metrics-and-scoring.md)
+- [Python support and evaluation](docs/python-support.md)
 - [Product contract and configuration](SPEC.md)
 - [Architecture](docs/architecture.md)
 - [Corpus validation](docs/corpus-validation.md)

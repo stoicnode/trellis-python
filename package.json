@@ -1,7 +1,7 @@
 {
 	"name": "@os-eco/trellis-cli",
-	"version": "0.3.0",
-	"description": "Offline TypeScript structural audit with a native 0–100 sloppiness index and optional unscored provider evidence",
+	"version": "0.4.0",
+	"description": "Offline TypeScript and Python structural audit with a native 0–100 sloppiness index and optional unscored provider evidence",
 	"type": "module",
 	"bin": {
 		"trellis": "./src/cli/main.ts"
@@ -22,6 +22,7 @@
 		"audit",
 		"static-analysis",
 		"typescript",
+		"python",
 		"complexity",
 		"duplication",
 		"import-cycles",
@@ -31,13 +32,13 @@
 	],
 	"author": "Jaymin West",
 	"license": "MIT",
-	"homepage": "https://github.com/jayminwest/trellis",
+	"homepage": "https://github.com/stoicnode/trellis-python",
 	"bugs": {
-		"url": "https://github.com/jayminwest/trellis/issues"
+		"url": "https://github.com/stoicnode/trellis-python/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/jayminwest/trellis.git"
+		"url": "https://github.com/stoicnode/trellis-python.git"
 	},
 	"scripts": {
 		"test": "bun test --timeout 20000",
@@ -71,6 +72,8 @@
 		"yaml": "^2.8.2"
 	},
 	"dependencies": {
+		"@lezer/common": "1.5.2",
+		"@lezer/python": "1.1.18",
 		"commander": "^15.0.0",
 		"js-yaml": "^4.1.1",
 		"typescript": "6.0.3",

@@ -20,9 +20,17 @@ import { join } from "node:path";
 import ts from "typescript";
 import type { Range } from "../contract/index.ts";
 import type { ClassifiedFile, SourceInventory } from "../discovery/index.ts";
+import { collectImportSites } from "../metrics/graph-imports.ts";
+import { collectPythonImportSites } from "../python/imports.ts";
+import {
+	PYTHON_PARSER_VERSION,
+	parsePython,
+	pythonFunctions,
+	pythonLineKinds,
+} from "../python/parser.ts";
 import { collectFunctions } from "./functions.ts";
 import { parseSource } from "./parse.ts";
-import { countLines } from "./sloc.ts";
+import { classifyLines, countLines } from "./sloc.ts";
 import type { FileSyntax, ParseDiagnostic, SyntaxInventory } from "./types.ts";
 
 /** A point range at line 1, column 1 — the location for file-wide problems (read failures). */
@@ -32,30 +40,83 @@ const FILE_START_RANGE: Range = {
 };
 
 /** Parse one classified file into a {@link FileSyntax}; read failures become `read-error` diagnostics. */
-async function parseClassifiedFile(root: string, file: ClassifiedFile): Promise<FileSyntax> {
-	const text = await readFile(join(root, file.path), "utf8").catch(() => null);
-	const parsed = parseSource(file.path, text ?? "");
+async function parseTypeScriptFile(file: ClassifiedFile, text: string): Promise<FileSyntax> {
+	const parsed = parseSource(file.path, text);
 	const { functions, signatureCount } = collectFunctions(parsed.sourceFile);
-	const diagnostics: ParseDiagnostic[] = [...parsed.diagnostics];
-	if (text === null) {
-		diagnostics.unshift({
-			path: file.path,
-			range: FILE_START_RANGE,
-			code: "read-error",
-			message: `could not read ${file.path}; analyzed as empty`,
-		});
-	}
 	return {
 		path: file.path,
 		packagePath: file.packagePath,
 		sourceSet: file.sourceSet,
+		language: "typescript",
+		text,
 		scriptKind: parsed.scriptKind,
 		sourceFile: parsed.sourceFile,
 		functions,
 		lines: countLines(parsed.sourceFile),
+		lineKinds: classifyLines(parsed.sourceFile),
+		imports: collectImportSites(parsed.sourceFile),
 		signatureCount,
-		diagnostics,
+		diagnostics: [...parsed.diagnostics],
 	};
+}
+
+async function parsePythonFile(file: ClassifiedFile, text: string): Promise<FileSyntax> {
+	const parsed = parsePython(file.path, text);
+	const lineFacts = pythonLineKinds(parsed.tree, text);
+	return {
+		path: file.path,
+		packagePath: file.packagePath,
+		sourceSet: file.sourceSet,
+		language: "python",
+		text,
+		parserTree: parsed.tree,
+		functions: pythonFunctions(parsed.tree, text, file.sourceSet, lineFacts.kinds),
+		lines: lineFacts.lines,
+		lineKinds: lineFacts.kinds,
+		imports: collectPythonImportSites(parsed.tree, text, file.path),
+		signatureCount: 0,
+		diagnostics: [...parsed.diagnostics],
+	};
+}
+
+async function parseClassifiedFile(root: string, file: ClassifiedFile): Promise<FileSyntax> {
+	const bytes = await readFile(join(root, file.path)).catch(() => null);
+	if (bytes === null) {
+		const diagnostics: ParseDiagnostic[] = [
+			{
+				path: file.path,
+				range: FILE_START_RANGE,
+				code: "read-error",
+				message: `could not read ${file.path}; analyzed as empty`,
+			},
+		];
+		if (file.language === "python") {
+			const parsed = await parsePythonFile(file, "");
+			return { ...parsed, diagnostics: [...diagnostics, ...parsed.diagnostics] };
+		}
+		const parsed = await parseTypeScriptFile(file, "");
+		return { ...parsed, diagnostics: [...diagnostics, ...parsed.diagnostics] };
+	}
+	let text: string;
+	if (file.language === "python") {
+		try {
+			text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+		} catch {
+			const parsed = await parsePythonFile(file, "");
+			return {
+				...parsed,
+				diagnostics: [
+					{
+						path: file.path,
+						range: FILE_START_RANGE,
+						code: "PY-ENCODING",
+						message: "Python source is not valid UTF-8",
+					},
+				],
+			};
+		}
+	} else text = bytes.toString("utf8");
+	return file.language === "python" ? parsePythonFile(file, text) : parseTypeScriptFile(file, text);
 }
 
 /** Order diagnostics by path, then start line, then start column. */
@@ -78,7 +139,7 @@ export async function buildSyntaxInventory(source: SourceInventory): Promise<Syn
 	const diagnostics = files.flatMap((file) => file.diagnostics).sort(byLocation);
 	return {
 		root: source.root,
-		compilerVersion: ts.version,
+		compilerVersion: `${ts.version}-python.${PYTHON_PARSER_VERSION}`,
 		files,
 		functionCount: files.reduce((sum, file) => sum + file.functions.length, 0),
 		diagnostics,

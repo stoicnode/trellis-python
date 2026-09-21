@@ -34,8 +34,8 @@
  */
 import type { Finding, MetricValue } from "../contract/index.ts";
 import type { SourceInventory } from "../discovery/index.ts";
+import { createPythonGraphResolver } from "../python/resolve.ts";
 import type { SyntaxInventory } from "../syntax/index.ts";
-import { collectImportSites } from "./graph-imports.ts";
 import { createGraphResolver } from "./graph-resolve.ts";
 import {
 	type DependencyGraph,
@@ -159,14 +159,15 @@ export function analyzeDependencyGraph(
 	syntax: SyntaxInventory,
 ): DependencyGraphAnalysis {
 	const resolver = createGraphResolver(source);
+	const pythonResolver = createPythonGraphResolver(source);
 	const edges: GraphEdge[] = syntax.files.flatMap((file) =>
-		collectImportSites(file.sourceFile).map((site) => ({
+		(file.imports ?? []).map((site) => ({
 			from: file.path,
 			kind: site.kind,
 			typeOnly: site.typeOnly,
 			specifier: site.specifier,
 			range: site.range,
-			resolution: resolver.resolve(file.path, site),
+			resolution: (file.language === "python" ? pythonResolver : resolver).resolve(file.path, site),
 		})),
 	);
 	const diagnosticFiles = syntax.files.filter((file) => file.diagnostics.length > 0).length;

@@ -57,10 +57,15 @@ function functionSloc(lines: readonly LineKind[], range: Range): number {
 /** Measure every function of one file against its (once-computed) line classification. */
 function measureFile(file: FileSyntax): FunctionMeasurement[] {
 	if (file.functions.length === 0) return [];
-	const lines = classifyLines(file.sourceFile);
 	return file.functions.map((fn) => {
-		const { cc, maxNesting } = measureFunctionComplexity(fn);
-		const sloc = functionSloc(lines, fn.range);
+		const measured =
+			"node" in fn && file.language !== "python" ? measureFunctionComplexity(fn) : fn.complexity;
+		if (measured === undefined) throw new Error(`missing complexity for ${file.path}`);
+		const { cc, maxNesting } = measured;
+		const lines =
+			file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : undefined);
+		if (lines === undefined) throw new Error(`missing line classification for ${file.path}`);
+		const sloc = fn.sloc ?? functionSloc(lines, fn.range);
 		const mass = functionMass(cc, sloc);
 		return {
 			identity:

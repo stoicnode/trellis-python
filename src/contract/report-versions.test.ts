@@ -139,13 +139,14 @@ describe("auditReportSchema (version-aware, §16.6)", () => {
 	});
 
 	test("rejects unknown schema versions actionably, naming the supported ones (AC4)", () => {
-		for (const version of ["0.9.0", "1.3.0", "2.0.0"]) {
+		for (const version of ["0.9.0", "1.4.0", "2.0.0"]) {
 			const result = auditReportSchema.safeParse({ ...evidenceReport(), schemaVersion: version });
 			expect(result.success).toBe(false);
 			if (result.success) throw new Error("unreachable");
 			const message = result.error.issues.map((issue) => issue.message).join("; ");
 			expect(message).toContain("1.0.0");
 			expect(message).toContain("1.1.0");
+			expect(message).toContain("1.3.0");
 		}
 	});
 

@@ -73,7 +73,9 @@ export type UnresolvedReason =
 	/** The `exports` shape exceeds the documented supported subset. */
 	| "unsupported-exports"
 	/** `import(expr)` where `expr` is not a string literal. */
-	| "non-literal-dynamic";
+	| "non-literal-dynamic"
+	/** More than one discovered Python module owns the requested name. */
+	| "ambiguous";
 
 /** What one import specifier resolved to. */
 export type EdgeResolution =

@@ -106,15 +106,14 @@ export interface ProviderAnalysisOptions {
 
 /**
  * The staged selection for an external provider analysis: the audit's
- * measured production/test files with their classification and package
- * boundaries preserved — the same measured sets the native duplication
- * analyzer selects (`MEASURED_SOURCE_SETS`), so provider evidence rides
- * alongside the native result over the same scope.
+ * TypeScript production/test files with their classification and package
+ * boundaries preserved. The optional adapters currently consume TypeScript
+ * source; Python remains covered by the native analyzers only.
  */
 export function measuredSelection(source: SourceInventory): StagedSelectionFile[] {
 	const measured = new Set<string>(MEASURED_SOURCE_SETS);
 	return source.files
-		.filter((file) => measured.has(file.sourceSet))
+		.filter((file) => file.language === "typescript" && measured.has(file.sourceSet))
 		.map((file) => ({ path: file.path, sourceSet: file.sourceSet, packagePath: file.packagePath }));
 }
 

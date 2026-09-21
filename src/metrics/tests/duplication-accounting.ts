@@ -10,7 +10,8 @@ export function referenceScope(files: readonly FileSyntax[]) {
 	let codeLines = 0;
 	let duplicatedLines = 0;
 	for (const file of files) {
-		for (const [line, kind] of classifyLines(file.sourceFile).entries()) {
+		const kinds = file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : []);
+		for (const [line, kind] of kinds.entries()) {
 			if (kind !== "code") continue;
 			codeLines++;
 			if (

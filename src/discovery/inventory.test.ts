@@ -31,15 +31,23 @@ describe("discoverSourceInventory single package (non-Git tree)", () => {
 		const inv = await discoverSourceInventory(repo);
 		expect(inv.packages).toEqual([{ path: ".", name: "app", hasManifest: true, declared: true }]);
 		expect(inv.files).toEqual([
-			{ path: "src/index.test.ts", sourceSet: "test", packagePath: ".", rule: "default:test" },
+			{
+				path: "src/index.test.ts",
+				language: "typescript",
+				sourceSet: "test",
+				packagePath: ".",
+				rule: "default:test",
+			},
 			{
 				path: "src/index.ts",
+				language: "typescript",
 				sourceSet: "production",
 				packagePath: ".",
 				rule: "default:production",
 			},
 			{
 				path: "src/view.tsx",
+				language: "typescript",
 				sourceSet: "production",
 				packagePath: ".",
 				rule: "default:production",
@@ -161,7 +169,7 @@ describe("discoverSourceInventory classification scopes", () => {
 		});
 	});
 
-	test("non-TS source files and whole non-TS packages are reported as unsupported", async () => {
+	test("Python source is analyzed while unsupported languages remain visible", async () => {
 		await put("package.json", JSON.stringify({ name: "poly" }));
 		await put("src/index.ts", "export {}\n");
 		await put("scripts/gen.py", "print(1)\n");
@@ -169,8 +177,20 @@ describe("discoverSourceInventory classification scopes", () => {
 		await put("ios/App.swift", "import UIKit\n");
 
 		const inv = await discoverSourceInventory(repo);
-		expect(inv.unsupported).toEqual({ files: 2, byExtension: { ".py": 1, ".swift": 1 } });
+		expect(inv.unsupported).toEqual({ files: 1, byExtension: { ".swift": 1 } });
+		expect(
+			inv.files.some((file) => file.path === "scripts/gen.py" && file.language === "python"),
+		).toBe(true);
 		expect(inv.unsupportedPackages).toEqual(["ios"]);
+	});
+
+	test("skips custom virtual environments identified by pyvenv.cfg", async () => {
+		await put("custom-env/pyvenv.cfg", "home = /usr/bin\n");
+		await put("custom-env/lib/site-packages/module.py", "def installed(): pass\n");
+		await put("src/app.py", "def app(): pass\n");
+		const inv = await discoverSourceInventory(repo);
+		expect(inv.files.map((file) => file.path)).toEqual(["src/app.py"]);
+		expect(inv.ignored).toContainEqual({ path: "custom-env", reason: "dependency-dir" });
 	});
 
 	test("node_modules and dot dirs are ignored by path, never descended into", async () => {
@@ -233,11 +253,10 @@ describe("toSourceCoverage", () => {
 
 		const coverage = toSourceCoverage(await discoverSourceInventory(repo));
 		expect(coverage).toEqual({
-			production: { files: 1 },
+			production: { files: 2 },
 			test: { files: 1 },
 			generated: { files: 1 },
 			excluded: { files: 1, note: "build outputs and config-excluded paths — not analyzed" },
-			unsupported: { files: 1, note: "non-TS sources, not analyzed" },
 		});
 	});
 

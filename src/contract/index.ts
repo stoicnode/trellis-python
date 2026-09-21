@@ -85,6 +85,7 @@ export {
 	type HotspotIdentity,
 	hotspotIdentitySchema,
 } from "./hotspot-identity.ts";
+export { type LanguageCoverageRow, languageCoverageRowSchema } from "./language-coverage.ts";
 export { type MetricValue, metricValueSchema } from "./metric.ts";
 export {
 	dottedIdSchema,
@@ -169,6 +170,7 @@ export {
 	PRE_IDENTITY_SCHEMA_VERSION,
 	PRE_PROVIDER_SCHEMA_VERSION,
 	SCHEMA_VERSION,
+	SCOPED_IDENTITY_SCHEMA_VERSION,
 	SCORING_VERSION,
 	SUPPORTED_SCHEMA_VERSIONS,
 	type SupportedSchemaVersion,

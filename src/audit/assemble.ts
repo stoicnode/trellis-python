@@ -63,6 +63,7 @@ import { type SourceInventory, toSourceCoverage } from "../discovery/index.ts";
 import type { SafeguardInspection } from "../safeguards/index.ts";
 import type { SloppinessScore } from "../scoring/index.ts";
 import type { SyntaxInventory } from "../syntax/index.ts";
+import { languageCoverage } from "./language-coverage.ts";
 
 /**
  * One measured analysis's report contribution — the structural minimum every
@@ -298,6 +299,7 @@ export function assembleReport(
 		scoringVersion: scoring.scoringVersion,
 		repo: repoMetadata(measurements.source),
 		sourceCoverage: reportCoverage(measurements.source, measurements.syntax),
+		languageCoverage: languageCoverage(measurements.source, measurements.syntax, findings),
 		completeness: rollUpCompleteness(metrics.map((metric) => metric.state)),
 		evidence: assembleEvidence(measurements.analyses, measurements.providers ?? [], metrics),
 		metrics: Object.fromEntries(metrics.map((metric) => [metric.id, metric])),

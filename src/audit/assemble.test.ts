@@ -166,9 +166,27 @@ describe("orderFindings", () => {
 describe("reportCoverage", () => {
 	test("pairs per-scope file counts with measured code lines", () => {
 		const source = fakeSource([
-			{ path: "src/a.ts", sourceSet: "production", packagePath: ".", rule: "default" },
-			{ path: "src/a.test.ts", sourceSet: "test", packagePath: ".", rule: "test-basename" },
-			{ path: "src/types.d.ts", sourceSet: "declaration-only", packagePath: ".", rule: "decl" },
+			{
+				path: "src/a.ts",
+				language: "typescript",
+				sourceSet: "production",
+				packagePath: ".",
+				rule: "default",
+			},
+			{
+				path: "src/a.test.ts",
+				language: "typescript",
+				sourceSet: "test",
+				packagePath: ".",
+				rule: "test-basename",
+			},
+			{
+				path: "src/types.d.ts",
+				language: "typescript",
+				sourceSet: "declaration-only",
+				packagePath: ".",
+				rule: "decl",
+			},
 		]);
 		const syntax = fakeSyntax([
 			fakeFile("src/a.ts", "production", "const a = 1;\nconst b = 2;\n"),
@@ -185,7 +203,13 @@ describe("reportCoverage", () => {
 	test("reports excluded and unsupported surface as counts only", () => {
 		const source: SourceInventory = {
 			...fakeSource([
-				{ path: "src/a.ts", sourceSet: "production", packagePath: ".", rule: "default" },
+				{
+					path: "src/a.ts",
+					language: "typescript",
+					sourceSet: "production",
+					packagePath: ".",
+					rule: "default",
+				},
 			]),
 			excluded: [{ path: "dist/out.ts", reason: "build-output" }],
 			unsupported: { files: 2, byExtension: { ".py": 2 } },

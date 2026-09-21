@@ -39,6 +39,16 @@ export interface ImportSite {
 	specifier: string | null;
 	/** 1-based range of the specifier (of the argument expression when non-literal). */
 	range: Range;
+	/** Python-only syntax facts used by the Python graph resolver. */
+	python?: {
+		form: "import" | "from" | "dynamic";
+		/** Dotted module name; `null` for a non-literal dynamic import. */
+		module: string | null;
+		/** Leading-dot count for `from ... import ...`; zero for absolute imports. */
+		level: number;
+		/** Imported names without aliases; `*` records a star import. */
+		imported: string[];
+	};
 }
 
 /** Site plus the sort key (node start) used to restore source order. */

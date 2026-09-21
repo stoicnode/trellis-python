@@ -24,8 +24,10 @@ import type { SourceConfig, SourceSet } from "../contract/index.ts";
 import { matchGlob } from "./glob.ts";
 
 const TS_SOURCE_RE = /\.(?:ts|tsx|mts|cts)$/;
+const PYTHON_SOURCE_RE = /\.py$/;
 const DECLARATION_RE = /\.d\.(?:ts|mts|cts)$/;
 const TEST_BASENAME_RE = /\.(?:test|spec)\.[^.]+$/;
+const PYTHON_TEST_BASENAME_RE = /^(?:test_.*|.*_test)\.py$/;
 const GENERATED_BASENAME_RE = /\.(?:gen|generated)\.[^.]+$/;
 
 const VENDORED_DIRS = new Set(["vendor", "third_party"]);
@@ -34,8 +36,8 @@ const TEST_DIRS = new Set(["test", "tests", "__tests__"]);
 
 /**
  * File extensions counted as **unsupported** source surface (SPEC §3.3): real
- * source in languages trellis does not analyze (including JavaScript — the
- * audit is TS/TSX only per §2 non-goals). Reported as coverage, never as
+ * source in languages trellis does not analyze (including JavaScript).
+ * Reported as coverage, never as
  * cleanliness.
  */
 export const UNSUPPORTED_SOURCE_EXTENSIONS = [
@@ -43,7 +45,6 @@ export const UNSUPPORTED_SOURCE_EXTENSIONS = [
 	".mjs",
 	".cjs",
 	".jsx",
-	".py",
 	".swift",
 	".go",
 	".rs",
@@ -66,7 +67,17 @@ export function isTypeScriptSource(path: string): boolean {
 	return TS_SOURCE_RE.test(path);
 }
 
-/** True when `path` is an unsupported (non-TS) source file per {@link UNSUPPORTED_SOURCE_EXTENSIONS}. */
+/** True when `path` is a Python source file. */
+export function isPythonSource(path: string): boolean {
+	return PYTHON_SOURCE_RE.test(path);
+}
+
+/** True when `path` is source supported by the native language adapters. */
+export function isSupportedSource(path: string): boolean {
+	return isTypeScriptSource(path) || isPythonSource(path);
+}
+
+/** True when `path` is an unsupported source file per {@link UNSUPPORTED_SOURCE_EXTENSIONS}. */
 export function isUnsupportedSource(path: string): boolean {
 	const dot = path.lastIndexOf(".");
 	if (dot < 0) return false;
@@ -74,7 +85,7 @@ export function isUnsupportedSource(path: string): boolean {
 	return (UNSUPPORTED_SOURCE_EXTENSIONS as readonly string[]).includes(ext);
 }
 
-/** The outcome of classifying one TS/TSX file. */
+/** The outcome of classifying one supported source file. */
 export interface Classification {
 	/** The assigned source set (SPEC §3.1). */
 	sourceSet: SourceSet;
@@ -82,12 +93,7 @@ export interface Classification {
 	rule: string;
 }
 
-/**
- * Classify one repo-relative TS/TSX path into exactly one source set using the
- * precedence documented above. Pure: no filesystem access. Exclusion is NOT
- * checked here — excluded files never reach classification.
- */
-export function classifyTsFile(path: string, config?: SourceConfig): Classification {
+function configuredClassification(path: string, config?: SourceConfig): Classification | undefined {
 	const overrides = config?.classify ?? {};
 	for (const pattern of Object.keys(overrides).sort()) {
 		if (matchGlob(pattern, path)) {
@@ -95,6 +101,17 @@ export function classifyTsFile(path: string, config?: SourceConfig): Classificat
 			return { sourceSet: set, rule: `config:classify:${pattern}` };
 		}
 	}
+	return undefined;
+}
+
+/**
+ * Classify one repo-relative supported path into exactly one source set using the
+ * precedence documented above. Pure: no filesystem access. Exclusion is NOT
+ * checked here — excluded files never reach classification.
+ */
+export function classifySourceFile(path: string, config?: SourceConfig): Classification {
+	const configured = configuredClassification(path, config);
+	if (configured !== undefined) return configured;
 	const segments = path.split("/");
 	const basename = segments[segments.length - 1] ?? path;
 	const dirs = segments.slice(0, -1);
@@ -107,8 +124,19 @@ export function classifyTsFile(path: string, config?: SourceConfig): Classificat
 	if (DECLARATION_RE.test(basename)) {
 		return { sourceSet: "declaration-only", rule: "default:declaration" };
 	}
-	if (TEST_BASENAME_RE.test(basename) || dirs.some((segment) => TEST_DIRS.has(segment))) {
+	if (isTestPath(basename, dirs)) {
 		return { sourceSet: "test", rule: "default:test" };
 	}
 	return { sourceSet: "production", rule: "default:production" };
 }
+
+function isTestPath(basename: string, dirs: readonly string[]): boolean {
+	return (
+		TEST_BASENAME_RE.test(basename) ||
+		PYTHON_TEST_BASENAME_RE.test(basename) ||
+		dirs.some((segment) => TEST_DIRS.has(segment))
+	);
+}
+
+/** @deprecated Use {@link classifySourceFile}; retained for existing TypeScript callers. */
+export const classifyTsFile = classifySourceFile;

@@ -26,8 +26,11 @@
  *   implementation it belongs to records the count in
  *   {@link FunctionFacts.overloadSignatures}.
  */
+
+import type { Tree } from "@lezer/common";
 import type ts from "typescript";
 import type { Completeness, Range, SourceSet } from "../contract/index.ts";
+import type { ImportSite } from "../metrics/graph-imports.ts";
 import type { FunctionIdentity } from "./identity.ts";
 
 /** The function-like node kinds the inventory recognizes (SPEC §5.1). */
@@ -41,7 +44,12 @@ export const FUNCTION_KINDS = [
 	"set-accessor",
 ] as const;
 
-export type FunctionKind = (typeof FUNCTION_KINDS)[number];
+export type TypeScriptFunctionKind = (typeof FUNCTION_KINDS)[number];
+export type FunctionKind = TypeScriptFunctionKind | "python-function";
+
+/** The in-process language adapters supported by the native audit. */
+export const LANGUAGE_IDS = ["typescript", "python"] as const;
+export type LanguageId = (typeof LANGUAGE_IDS)[number];
 
 /** Script variant chosen from the file extension: `.tsx` → TSX, everything else → TS. */
 export type ScriptVariant = "ts" | "tsx";
@@ -83,6 +91,13 @@ export interface LineCounts {
 	blank: number;
 }
 
+/** A language-neutral normalized lexical token used by the shared clone engine. */
+export interface NormalizedToken {
+	kind: number;
+	startLine: number;
+	endLine: number;
+}
+
 /**
  * One function-like node **with a body** in the inventory. Bodiless nodes
  * (overload signatures, declarations) never appear here — see the module
@@ -90,7 +105,7 @@ export interface LineCounts {
  * `ts.SourceFile`, so analyzers walk the same parse instead of re-parsing;
  * `node.getSourceFile()` is always the owning {@link FileSyntax.sourceFile}.
  */
-export interface FunctionFacts {
+export interface NormalizedFunctionFacts {
 	/** Scoped identity, derived from this file's shared AST after sibling registration. */
 	identity: FunctionIdentity;
 	kind: FunctionKind;
@@ -103,8 +118,6 @@ export interface FunctionFacts {
 	name: string;
 	/** Where {@link name} came from (traceability). */
 	nameOrigin: "declared" | "contextual" | "anonymous";
-	/** The function-like AST node inside the shared parse. */
-	node: ts.Node;
 	/** Whole-node range (signature through closing brace), 1-based. */
 	range: Range;
 	/** Body-only range; for an expression-bodied arrow, the expression. */
@@ -115,25 +128,74 @@ export interface FunctionFacts {
 	parentIndex: number | null;
 	/** Bodiless overload signatures attached to this implementation (0 for kinds that cannot overload). */
 	overloadSignatures: number;
+	/** Adapter-measured structural facts used by language-neutral aggregation. */
+	complexity?: { cc: number; maxNesting: number };
+	/** Code lines in this function's whole range, including nested function bodies. */
+	sloc?: number;
 }
 
+/** TypeScript-private function fact retained for focused compiler API consumers. */
+export interface TypeScriptFunctionFacts extends NormalizedFunctionFacts {
+	kind: TypeScriptFunctionKind;
+	/** The function-like AST node inside the shared TypeScript parse. */
+	node: ts.Node;
+}
+
+/** Python's parser-private tree does not escape its adapter; only normalized facts do. */
+export type PythonFunctionFacts = NormalizedFunctionFacts;
+
+/** Backward-compatible TypeScript function inventory type. */
+export type FunctionFacts = TypeScriptFunctionFacts;
+
 /** One parsed file: the shared parse plus every derived fact. */
-export interface FileSyntax {
+export interface BaseFileSyntax {
 	/** Repo-relative POSIX path. */
 	path: string;
 	/** Owning package root from discovery (`.` for the repo root). */
 	packagePath: string;
 	sourceSet: SourceSet;
-	scriptKind: ScriptVariant;
-	/** The one shared parse of this file — reused by every analyzer. */
-	sourceFile: ts.SourceFile;
+	language?: LanguageId;
+	/** Exact decoded source text, retained for fingerprinting and adapter tokenization. */
+	text?: string;
 	/** Inventoried functions in source order (pre-order: parents precede nested children). */
-	functions: FunctionFacts[];
+	functions: NormalizedFunctionFacts[];
 	lines: LineCounts;
+	/** One line classification per physical source line, shared by all metric consumers. */
+	lineKinds?: readonly import("./sloc.ts").LineKind[];
+	/** Static import sites from the adapter's one parse. */
+	imports?: readonly ImportSite[];
+	/** Adapter-provided normalized token stream, when its parser has no TypeScript tree. */
+	tokens?: readonly NormalizedToken[];
 	/** Bodiless function-like signatures seen (overload/`declare`/abstract); never inventoried. */
 	signatureCount: number;
 	/** Located parse problems; empty when the parse was clean. */
 	diagnostics: ParseDiagnostic[];
+}
+
+/** A parsed TypeScript/TSX file retaining its compiler tree as adapter-private evidence. */
+export interface TypeScriptFileSyntax extends BaseFileSyntax {
+	language?: "typescript";
+	text?: string;
+	lineKinds?: readonly import("./sloc.ts").LineKind[];
+	imports?: readonly ImportSite[];
+	scriptKind: ScriptVariant;
+	sourceFile: ts.SourceFile;
+	functions: TypeScriptFunctionFacts[];
+}
+
+/** A parsed Python file retaining its Lezer tree only inside the adapter boundary. */
+export interface PythonFileSyntax extends BaseFileSyntax {
+	language: "python";
+	parserTree: Tree;
+	functions: PythonFunctionFacts[];
+}
+
+/** One normalized adapter result, deliberately free of cross-language AST assumptions. */
+export type FileSyntax = TypeScriptFileSyntax | PythonFileSyntax;
+
+/** Narrow a normalized file when a caller needs the TypeScript compiler tree. */
+export function isTypeScriptFile(file: FileSyntax): file is TypeScriptFileSyntax {
+	return "sourceFile" in file;
 }
 
 /**
@@ -144,7 +206,7 @@ export interface FileSyntax {
 export interface SyntaxInventory {
 	/** Absolute audited root. */
 	root: string;
-	/** Pinned compiler identity (`ts.version`) that produced these facts (traceability). */
+	/** Stable native adapter identity; individual parser versions live on adapter provenance. */
 	compilerVersion: string;
 	/** Parsed files in the discovery inventory's (sorted) order. */
 	files: FileSyntax[];

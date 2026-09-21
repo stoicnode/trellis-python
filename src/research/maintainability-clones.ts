@@ -1,7 +1,7 @@
 /** Syntax context only: neither shared responsibility nor safe extraction is inferred. */
 import ts from "typescript";
 import type { CloneGroup, CloneMember } from "../metrics/duplication.ts";
-import type { FileSyntax } from "../syntax/index.ts";
+import { type FileSyntax, isTypeScriptFile } from "../syntax/index.ts";
 
 function nodeFacts(node: ts.Node) {
 	const call = ts.isCallExpression(node);
@@ -21,7 +21,8 @@ function nodeFacts(node: ts.Node) {
 
 function memberContext(member: CloneMember, files: ReadonlyMap<string, FileSyntax>) {
 	const file = files.get(member.path);
-	if (!file || file.diagnostics.length) return { ...member, context: "unavailable" };
+	if (!file || !isTypeScriptFile(file) || file.diagnostics.length)
+		return { ...member, context: "unavailable" };
 	let calls = 0;
 	let registrations = 0;
 	let decisions = 0;

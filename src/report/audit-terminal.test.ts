@@ -91,7 +91,8 @@ describe("renderAuditTerminal per-fixture content", () => {
 
 	test("renders mixed-language surface as unsupported coverage, never cleanliness", () => {
 		const output = render("mixed-language");
-		expect(output).toContain("unsupported  2 files · non-TS sources, not analyzed");
+		expect(output).toContain("unsupported  1 file · non-TS sources, not analyzed");
+		expect(output).toContain("python      1/1 files analyzed");
 		expect(output).toContain("sloppiness index 0/100");
 	});
 
