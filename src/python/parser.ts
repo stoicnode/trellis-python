@@ -3,7 +3,13 @@
  * into normalized facts; no Python interpreter or project code is invoked.
  */
 import type { Tree } from "@lezer/common";
-import type { LineCounts, LineKind, NormalizedToken, ParseDiagnostic } from "../syntax/types.ts";
+import type {
+	CloneTokenContext,
+	LineCounts,
+	LineKind,
+	NormalizedToken,
+	ParseDiagnostic,
+} from "../syntax/types.ts";
 import type { PythonDocstring } from "./docstrings.ts";
 import { parser } from "./grammar/trellis-parser.ts";
 import { pythonIndentationDiagnostics } from "./layout.ts";
@@ -61,12 +67,49 @@ function tokenKind(name: string, text: string): number {
 	return 0x40000000 + ((hash >>> 0) % 0x3fffffff);
 }
 
+function rawTokenKind(name: string): number {
+	let hash = 2166136261;
+	for (let index = 0; index < name.length; index += 1)
+		hash = Math.imul(hash ^ name.charCodeAt(index), 16777619);
+	return hash >>> 0;
+}
+
 function isBody(node: Node): boolean {
 	return node.name === "Body" || node.name === "MatchBody";
 }
 
 function isCodeToken(node: Node): boolean {
 	return node.name !== "Comment" && !node.error && node.name !== "⚠";
+}
+
+function isStaticCallArgument(node: Node): boolean {
+	if (
+		node.name === "String" ||
+		node.name === "Number" ||
+		node.name === "Boolean" ||
+		node.name === "None"
+	)
+		return true;
+	if (
+		node.name === "ArrayExpression" ||
+		node.name === "DictionaryExpression" ||
+		node.name === "SetExpression" ||
+		node.name === "TupleExpression"
+	)
+		return node.children.every(
+			(child) =>
+				["[", "]", "{", "}", "(", ")", ",", ":"].includes(child.name) ||
+				isStaticCallArgument(child),
+		);
+	return false;
+}
+
+function isStaticDataCall(node: Node): boolean {
+	if (node.name !== "CallExpression") return false;
+	const args = node.children.find((child) => child.name === "ArgList");
+	if (args === undefined) return false;
+	const values = args.children.filter((child) => !["(", ")", ","].includes(child.name));
+	return values.length > 0 && values.every(isStaticCallArgument);
 }
 
 /** A disjoint Python token alphabet. Body markers preserve suite boundaries absent from leaf tokens. */
@@ -83,13 +126,27 @@ export function pythonTokens(
 		onToken();
 		tokens.push(token);
 	};
-	const visit = (node: Node): void => {
+	const role = (node: Node, inherited: CloneTokenContext): CloneTokenContext => {
+		const { name } = node;
+		if (name === "ImportStatement") return "import-export-list";
+		if (name === "TypeDefinition" || name === "TypeDef") return "type-declaration";
+		if (isStaticDataCall(node)) return "literal-data";
+		if (name === "DictionaryExpression" || name === "ArrayExpression" || name === "SetExpression")
+			return "literal-data";
+		return inherited;
+	};
+	const visit = (node: Node, inherited: CloneTokenContext): void => {
 		if (node.name === "ExpressionStatement" && excluded.has(node.from)) return;
+		const context = role(node, inherited);
 		if (isBody(node)) {
 			emit({
 				kind: 0x3fffffff,
 				startLine: lineOf(starts, node.from),
 				endLine: lineOf(starts, node.from),
+				context,
+				from: node.from,
+				to: node.from,
+				rawKind: 0x3fffffff,
 			});
 		}
 		if (node.children.length === 0) {
@@ -98,19 +155,27 @@ export function pythonTokens(
 					kind: tokenKind(node.name, text.slice(node.from, node.to)),
 					startLine: lineOf(starts, node.from),
 					endLine: lineOf(starts, Math.max(node.from, node.to - 1)),
+					context,
+					from: node.from,
+					to: node.to,
+					rawKind: rawTokenKind(node.name),
 				});
 			}
 			return;
 		}
-		for (const child of node.children) visit(child);
+		for (const child of node.children) visit(child, context);
 		if (isBody(node))
 			emit({
 				kind: 0x3ffffffe,
 				startLine: lineOf(starts, node.to),
 				endLine: lineOf(starts, node.to),
+				context,
+				from: node.to,
+				to: node.to,
+				rawKind: 0x3ffffffe,
 			});
 	};
-	visit(nodeFromCursor(tree.cursor()));
+	visit(nodeFromCursor(tree.cursor()), "executable-logic");
 	return tokens;
 }
 

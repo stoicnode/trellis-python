@@ -96,10 +96,22 @@ export interface LineCounts {
 export type LineKind = "code" | "commentOnly" | "blank";
 
 /** A language-neutral normalized lexical token used by the shared clone engine. */
+export type CloneTokenContext =
+	| "executable-logic"
+	| "import-export-list"
+	| "type-declaration"
+	| "literal-data"
+	| "mixed-unknown";
+
 export interface NormalizedToken {
 	kind: number;
 	startLine: number;
 	endLine: number;
+	context?: CloneTokenContext;
+	/** Physical source positions and original grammar kind for advisory normalization studies. */
+	from?: number;
+	to?: number;
+	rawKind?: number;
 }
 
 /**

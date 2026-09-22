@@ -56,6 +56,16 @@ source has 17 production JSDoc warnings in this slice. The two-source by
 two-analyzer self-audit is under
 [`self-audit/p23-documentation/`](self-audit/p23-documentation/manifest.json).
 
+P2.2's separate advisory clone population is retained in
+[`p22-clones/`](p22-clones/summary.json). Across the 16 deterministic scopes,
+940 raw production groups yield 139 candidate executable groups; no scored
+index moves from P2.3. The summary compares per-scope raw groups,
+independent copies, eligible-line density and stricter postfilters. Rich's
+table-heavy source retains raw matches but contributes no executable
+candidate group. The four-cell Trellis self-audit is under
+[`self-audit/p22-clones/`](self-audit/p22-clones/manifest.json); all cells
+score 39.
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

@@ -24,6 +24,20 @@ interface LocatedGroup {
 	hasUncontained: boolean;
 }
 
+/** Half-open positions in one file's normalized token stream. */
+export interface CloneTokenInterval {
+	path: string;
+	startToken: number;
+	endToken: number;
+	startLine: number;
+	endLine: number;
+}
+
+export interface FinalizedCloneGroups {
+	groups: CloneGroup[];
+	intervals: CloneTokenInterval[][];
+}
+
 function locateMembers(
 	group: RawGroup,
 	streams: readonly TokenStream[],
@@ -107,23 +121,40 @@ function memberOrder(a: CloneMember, b: CloneMember): number {
 	return a.range.start.line - b.range.start.line || a.range.end.line - b.range.end.line;
 }
 
-function project(group: LocatedGroup, work: DuplicationWork): CloneGroup {
+function project(
+	group: LocatedGroup,
+	fileStart: Uint32Array,
+	work: DuplicationWork,
+): { group: CloneGroup; intervals: CloneTokenInterval[] } {
 	work.retainGroup();
-	const members: CloneMember[] = [];
+	const members: { clone: CloneMember; interval: CloneTokenInterval }[] = [];
 	for (const member of group.members) {
 		work.retainOccurrence();
+		const offset = fileStart[member.file] ?? 0;
 		members.push({
-			path: member.path,
-			range: { start: { line: member.startLine }, end: { line: member.endLine } },
-			tokenCount: group.length,
-			lineCount: member.endLine - member.startLine + 1,
+			clone: {
+				path: member.path,
+				range: { start: { line: member.startLine }, end: { line: member.endLine } },
+				tokenCount: group.length,
+				lineCount: member.endLine - member.startLine + 1,
+			},
+			interval: {
+				path: member.path,
+				startToken: member.start - offset,
+				endToken: member.end - offset,
+				startLine: member.startLine,
+				endLine: member.endLine,
+			},
 		});
 	}
 	members.sort((a, b) => {
 		work.charge();
-		return memberOrder(a, b);
+		return memberOrder(a.clone, b.clone);
 	});
-	return { id: "", tokenCount: group.length, members };
+	return {
+		group: { id: "", tokenCount: group.length, members: members.map((entry) => entry.clone) },
+		intervals: members.map((entry) => entry.interval),
+	};
 }
 
 function groupOrder(a: CloneGroup, b: CloneGroup): number {
@@ -137,29 +168,42 @@ function groupOrder(a: CloneGroup, b: CloneGroup): number {
 	);
 }
 
+export function finalizeCandidateGroupsDetailed(
+	raw: Map<number, RawGroup[]>,
+	streams: readonly TokenStream[],
+	fileStart: Uint32Array,
+	work: DuplicationWork,
+): FinalizedCloneGroups {
+	work.enter("materialization");
+	const located = locate(raw, streams, fileStart, work);
+	work.enter("finalization");
+	markSurvivors(located, work);
+	const projected: ReturnType<typeof project>[] = [];
+	for (const group of located) {
+		work.charge();
+		if (group.hasUncontained) projected.push(project(group, fileStart, work));
+	}
+	projected.sort((a, b) => {
+		work.charge();
+		return groupOrder(a.group, b.group);
+	});
+	for (const [index, entry] of projected.entries()) {
+		work.charge();
+		entry.group.id = `clone-group-${index + 1}`;
+	}
+	work.checkpoint();
+	return {
+		groups: projected.map((entry) => entry.group),
+		intervals: projected.map((entry) => entry.intervals),
+	};
+}
+
+/** Compatibility entry point for direct finalization callers. */
 export function finalizeCandidateGroups(
 	raw: Map<number, RawGroup[]>,
 	streams: readonly TokenStream[],
 	fileStart: Uint32Array,
 	work: DuplicationWork,
 ): CloneGroup[] {
-	work.enter("materialization");
-	const located = locate(raw, streams, fileStart, work);
-	work.enter("finalization");
-	markSurvivors(located, work);
-	const groups: CloneGroup[] = [];
-	for (const group of located) {
-		work.charge();
-		if (group.hasUncontained) groups.push(project(group, work));
-	}
-	groups.sort((a, b) => {
-		work.charge();
-		return groupOrder(a, b);
-	});
-	for (const [index, group] of groups.entries()) {
-		work.charge();
-		group.id = `clone-group-${index + 1}`;
-	}
-	work.checkpoint();
-	return groups;
+	return finalizeCandidateGroupsDetailed(raw, streams, fileStart, work).groups;
 }

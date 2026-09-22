@@ -1,8 +1,9 @@
 # Index measurement and calibration improvement plan
 
 Status: in progress; Phase 0 evidence and Phase 1 graph/Python repairs are
-implemented. P2.1's Python executable-size correction and P2.3's advisory
-documentation detector are implemented; P2.2 and Phases 3–6 are pending.
+implemented. Phase 2's Python executable-size correction, advisory clone
+candidate population and advisory documentation detector are implemented;
+Phases 3–6 are pending.
 Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.

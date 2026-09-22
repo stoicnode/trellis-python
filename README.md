@@ -212,6 +212,15 @@ Warnings include measured counts and do not affect the index. Configure
 `documentation.maxWords` in `trellis.yaml`; use `policy.failOnNew` to gate new
 `documentation.excessive` findings against a baseline.
 
+Clone reports also carry advisory `duplication.candidate.*` metrics for
+independent executable copies. They classify syntax context and count
+non-overlapping token occurrences, including copies that share a physical
+line. Raw clone groups and the scored duplication density remain unchanged;
+similar data tables remain visible as raw evidence without being called
+duplicated implementation. See the
+[candidate clone guide](docs/clone-candidates.md) for the population and
+postfilters.
+
 Audits never execute the project's tests, builds, linters, or hooks.
 Safeguard findings describe configuration and wiring; they do not establish
 that those checks pass.

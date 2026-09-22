@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "slice": "P2.2 independent executable clone candidate evidence",
+  "targetBeforeRevision": "cdabc7f",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "64c1abf11d5df3f7367ce8eeb42faf482aa612497324b87c044b327c90e39414",
+  "sourceAfterSha256": "c45bb9357e7b4dbc77a32d93a08be92bc70055aa3b90c816f53d67ce55375298",
+  "configuration": {
+    "mode": "default",
+    "configFile": null
+  },
+  "configurationSha256": "7ac8d909bfb84cdf940f7f3e5470913a843249e516decec3c2e10f14955e7333",
+  "bunVersion": "1.2.22",
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "e06b419eeeef76b05c0ecf3d16253afeb34f471c1a88020ec140fccc3ef10d29",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 39,
+      "productionErosionMass": 23965.66,
+      "productionCloneDensity": 0.033078,
+      "productionRawCloneGroups": 17,
+      "productionCandidateCloneGroups": null,
+      "productionCycleGroups": 1
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "644388d37347a6f9f3adae12a8dbae5a6a0c51b1a9f546b44b081040ed0ff45b",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 24770.262,
+      "productionCloneDensity": 0.03266,
+      "productionRawCloneGroups": 18,
+      "productionCandidateCloneGroups": null,
+      "productionCycleGroups": 1
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "91dd86e09e42e8fc79fededeb98c2f3cc0a87a63a51f89e0d26c9b0267fa2365",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 39,
+      "productionErosionMass": 23965.66,
+      "productionCloneDensity": 0.033078,
+      "productionRawCloneGroups": 17,
+      "productionCandidateCloneGroups": 0,
+      "productionCycleGroups": 1
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "97b410d33275ace7cc89db696c4cf650ea66331abe2e10cc8927d186a482b9a4",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 24770.262,
+      "productionCloneDensity": 0.03266,
+      "productionRawCloneGroups": 18,
+      "productionCandidateCloneGroups": 0,
+      "productionCycleGroups": 1
+    }
+  },
+  "afterThreeRunPayloadFingerprints": [
+    "536018936df93bb934b1cd658c85da10ae43a2cded539bd39206c27819e8458d",
+    "536018936df93bb934b1cd658c85da10ae43a2cded539bd39206c27819e8458d",
+    "536018936df93bb934b1cd658c85da10ae43a2cded539bd39206c27819e8458d"
+  ],
+  "review": {
+    "interpretation": "All four cells score 39. New advisory candidate metrics do not enter the formula. The new source adds modest clone-analysis hotspots; the initial CC 25 metric-assembly hotspot was simplified before acceptance. No unexplained index movement remains."
+  }
+}

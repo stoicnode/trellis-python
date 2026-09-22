@@ -50,7 +50,9 @@ import ts from "typescript";
 import type { Range, SourceSet } from "../contract/index.ts";
 import { pythonTokens } from "../python/parser.ts";
 import { type FileSyntax, positionAt } from "../syntax/index.ts";
+import type { CloneTokenContext } from "../syntax/types.ts";
 import type { SyntaxWork } from "../syntax/work.ts";
+import { typeScriptCloneContext } from "./clone-context.ts";
 import type { DuplicationPhase, DuplicationStop } from "./duplication-work.ts";
 
 /**
@@ -110,6 +112,12 @@ export interface TokenStream {
 	startLines: number[];
 	/** 1-based line of each token's end. */
 	endLines: number[];
+	/** AST-derived source role for each token, when collected from parsed files. */
+	contexts?: CloneTokenContext[];
+	/** Original token kinds and half-open source offsets, when collected from parsed files. */
+	rawKinds?: number[];
+	startOffsets?: number[];
+	endOffsets?: number[];
 }
 
 /** One member of a clone group: a token-exact maximal run, located by line range. */
@@ -172,7 +180,7 @@ function normalizeKind(kind: ts.SyntaxKind): ts.SyntaxKind {
  * is dropped so file-final clones are not artificially extended.
  */
 export interface TokenCollectionWork extends SyntaxWork {
-	/** Check the shared token ceiling and reserve the three location/kind slots before append. */
+	/** Check the shared token ceiling and reserve kind, location and context slots before append. */
 	token(): void;
 }
 
@@ -194,12 +202,20 @@ function collectTokens(file: FileSyntax, work: TokenCollectionWork): TokenStream
 			kinds: tokens.map((token) => token.kind),
 			startLines: tokens.map((token) => token.startLine),
 			endLines: tokens.map((token) => token.endLine),
+			contexts: tokens.map((token) => token.context ?? "mixed-unknown"),
+			rawKinds: tokens.map((token) => token.rawKind ?? token.kind),
+			startOffsets: tokens.map((token) => token.from ?? 0),
+			endOffsets: tokens.map((token) => token.to ?? 0),
 		};
 	}
 	const sourceFile = file.sourceFile;
 	const kinds: ts.SyntaxKind[] = [];
 	const startLines: number[] = [];
 	const endLines: number[] = [];
+	const contexts: CloneTokenContext[] = [];
+	const rawKinds: number[] = [];
+	const startOffsets: number[] = [];
+	const endOffsets: number[] = [];
 	work.reserve(2);
 	const stack: ts.Node[] = [sourceFile];
 	while (stack.length > 0) {
@@ -215,6 +231,10 @@ function collectTokens(file: FileSyntax, work: TokenCollectionWork): TokenStream
 			kinds.push(normalizeKind(node.kind));
 			startLines.push(positionAt(sourceFile, node.getStart(sourceFile)).line);
 			endLines.push(positionAt(sourceFile, node.getEnd()).line);
+			contexts.push(typeScriptCloneContext(node));
+			rawKinds.push(node.kind);
+			startOffsets.push(node.getStart(sourceFile));
+			endOffsets.push(node.getEnd());
 			continue;
 		}
 		for (let index = children.length - 1; index >= 0; index -= 1) {
@@ -233,6 +253,10 @@ function collectTokens(file: FileSyntax, work: TokenCollectionWork): TokenStream
 		kinds,
 		startLines,
 		endLines,
+		contexts,
+		rawKinds,
+		startOffsets,
+		endOffsets,
 	};
 }
 

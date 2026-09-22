@@ -28,6 +28,13 @@ engine and its 100-token / 3-line thresholds, with Python-specific lexical
 normalization and suite boundaries. Python and TypeScript tokens cannot clone
 across languages.
 
+Advisory `duplication.candidate.*` metrics count independent executable copies
+from those raw groups. Python import statements, type declarations, literal
+collections and calls with entirely literal arguments receive separate syntax
+roles; mixed spans remain visible without an automatic implementation-copy
+claim. Candidate intervals are selected on tokens, so copies sharing a line
+can still be independent. These metrics never enter the current index.
+
 Confirmed `typing.overload` declarations, including imported aliases and
 qualified decorators on methods and async methods, count as signatures rather
 than executable functions. Their following implementation retains its scoped

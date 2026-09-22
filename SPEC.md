@@ -384,6 +384,32 @@ Semantics fixed by this decision:
   executable code lines after actual first-statement docstrings are omitted;
   the token population omits those same docstrings. Original source ranges
   remain attached to clone members. TypeScript's population is unchanged.
+- **Advisory executable-copy candidate (P2.2)**: native raw normalized groups
+  above remain the scored authority. A separate `duplication.candidate.*`
+  metric family and added clone finding facts classify each occurrence by AST
+  role: executable logic, import/export list, type declaration, literal data,
+  or mixed/unknown. Entirely literal argument calls are data context; mixed
+  executable/data spans are classified conservatively. Within each raw group,
+  a deterministic earliest-finish interval selection counts the maximum
+  number of non-overlapping token occurrences per file. Shared physical lines
+  do not make disjoint token intervals overlap; a self-shifted list with only
+  one independent occurrence is not a copy claim. At least two independent
+  executable occurrences are required for candidate burden. The candidate
+  density numerator is the union of eligible executable lines covered by
+  those selected occurrences; its denominator is the same eligible-line
+  population across the source set. Candidate counts and density never enter
+  the current formula.
+- **Normalization comparisons (P2.2)**: postfilters on those same raw groups
+  report whether independent members preserve original token kinds, the
+  equality pattern of identifiers/literals, exact source token text (so
+  identical data copies differ from merely similar tables), and complete
+  statement boundaries. These are research evidence, not additional default
+  findings or a new detector. The context and boundaries are static syntax
+  classifications, not proof of a safe extraction or of unnecessary data.
+  Advisory candidate work has a separate bounded pass; its exhaustion marks
+  only candidate metrics incomplete and leaves committed raw groups, raw
+  density and the scored index intact. Parse diagnostics still mark both
+  populations partial.
 - **Production/test boundary**: detection runs **per source set** — token
   streams are never matched across sets, so production and test duplication
   are measured separately (§3.1); `generated`, `vendored`,

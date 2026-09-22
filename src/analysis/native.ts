@@ -54,6 +54,7 @@ import {
 } from "../metrics/index.ts";
 import { inspectSafeguards, type SafeguardInspection } from "../safeguards/index.ts";
 import type { SyntaxInventory } from "../syntax/index.ts";
+import { DUPLICATION_METRICS } from "./duplication-metrics.ts";
 import {
 	ALL_SOURCE_SETS,
 	MEASURED_SOURCE_SETS,
@@ -292,16 +293,6 @@ const DOCUMENTATION_METRICS = [
 	"documentation.blocks.test",
 	"documentation.excessive.production",
 	"documentation.excessive.test",
-] as const;
-
-/** The duplication analyzer's metric ids (mirrors `analyzeDuplication` output, sorted). */
-const DUPLICATION_METRICS = [
-	"duplication.density.production",
-	"duplication.density.test",
-	"duplication.duplicated-lines.production",
-	"duplication.duplicated-lines.test",
-	"duplication.groups.production",
-	"duplication.groups.test",
 ] as const;
 
 /** The dependency-graph analyzer's metric ids (mirrors its output, sorted). */

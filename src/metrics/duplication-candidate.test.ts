@@ -99,6 +99,23 @@ describe("bounded duplication candidate", () => {
 		expect(result.totals).toBeNull();
 	});
 
+	test("keeps committed raw clones when only advisory candidate work exhausts", () => {
+		const input = files(2);
+		const full = measureCandidateScope(input);
+		const limited = measureCandidateScope(input, {
+			phaseLimits: { finalization: full.work.phases.finalization },
+		});
+		expect(limited.exhaustion).toBeNull();
+		expect(limited.groups).toEqual(full.groups);
+		expect(limited.totals).toEqual(full.totals);
+		expect(limited.candidate).toBeNull();
+		expect(limited.candidateExhaustion).toEqual({
+			phase: "finalization",
+			kind: "phase-work",
+			limit: full.work.phases.finalization,
+		});
+	});
+
 	test("refuses token excess during collection and before combined input allocation", () => {
 		const collected = measureCandidateScope(files(40), { maxTokens: 5 });
 		expect(collected.exhaustion).toEqual({ phase: "input", kind: "maxTokens", limit: 5 });

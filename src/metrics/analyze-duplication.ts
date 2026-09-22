@@ -35,6 +35,7 @@
  */
 import type { Finding, MetricValue, SourceSet } from "../contract/index.ts";
 import type { FileSyntax, SyntaxInventory } from "../syntax/index.ts";
+import type { CloneCandidateScope } from "./clone-candidates.ts";
 import {
 	type BudgetExhaustion,
 	type CloneGroup,
@@ -69,6 +70,10 @@ export interface DuplicationScope {
 	duplicatedLines: number | null;
 	/** `duplicatedLines / codeLines`; `null` when the scope has no code lines. */
 	density: number | null;
+	/** Separate, unscored executable-copy population. */
+	candidate: CloneCandidateScope | null;
+	/** Advisory-only resource stop; raw clone measurement may still be complete. */
+	candidateExhaustion: BudgetExhaustion | null;
 	/** Surviving clone groups, deterministically ordered. */
 	groups: CloneGroup[];
 	/** Files in this scope that produced parse diagnostics (partial measurement). */
@@ -105,6 +110,8 @@ function measureScope(
 		codeLines,
 		duplicatedLines,
 		density: detection.totals?.density ?? null,
+		candidate: detection.candidate,
+		candidateExhaustion: locateBudgetExhaustion(detection.candidateExhaustion),
 		groups: detection.groups,
 		diagnosticFiles: detection.diagnosticFiles,
 		exhaustion: locateBudgetExhaustion(detection.exhaustion),
@@ -143,10 +150,59 @@ function metricFraction(scope: DuplicationScope) {
 	return { numerator: scope.duplicatedLines, denominator: scope.codeLines };
 }
 
+function candidateScopeReason(
+	scope: DuplicationScope,
+	rawReason: string | undefined,
+): string | undefined {
+	const stop = scope.candidateExhaustion;
+	return stop === null
+		? rawReason
+		: `advisory clone-candidate ${stop.kind} limit ${stop.limit} in ${stop.phase}; candidate view not measured`;
+}
+
+const CANDIDATE_COUNTS: readonly [string, string, (candidate: CloneCandidateScope) => number][] = [
+	["covered-lines", "lines", (candidate) => candidate.coveredLines],
+	["eligible-lines", "lines", (candidate) => candidate.eligibleLines],
+	["equality-preserving-groups", "count", (candidate) => candidate.equalityPreservingGroups],
+	["exact-data-groups", "count", (candidate) => candidate.exactDataGroups],
+	["executable-groups", "count", (candidate) => candidate.executableGroups],
+	["independent-copies", "count", (candidate) => candidate.independentCopies],
+	["kind-preserving-groups", "count", (candidate) => candidate.kindPreservingGroups],
+	["statement-aligned-groups", "count", (candidate) => candidate.statementAlignedGroups],
+];
+
+function candidateMetrics(scope: DuplicationScope, reason: string | undefined): MetricValue[] {
+	const candidate = scope.candidate;
+	const counts = CANDIDATE_COUNTS.map(([name, unit, value]) =>
+		metric(
+			`duplication.candidate.${name}.${scope.sourceSet}`,
+			unit,
+			candidate === null ? null : value(candidate),
+			reason,
+		),
+	);
+	const fraction =
+		candidate === null || candidate.eligibleLines === 0
+			? undefined
+			: { numerator: candidate.coveredLines, denominator: candidate.eligibleLines };
+	const density = candidate?.density;
+	return [
+		...counts,
+		metric(
+			`duplication.candidate.density.${scope.sourceSet}`,
+			"ratio",
+			density === null || density === undefined ? null : roundTo(density, 6),
+			reason,
+			fraction,
+		),
+	];
+}
+
 /** Emit the per-scope metric set: ids carry the source set as their last segment. */
 function scopeMetrics(scope: DuplicationScope): MetricValue[] {
 	const set = scope.sourceSet;
 	const reason = scopeReason(scope);
+	const candidateReason = candidateScopeReason(scope, reason);
 	const unmeasured = scope.exhaustion !== null;
 	const density = scope.density === null ? null : roundTo(scope.density, 6);
 	const fraction = metricFraction(scope);
@@ -161,13 +217,16 @@ function scopeMetrics(scope: DuplicationScope): MetricValue[] {
 		metric(`duplication.groups.${set}`, "count", unmeasured ? null : scope.groups.length, reason),
 		metric(`duplication.duplicated-lines.${set}`, "lines", scope.duplicatedLines, reason, detail),
 		metric(`duplication.density.${set}`, "ratio", density, reason, fraction),
+		...candidateMetrics(scope, candidateReason),
 	];
 }
 
 /** One finding per clone group (SPEC §6.2); group order is already deterministic. */
 function groupFindings(scope: DuplicationScope): Finding[] {
+	const candidates = new Map(scope.candidate?.groups.map((group) => [group.id, group]) ?? []);
 	return scope.groups.map((group) => {
 		const first = group.members[0];
+		const candidate = candidates.get(group.id);
 		return {
 			kind: "duplication.clone-group",
 			path: first?.path ?? "",
@@ -184,6 +243,21 @@ function groupFindings(scope: DuplicationScope): Finding[] {
 					startLine: member.range.start.line,
 					endLine: member.range.end.line,
 				})),
+				...(candidate === undefined
+					? {}
+					: {
+							candidateContext: candidate.context,
+							independentOccurrences: candidate.independentOccurrences,
+							independentExecutableOccurrences: candidate.independentExecutableOccurrences,
+							memberContexts: candidate.memberContexts,
+							independentMemberIndexes: candidate.independentMemberIndexes,
+							independentExecutableMemberIndexes: candidate.independentExecutableMemberIndexes,
+							candidateEligible: candidate.eligible,
+							kindPreserving: candidate.kindPreserving,
+							equalityPreserving: candidate.equalityPreserving,
+							exactContentCopy: candidate.exactContentCopy,
+							statementAligned: candidate.statementAligned,
+						}),
 			},
 		};
 	});

@@ -11,6 +11,15 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Added
 
+- Native duplication now emits a separate, unscored candidate view of
+  independent executable copies. Per-token syntax roles distinguish executable
+  logic, import/export lists, type declarations, literal data and mixed spans.
+  Clone findings retain raw matches and add independent member indexes and
+  context; candidate metrics use the same eligible-line population for their
+  numerator and denominator. Stricter postfilters report original literal
+  kind, identifier/literal equality, exact data text and statement-boundary
+  agreement. A candidate-only resource stop leaves raw clones and scoring
+  intact and marks candidate metrics incomplete.
 - Native advisory analysis now flags Python module/class/function docstrings and
   attached TypeScript/TSX JSDoc blocks exceeding 40 nonblank content lines or
   300 whitespace-separated words. Reports retain original ranges, counts,
