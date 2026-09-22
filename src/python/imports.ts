@@ -90,7 +90,18 @@ function fromModuleParts(parts: readonly Leaf[], text: string, from: number) {
 	const importIndex = parts.findIndex((leaf) => leaf.name === "import" && leaf.from !== from);
 	if (importIndex < 0) return null;
 	const moduleParts = parts.slice(1, importIndex);
-	const level = moduleParts.filter((leaf) => leaf.name === ".").length;
+	let level = 0;
+	for (const leaf of moduleParts) {
+		if (leaf.name === ".") {
+			level += 1;
+			continue;
+		}
+		if (leaf.name === "Ellipsis") {
+			level += 3;
+			continue;
+		}
+		break;
+	}
 	const module = moduleFrom(text, moduleParts);
 	const anchor = module ?? moduleParts[0];
 	if (anchor === undefined) return null;

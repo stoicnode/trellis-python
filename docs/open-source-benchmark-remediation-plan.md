@@ -79,6 +79,11 @@ refresh only documented golden artifacts if measurement values change.
   their uncertainty blocks cycle completeness for the affected source set or whole
   workspace; do not turn an unknown edge into an external or a zero-cycle assertion.
 
+**Decision:** a non-literal dynamic import leaves the whole workspace dependency graph
+incomplete. Cycle metrics may still expose cycles found in the known graph, but cannot
+assert a complete zero-cycle result while an unknown edge remains. This records the
+existing graph-policy behavior; it does not change the policy identity.
+
 **Gate:** the pinned corpus has no false unresolved imports caused by relative-level
 parsing or an explicitly declared source condition. Every remaining unresolved site
 has a specific, defensible reason. Valid local cycles, external imports, inaccessible

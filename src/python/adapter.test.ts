@@ -4,6 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { measuredSelection } from "../audit/providers.ts";
 import { discoverSourceInventory } from "../discovery/index.ts";
+import { analyzeCycles } from "../metrics/analyze-cycles.ts";
+import { analyzeDependencyGraph } from "../metrics/analyze-graph.ts";
+import { buildSyntaxInventory } from "../syntax/index.ts";
 import { collectPythonImportSites } from "./imports.ts";
 import { parsePython, pythonFunctions, pythonLineKinds, pythonTokens } from "./parser.ts";
 import { createPythonGraphResolver } from "./resolve.ts";
@@ -173,6 +176,76 @@ describe("Python structural adapter", () => {
 });
 
 describe("Python import adapter", () => {
+	test("counts only leading relative markers and preserves imported source sites", () => {
+		const source = ["from pygments.style import Style", "from ...pkg import value"].join("\n");
+		const parsed = parsePython("src/pkg/module.py", source);
+		expect(parsed.diagnostics).toEqual([]);
+		expect(collectPythonImportSites(parsed.tree, source, "src/pkg/module.py")).toEqual([
+			expect.objectContaining({
+				specifier: "pygments.style",
+				range: {
+					start: { line: 1, column: 6 },
+					end: { line: 1, column: 20 },
+				},
+				python: { form: "from", level: 0, module: "pygments.style", imported: ["Style"] },
+			}),
+			expect.objectContaining({
+				specifier: "pkg",
+				range: {
+					start: { line: 2, column: 9 },
+					end: { line: 2, column: 12 },
+				},
+				python: { form: "from", level: 3, module: "pkg", imported: ["value"] },
+			}),
+		]);
+	});
+
+	test("keeps a valid local relative cycle complete", async () => {
+		const root = await workspace({
+			"src/pkg/__init__.py": "",
+			"src/pkg/left.py": "from .right import value\n",
+			"src/pkg/right.py": "from .left import value\n",
+		});
+		const inventory = await discoverSourceInventory(root);
+		const syntax = await buildSyntaxInventory(inventory);
+		expect(syntax.files.flatMap((file) => file.diagnostics)).toEqual([]);
+		const analysis = analyzeCycles(analyzeDependencyGraph(inventory, syntax));
+		expect(analysis.groups).toEqual([
+			expect.objectContaining({
+				members: ["src/pkg/left.py", "src/pkg/right.py"],
+				representativePath: ["src/pkg/left.py", "src/pkg/right.py", "src/pkg/left.py"],
+			}),
+		]);
+		expect(analysis.metrics.find((metric) => metric.id === "import-cycle.groups")).toMatchObject({
+			state: "complete",
+			value: 1,
+		});
+	});
+
+	test("distinguishes external dotted modules, package symbols, and missing local children", async () => {
+		const source = [
+			"from pygments.style import Style",
+			"from pkg import exported_symbol",
+			"from pkg.missing import value",
+		].join("\n");
+		const root = await workspace({
+			"src/pkg/__init__.py": "exported_symbol = 1\n",
+			"src/pkg/main.py": source,
+		});
+		const inventory = await discoverSourceInventory(root);
+		const sites = collectPythonImportSites(
+			parsePython("src/pkg/main.py", source).tree,
+			source,
+			"src/pkg/main.py",
+		);
+		const resolver = createPythonGraphResolver(inventory);
+		expect(sites.map((site) => resolver.resolve("src/pkg/main.py", site))).toEqual([
+			{ status: "external", packageName: "pygments" },
+			{ status: "local", target: "src/pkg/__init__.py" },
+			expect.objectContaining({ status: "unresolved", reason: "no-target" }),
+		]);
+	});
+
 	test("extracts and resolves project, package, relative, external, missing and dynamic imports", async () => {
 		const source = [
 			"import pkg.b as sibling, os",
