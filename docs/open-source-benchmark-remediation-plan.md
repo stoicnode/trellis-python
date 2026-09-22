@@ -124,14 +124,16 @@ Peak RSS is the operating-system maximum; reported wall time includes discovery 
 
 | Repository | Before | After |
 |---|---|---|
-| date-fns `766dea9` | 489,181 tokens; exhausted extraction at 100M work (36.09M extraction); 2,952 groups / 19,617 occurrences retained at stop; ~1.11s; 729.6 MiB peak RSS | complete: 79.52M work (14.40M extraction), 6,967 intermediate groups / 47,914 occurrences, 1,063 final groups; 0.86s; 428.3 MiB peak RSS |
-| Rich `9d8f9a3` | 193,850 tokens; exhausted extraction at 100M work (73.64M extraction); 181 groups / 12,851 occurrences retained at stop; ~0.95s; 280.7 MiB peak RSS | complete: 50.51M work (19.84M extraction), 5,052 intermediate groups / 197,156 occurrences, 104 final groups; 0.67s; 222.5 MiB peak RSS |
+| date-fns `766dea9` | 489,181 tokens; exhausted extraction at 100M work (36.09M extraction); 2,952 groups / 19,617 occurrences retained at stop; ~1.11s; 729.6 MiB peak RSS | complete: ~80.6M work (15.45M extraction), 6,967 intermediate groups / 47,914 occurrences, 1,063 final groups; ~1.08s; 441.5 MiB peak RSS |
+| Rich `9d8f9a3` | 193,850 tokens; exhausted extraction at 100M work (73.64M extraction); 181 groups / 12,851 occurrences retained at stop; ~0.95s; 280.7 MiB peak RSS | complete: ~51.0M work (20.36M extraction), 5,052 intermediate groups / 197,156 occurrences, 104 final groups; ~0.83s; 230.1 MiB peak RSS |
 
 The profile telemetry records date-fns' 138,885 intervals / 1,452,275 interval
 occurrences and Rich's 25,459 intervals / 13,806,186 interval occurrences. The
 independent small-input oracle, 2/10/40-copy controls, periodic repetitions, forced
-limits and cancellation checks continue to pass; repeated complete runs produce
-byte-identical measurements.
+limits and cancellation checks continue to pass. Repeated complete runs produce
+byte-identical clone groups and line metrics. Finalization's comparator-call work
+counter varied slightly across fresh processes (less than 0.01% on date-fns), so the
+table rounds total work rather than claiming byte-identical telemetry.
 
 ### 5. Stop presenting incomplete audits as numerical rankings
 
