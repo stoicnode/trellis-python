@@ -155,6 +155,7 @@ function evidenceReport(): EvidenceAuditReport {
 			...finding,
 			identity: { version: "1.0.0", state: "ambiguous", reason: "anonymous" },
 		})),
+		score: { ...baseReport().score, unknownDimensions: [] },
 		evidence: {
 			completeness: "complete",
 			analyses: [scoredNative(["duplication.density"])],
@@ -184,7 +185,15 @@ describe("auditReportSchema completeness split (§16.2)", () => {
 				completeness: "incomplete",
 				analyses: [advisoryExternal("incomplete"), scoredNative(["duplication.density"])],
 			},
-			score: { ...evidenceReport().score, partial: true },
+			score: {
+				...evidenceReport().score,
+				index: null,
+				partial: true,
+				unknownDimensions: ["duplication"],
+				contributions: [
+					{ dimension: "duplication", points: null, metricIds: ["duplication.density"] },
+				],
+			},
 		};
 		expect(auditReportSchema.safeParse(report).success).toBe(false);
 	});
@@ -196,7 +205,15 @@ describe("auditReportSchema completeness split (§16.2)", () => {
 				completeness: "incomplete",
 				analyses: [incompleteScoredNative(["duplication.density"])],
 			},
-			score: { ...evidenceReport().score, partial: true },
+			score: {
+				...evidenceReport().score,
+				index: null,
+				partial: true,
+				unknownDimensions: ["duplication"],
+				contributions: [
+					{ dimension: "duplication", points: null, metricIds: ["duplication.density"] },
+				],
+			},
 		};
 		expect(auditReportSchema.safeParse(report).success).toBe(true);
 		// The same scored failure without the partial headline is dishonest.
@@ -224,7 +241,15 @@ describe("auditReportSchema completeness split (§16.2)", () => {
 					reason: "budget exhausted before pairing completed",
 				},
 			},
-			score: { ...evidenceReport().score, partial: true },
+			score: {
+				...evidenceReport().score,
+				index: null,
+				partial: true,
+				unknownDimensions: ["duplication"],
+				contributions: [
+					{ dimension: "duplication", points: null, metricIds: ["duplication.density"] },
+				],
+			},
 		};
 		expect(auditReportSchema.safeParse(report).success).toBe(true);
 		const unflagged = { ...report, score: { ...report.score, partial: false } };

@@ -40,10 +40,12 @@ describe("renderAuditMarkdown across the render fixtures", () => {
 			const fixture = fixtures.get(kind);
 			if (fixture === undefined) throw new Error(`fixture ${kind} not built`);
 			const output = renderAuditMarkdown(fixture.report);
-			const scoreLines = output.split("\n").filter((line) => /sloppiness index \d/.test(line));
+			const scoreLines = output.split("\n").filter((line) => line.startsWith("**sloppiness index"));
 			expect(scoreLines.length).toBeGreaterThan(0);
 			for (const line of scoreLines) {
-				expect(line).toContain(`${fixture.report.score.index}/100`);
+				if (fixture.report.score.index === null)
+					expect(line).toContain("sloppiness index withheld");
+				else expect(line).toContain(`${fixture.report.score.index}/100`);
 				expect(line).toContain("lower is better");
 				expect(line).toContain(`scoring ${fixture.report.scoringVersion}`);
 			}
@@ -94,9 +96,11 @@ describe("renderAuditMarkdown per-fixture content", () => {
 		expect(output).toContain("sloppiness index 0/100");
 	});
 
-	test("renders an incomplete repository with a flagged partial headline and reasons", () => {
+	test("withholds an incomplete repository headline and names the unknown dimensions", () => {
 		const output = render("incomplete");
-		expect(output).toContain("PARTIAL (missing analysis is never zero debt)");
+		expect(output).toContain("sloppiness index withheld");
+		expect(output).toContain("INCOMPLETE (missing analysis is never zero debt)");
+		expect(output).toContain("unknown: complexity-erosion, duplication, import-cycle");
 		expect(output).toContain("completeness: incomplete");
 		expect(output).toContain("incomplete — 1 production file(s) produced parse diagnostics");
 	});

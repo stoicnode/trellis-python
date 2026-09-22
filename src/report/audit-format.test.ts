@@ -193,11 +193,12 @@ describe("scoreHeadline", () => {
 		expect(headline).not.toContain("%");
 	});
 
-	test("flags a partial headline when analysis is missing", () => {
-		expect(scoreHeadline(incomplete.report)).toContain(
-			"PARTIAL (missing analysis is never zero debt)",
-		);
-		expect(scoreHeadline(clean.report)).not.toContain("PARTIAL");
+	test("withholds a headline when required analysis is missing", () => {
+		const headline = scoreHeadline(incomplete.report);
+		expect(headline).toContain("sloppiness index withheld");
+		expect(headline).toContain("INCOMPLETE (missing analysis is never zero debt)");
+		expect(headline).toContain("unknown: complexity-erosion, duplication, import-cycle");
+		expect(scoreHeadline(clean.report)).not.toContain("withheld");
 	});
 });
 

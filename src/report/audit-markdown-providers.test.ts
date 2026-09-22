@@ -96,7 +96,8 @@ describe("renderAuditMarkdown without optional providers", () => {
 	test("renders a pre-provider (1.0.0) artifact with no provider section, never relabeled", async () => {
 		await seedClonePair(repo);
 		const report = await auditWorkspace(repo, { now: PINNED });
-		const legacy = { ...report } as Record<string, unknown>;
+		const { unknownDimensions: _, ...legacyScore } = report.score;
+		const legacy = { ...report, score: legacyScore } as Record<string, unknown>;
 		delete legacy.evidence;
 		legacy.schemaVersion = "1.0.0";
 		const loaded = auditReportSchema.parse(legacy);
