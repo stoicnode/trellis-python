@@ -245,6 +245,47 @@ describe("createGraphResolver workspace packages", () => {
 		expect(resolution.status).toBe("unresolved");
 		expect(resolution).toMatchObject({ reason: "no-target" });
 	});
+
+	test("uses the importing file's governing custom condition to select a discovered source export", async () => {
+		await put(
+			"packages/app/tsconfig.json",
+			JSON.stringify({ compilerOptions: { customConditions: ["@acme/source"] } }),
+		);
+		await put(
+			"packages/core/package.json",
+			JSON.stringify({
+				name: "@acme/core",
+				exports: {
+					".": { "@acme/source": "./src/index.ts", import: "./build/index.js" },
+				},
+			}),
+		);
+		await put("packages/app/src/main.ts", "");
+		await put("packages/core/src/index.ts", "");
+		const r = await resolver();
+		expect(r.resolve("packages/app/src/main.ts", site("@acme/core"))).toEqual({
+			status: "local",
+			target: "packages/core/src/index.ts",
+		});
+	});
+
+	test("selects nested default targets and reports an absent build target without inventing an edge", async () => {
+		await put(
+			"packages/core/package.json",
+			JSON.stringify({
+				name: "@acme/core",
+				exports: {
+					".": { import: { types: "./build/index.d.ts", default: "./build/index.js" } },
+				},
+			}),
+		);
+		await put("src/app.ts", "");
+		const r = await resolver();
+		expect(r.resolve("src/app.ts", site("@acme/core"))).toMatchObject({
+			status: "unresolved",
+			reason: "no-target",
+		});
+	});
 });
 
 describe("createGraphResolver external classification", () => {

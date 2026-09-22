@@ -65,6 +65,23 @@ describe("assessScoredBasis advisory-only changes", () => {
 });
 
 describe("assessScoredBasis scored measurement changes", () => {
+	test("refuses a 0.4.0 graph artifact after the graph-policy identity changes", () => {
+		const graph = (providerOptions: Record<string, string>) =>
+			nativeComplexityAnalysis({
+				id: "trellis.dependency-graph",
+				metricIds: ["graph.files"],
+				providerOptions,
+			});
+		const baseline = evidenceReport([graph({})], { analyzerVersion: "0.4.0" });
+		const current = evidenceReport([graph({ "graph-policy": "1.1.0" })], {
+			analyzerVersion: "0.4.0",
+		});
+		const basis = assessScoredBasis(baseline, current);
+		expect(basis.comparable).toBe(false);
+		expect(basis.issues.map((issue) => issue.code)).toEqual(["scored-measurement"]);
+		expect(compareReports(baseline, current).score).toBeUndefined();
+	});
+
 	test("a scored analysis recording different measurement semantics fails closed per measurement", () => {
 		const baseline = evidenceReport([nativeComplexityAnalysis()]);
 		const current = evidenceReport([

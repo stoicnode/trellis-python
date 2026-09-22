@@ -23,9 +23,10 @@
  *    config contributes no options (recorded in `configs`).
  * 3. **Workspace packages** — a bare specifier naming a workspace package
  *    (manifest `name` from discovery) resolves through that package's own
- *    manifest: `exports` (string or one level of conditions, tried in the
- *    order `import` → `require` → `default` → `types`; a single `*` wildcard
- *    per key/target), then `main`, then `types`, then `index` at the package
+ *    manifest: `exports` (string or nested conditions; governing tsconfig
+ *    `customConditions` first, then `import` → `require` → `default` →
+ *    `types`; a single `*` wildcard per key/target), then `main`, then
+ *    `types`, then `index` at the package
  *    root. A package **with** an `exports` map encapsulates: a subpath with
  *    no matching entry is `unresolved` (`exports-encapsulation`), not a file
  *    probe. Each candidate then resolves like a relative specifier.
@@ -248,7 +249,7 @@ function resolveWorkspacePackage(
 	const manifest = packageManifest(state, pkgPath);
 	let candidates: string[];
 	if (manifest.exports !== undefined) {
-		const looked = exportsCandidates(manifest.exports, subpath);
+		const looked = exportsCandidates(manifest.exports, subpath, options.customConditions ?? []);
 		if ("failure" in looked) {
 			return {
 				status: "unresolved",

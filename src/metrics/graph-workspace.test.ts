@@ -36,6 +36,42 @@ describe("exportsCandidates", () => {
 		});
 	});
 
+	test("uses declared custom conditions before the standard source conditions", () => {
+		const exports = {
+			".": {
+				"@acme/source": "./src/index.ts",
+				import: "./build/index.js",
+			},
+		};
+		expect(exportsCandidates(exports, "", ["@acme/source"])).toEqual({
+			candidates: ["./src/index.ts"],
+		});
+		expect(exportsCandidates(exports, "")).toEqual({ candidates: ["./build/index.js"] });
+	});
+
+	test("recurses through nested condition entries selected by the import form", () => {
+		const exports = {
+			".": {
+				import: { types: "./build/index.d.ts", default: "./build/index.js" },
+				require: { default: "./build/index.cjs" },
+			},
+		};
+		expect(exportsCandidates(exports, "")).toEqual({
+			candidates: ["./build/index.js"],
+		});
+	});
+
+	test("recognizes a root conditional exports object without a dot entry", () => {
+		const exports = {
+			"@acme/source": "./src/index.ts",
+			import: { types: "./build/index.d.ts", default: "./build/index.js" },
+		};
+		expect(exportsCandidates(exports, "", ["@acme/source"])).toEqual({
+			candidates: ["./src/index.ts"],
+		});
+		expect(exportsCandidates(exports, "")).toEqual({ candidates: ["./build/index.js"] });
+	});
+
 	test("wildcard entries substitute the matched middle; longest prefix wins", () => {
 		const exports = {
 			"./*": "./src/*.ts",
@@ -47,6 +83,12 @@ describe("exportsCandidates", () => {
 		expect(exportsCandidates(exports, "other")).toEqual({ candidates: ["./src/other.ts"] });
 	});
 
+	test("keeps an invalid matching wildcard entry unsupported", () => {
+		expect(
+			exportsCandidates({ "./*": "./src/*.ts", "./feature/*": { import: 42 } }, "feature/flags"),
+		).toEqual({ failure: "unsupported-exports" });
+	});
+
 	test("unlisted subpaths are encapsulated, never probed", () => {
 		expect(exportsCandidates({ ".": "./src/index.ts" }, "secret")).toEqual({
 			failure: "exports-encapsulation",
@@ -55,7 +97,13 @@ describe("exportsCandidates", () => {
 
 	test("shapes beyond the documented subset fail as unsupported", () => {
 		expect(exportsCandidates(["./a.ts"], "")).toEqual({ failure: "unsupported-exports" });
+		expect(exportsCandidates({ ".": { import: ["./a.ts"] } }, "")).toEqual({
+			failure: "unsupported-exports",
+		});
 		expect(exportsCandidates({ ".": ["./a.ts"] }, "")).toEqual({
+			failure: "unsupported-exports",
+		});
+		expect(exportsCandidates({ ".": { import: 42 } }, "")).toEqual({
 			failure: "unsupported-exports",
 		});
 		expect(exportsCandidates({ ".": { import: { nested: "./a.ts" } } }, "")).toEqual({

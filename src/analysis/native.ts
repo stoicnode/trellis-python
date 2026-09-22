@@ -50,6 +50,7 @@ import {
 	type DependencyGraphAnalysis,
 	type DuplicationAnalysis,
 	type DuplicationOptions,
+	GRAPH_POLICY_VERSION,
 } from "../metrics/index.ts";
 import { inspectSafeguards, type SafeguardInspection } from "../safeguards/index.ts";
 import type { SyntaxInventory } from "../syntax/index.ts";
@@ -209,7 +210,9 @@ export function runDependencyGraphAnalysis(
 	return {
 		product,
 		result: {
-			provider: nativeAnalyzerIdentity("trellis.dependency-graph", "shared-parse"),
+			provider: nativeAnalyzerIdentity("trellis.dependency-graph", "shared-parse", {
+				"graph-policy": GRAPH_POLICY_VERSION,
+			}),
 			...scopeFields(scope),
 			analysis: nativeAnalysisIdentity(scope, syntax.compilerVersion),
 			metrics: product.metrics,
@@ -235,7 +238,9 @@ export function runImportCycleAnalysis(
 	return {
 		product,
 		result: {
-			provider: nativeAnalyzerIdentity("trellis.import-cycles", "graph"),
+			provider: nativeAnalyzerIdentity("trellis.import-cycles", "graph", {
+				"graph-policy": GRAPH_POLICY_VERSION,
+			}),
 			state: graph.result.state,
 			analysis: graph.result.analysis,
 			observedCoverage: graph.result.observedCoverage,
@@ -321,14 +326,18 @@ const duplicationAnalyzer: NativeAnalyzerRegistration = {
 };
 
 const dependencyGraphAnalyzer: NativeAnalyzerRegistration = {
-	identity: nativeAnalyzerIdentity("trellis.dependency-graph", "shared-parse"),
+	identity: nativeAnalyzerIdentity("trellis.dependency-graph", "shared-parse", {
+		"graph-policy": GRAPH_POLICY_VERSION,
+	}),
 	capabilities: ["dependency-graph"],
 	metrics: GRAPH_METRICS,
 	requires: [],
 };
 
 const importCyclesAnalyzer: NativeAnalyzerRegistration = {
-	identity: nativeAnalyzerIdentity("trellis.import-cycles", "graph"),
+	identity: nativeAnalyzerIdentity("trellis.import-cycles", "graph", {
+		"graph-policy": GRAPH_POLICY_VERSION,
+	}),
 	capabilities: ["import-cycles"],
 	metrics: CYCLE_METRICS,
 	requires: ["trellis.dependency-graph"],

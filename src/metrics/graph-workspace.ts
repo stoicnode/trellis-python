@@ -5,11 +5,13 @@
  * A bare specifier naming a workspace package resolves through that package's
  * own manifest (documented supported subset):
  *
- * - `exports` — a string (root entry only), or a map with one level of
- *   conditions tried in the order `import` → `require` → `default` →
- *   `types`; keys and targets support a single `*` wildcard (longest literal
- *   prefix wins). Arrays, nested condition objects, and non-string scalars
- *   are `unsupported-exports`. A package **with** an `exports` map
+ * - `exports` — a string (root entry only), or a recursively nested map of
+ *   conditions (including a root conditional object without a `"."` key).
+ *   The importing file's governing tsconfig `customConditions` take
+ *   precedence, followed by `import` → `require` → `default` → `types`.
+ *   Keys and targets support a single `*` wildcard (longest literal prefix
+ *   wins). Arrays and non-string scalar targets are `unsupported-exports`.
+ *   A package **with** an `exports` map
  *   encapsulates: a subpath with no matching entry fails
  *   `exports-encapsulation` — there is no fallback file probe.
  * - Without `exports`: the root resolves via `main`, then `types`, then
@@ -22,7 +24,7 @@
 
 import type { UnresolvedReason } from "./graph-types.ts";
 
-/** Conditions tried, in order, for one `exports` entry (documented subset). */
+/** Built-in conditions tried after a governing tsconfig's custom conditions. */
 const EXPORTS_CONDITIONS = ["import", "require", "default", "types"] as const;
 
 /** Match `value` against a pattern with at most one `*`; returns the matched middle or null. */
@@ -34,31 +36,37 @@ export function wildcardMatch(pattern: string, value: string): string | null {
 	return value.slice(prefix.length, value.length - suffix.length);
 }
 
-/** Extract the target string from one `exports` entry value (documented subset). */
-function exportsTarget(value: unknown): { target: string } | { unsupported: true } | null {
+/** The ordered conditions active for one resolution, with duplicate custom conditions removed. */
+function activeConditions(customConditions: readonly string[]): string[] {
+	return [...new Set([...customConditions, ...EXPORTS_CONDITIONS])];
+}
+
+/** Extract one selected target from recursively nested conditional exports. */
+function exportsTarget(
+	value: unknown,
+	conditions: readonly string[],
+): { target: string } | { unsupported: true } {
 	if (typeof value === "string") return { target: value };
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
 		return { unsupported: true };
 	}
-	const conditions = value as Record<string, unknown>;
-	for (const condition of EXPORTS_CONDITIONS) {
-		const selected = conditions[condition];
-		if (typeof selected === "string") return { target: selected };
-		if (selected !== undefined) return { unsupported: true };
+	const conditional = value as Record<string, unknown>;
+	for (const condition of conditions) {
+		const selected = conditional[condition];
+		if (selected === undefined) continue;
+		const target = exportsTarget(selected, conditions);
+		return target;
 	}
-	return null;
-}
-
-/** `exportsTarget` returning null on unsupported shapes (wildcard scan helper). */
-function exportsTargetOrNull(value: unknown): string | null {
-	const target = exportsTarget(value);
-	return target === null || "unsupported" in target ? null : target.target;
+	return { unsupported: true };
 }
 
 /** One exact `exports` entry lookup; unsupported shapes fail explicitly. */
-function exactCandidate(value: unknown): { candidates: string[] } | { failure: UnresolvedReason } {
-	const target = exportsTarget(value);
-	return target === null || "unsupported" in target
+function exactCandidate(
+	value: unknown,
+	conditions: readonly string[],
+): { candidates: string[] } | { failure: UnresolvedReason } {
+	const target = exportsTarget(value, conditions);
+	return "unsupported" in target
 		? { failure: "unsupported-exports" }
 		: { candidates: [target.target] };
 }
@@ -67,18 +75,21 @@ function exactCandidate(value: unknown): { candidates: string[] } | { failure: U
 function wildcardCandidate(
 	map: Record<string, unknown>,
 	key: string,
+	conditions: readonly string[],
 ): { candidates: string[] } | { failure: UnresolvedReason } {
-	let best: { prefix: number; target: string } | null = null;
+	let best: { prefix: number; middle: string; target: ReturnType<typeof exportsTarget> } | null =
+		null;
 	for (const [pattern, value] of Object.entries(map)) {
 		const middle = wildcardMatch(pattern, key);
 		if (middle === null) continue;
-		const target = exportsTargetOrNull(value);
-		if (target === null) continue;
 		if (best === null || pattern.indexOf("*") > best.prefix) {
-			best = { prefix: pattern.indexOf("*"), target: target.replace("*", middle) };
+			best = { prefix: pattern.indexOf("*"), middle, target: exportsTarget(value, conditions) };
 		}
 	}
-	return best === null ? { failure: "exports-encapsulation" } : { candidates: [best.target] };
+	if (best === null) return { failure: "exports-encapsulation" };
+	return "unsupported" in best.target
+		? { failure: "unsupported-exports" }
+		: { candidates: [best.target.target.replace("*", best.middle)] };
 }
 
 /**
@@ -88,6 +99,7 @@ function wildcardCandidate(
 export function exportsCandidates(
 	exports: unknown,
 	subpath: string,
+	customConditions: readonly string[] = [],
 ): { candidates: string[] } | { failure: UnresolvedReason } {
 	const key = subpath === "" ? "." : `./${subpath}`;
 	if (typeof exports === "string") {
@@ -97,8 +109,15 @@ export function exportsCandidates(
 		return { failure: "unsupported-exports" };
 	}
 	const map = exports as Record<string, unknown>;
+	const conditions = activeConditions(customConditions);
+	const hasSubpathKeys = Object.keys(map).some((entry) => entry.startsWith("."));
+	if (!hasSubpathKeys) {
+		return key === "." ? exactCandidate(map, conditions) : { failure: "exports-encapsulation" };
+	}
 	const exact = map[key];
-	return exact !== undefined ? exactCandidate(exact) : wildcardCandidate(map, key);
+	return exact !== undefined
+		? exactCandidate(exact, conditions)
+		: wildcardCandidate(map, key, conditions);
 }
 
 /** Manifest fallback candidates when no `exports` map governs (`main`, then `types`, then `index`). */
