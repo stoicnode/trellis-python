@@ -38,7 +38,7 @@ retain their existing numerical scores.
 |---|---:|---:|---|---:|---:|
 | Zod full | TS | 311 / 46,651 | withheld: import-cycle | 1,206 | 690 |
 | date-fns full | TS | 1,652 / 83,344 | withheld: import-cycle | 1,217 | 890 |
-| TanStack Query full | TS | 664 / 46,718 | withheld: duplication test, import-cycle | 1,868 | 893 |
+| TanStack Query full | TS | 664 / 46,718 | withheld: import-cycle | 1,868 | 893 |
 | Requests full | Python | 22 / 5,095 | withheld: import-cycle | 173 | 169 |
 | Flask full | Python | 35 / 8,074 | withheld: import-cycle | 244 | 170 |
 | Rich full | Python | 146 / 36,847 | withheld: import-cycle | 696 | 253 |
@@ -53,6 +53,8 @@ finishes on date-fns and Rich within the existing bounds. Remaining full-run
 uncertainty is explicit: Zod has 36 `no-target` and two dynamic imports;
 date-fns has three and one; TanStack Query has 220 and one; Requests has one
 and two; Flask has two dynamic imports; Rich has three dynamic imports.
+TanStack Query's test-set duplication metrics are also incomplete; they remain
+visible separately from the production-score unknown dimension.
 
 ## Location review and calibration decision
 
