@@ -37,7 +37,7 @@ export interface MetricSnapshot {
 /** The audit facts the record keeps per corpus entry. */
 export interface EntrySummary {
 	id: string;
-	index: number;
+	index: number | null;
 	partial: boolean;
 	completeness: string;
 	productionFiles: number;
@@ -154,6 +154,9 @@ export function assessPair(
 		deltas[id] = { before: b, after: a, delta: b !== null && a !== null ? a - b : null };
 		const failure = metricExpectationFailure(pair, id, b, a);
 		if (failure !== null) failures.push(failure);
+	}
+	if (before.index === null || after.index === null) {
+		throw new Error(`pair "${pair.id}" requires complete numeric headlines`);
 	}
 	const indexDelta = after.index - before.index;
 	const indexFailure = indexExpectationFailure(pair, indexDelta);

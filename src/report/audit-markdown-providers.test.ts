@@ -218,8 +218,8 @@ describe("renderAuditMarkdown with a complete provider analysis", () => {
 			expect(output).not.toMatch(/\d+%/);
 			expect(headline(output)).not.toContain("PARTIAL");
 			// Native score contributions still sum to the native score.
-			const sum = report.score.contributions.reduce((total, c) => total + c.points, 0);
-			expect(sum).toBeCloseTo(report.score.index, 6);
+			const sum = report.score.contributions.reduce((total, c) => total + (c.points ?? 0), 0);
+			expect(sum).toBeCloseTo(report.score.index ?? 0, 6);
 			// No provider metric or finding appears among the score contributions.
 			for (const contribution of report.score.contributions) {
 				for (const metricId of contribution.metricIds) {

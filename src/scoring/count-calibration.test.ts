@@ -34,7 +34,7 @@ describe("count calibration", () => {
 		for (const kloc of [1, 10, 100]) {
 			const cleaner = scoreSloppiness(profile([kloc, kloc, 0], [0.01, 0.01, 0]));
 			const worse = scoreSloppiness(profile([20 * kloc, 15 * kloc, 5 * kloc], [0.3, 0.2, 0.1]));
-			expect(worse.index - cleaner.index).toBeGreaterThan(40);
+			expect((worse.index ?? 0) - (cleaner.index ?? 0)).toBeGreaterThan(40);
 		}
 	});
 

@@ -165,7 +165,7 @@ describe("compareReports", () => {
 		expect(comparison.score).toBeDefined();
 	});
 
-	test("compares incomplete reports by state, without inventing values", () => {
+	test("refuses incomplete reports without inventing a numeric score delta", () => {
 		const baseline = baseReport();
 		const current = baseReport();
 		current.completeness = "incomplete";
@@ -177,11 +177,11 @@ describe("compareReports", () => {
 			reason: "12 imports unresolved without node_modules",
 		};
 		const comparison = compareReports(baseline, current);
-		expect(comparison.compatibility.comparable).toBe(true);
-		const delta = comparison.metrics?.find((d) => d.id === "import-cycle.groups");
-		expect(delta?.baseline).toEqual({ state: "complete", value: 1 });
-		expect(delta?.current).toEqual({ state: "incomplete" });
-		expect(delta?.delta).toBeUndefined();
+		expect(comparison.compatibility.comparable).toBe(false);
+		expect(comparison.compatibility.issues.map((issue) => issue.code)).toContain(
+			"withheld-headline",
+		);
+		expect(comparison.score).toBeUndefined();
 	});
 
 	test("produces byte-identical results on repeated comparison", () => {

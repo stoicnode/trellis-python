@@ -60,6 +60,21 @@ describe("assessPolicy max-index", () => {
 		expect(assessment.failed).toBe(false);
 		expect(assessment.results).toEqual([]);
 	});
+
+	test("fails closed when a required native analysis withholds the headline", () => {
+		const report = {
+			...baseReport(),
+			score: { ...baseReport().score, index: null, partial: true },
+		};
+		const assessment = assessPolicy(report, {
+			maxIndex: 25,
+			budgets: {},
+			failOnNew: [],
+			requireEvidence: [],
+		});
+		expect(assessment.failed).toBe(true);
+		expect(assessment.results[0]?.reasons[0]?.code).toBe("index-withheld");
+	});
 });
 
 describe("assessPolicy metric budgets", () => {

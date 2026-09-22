@@ -148,7 +148,7 @@
 					"state": "incomplete"
 				},
 				"index": {
-					"eq": 100
+					"eq": null
 				}
 			}
 		},

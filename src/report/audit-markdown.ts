@@ -88,7 +88,7 @@ export function renderAuditMarkdown(
 	);
 	for (const contribution of report.score.contributions) {
 		lines.push(
-			`| ${contribution.dimension} | ${contribution.points} | ${contribution.metricIds.join(", ")} |`,
+			`| ${contribution.dimension} | ${contribution.points ?? "unknown"} | ${contribution.metricIds.join(", ")} |`,
 		);
 	}
 

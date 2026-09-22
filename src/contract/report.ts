@@ -59,10 +59,11 @@ import { languageCoverageRowSchema } from "./language-coverage.ts";
 import { type MetricValue, metricValueSchema } from "./metric.ts";
 import { dottedIdSchema, finiteNumberSchema, versionStringSchema } from "./primitives.ts";
 import { safeguardResultSchema } from "./safeguard.ts";
-import { rollUpCompleteness } from "./states.ts";
+import { validateCurrentScore, validateMeasurementHonesty } from "./score-validation.ts";
 import {
 	PRE_IDENTITY_SCHEMA_VERSION,
 	PRE_PROVIDER_SCHEMA_VERSION,
+	PRE_WITHHELD_SCHEMA_VERSION,
 	SCHEMA_VERSION,
 	SCOPED_IDENTITY_SCHEMA_VERSION,
 } from "./version.ts";
@@ -70,17 +71,18 @@ import {
 /** Per-dimension points, traceable to the raw metrics that produced them (SPEC §7). */
 export const scoreContributionSchema = z.strictObject({
 	dimension: dottedIdSchema,
-	points: finiteNumberSchema.min(0).max(100),
+	points: finiteNumberSchema.min(0).max(100).nullable(),
 	metricIds: z.array(dottedIdSchema),
 });
 
 export type ScoreContribution = z.infer<typeof scoreContributionSchema>;
 
 export const scoreSchema = z.strictObject({
-	index: finiteNumberSchema.min(0).max(100),
+	index: finiteNumberSchema.min(0).max(100).nullable(),
 	direction: z.literal("lower-is-better"),
 	partial: z.boolean(),
 	contributions: z.array(scoreContributionSchema),
+	unknownDimensions: z.array(dottedIdSchema).optional(),
 });
 
 export type Score = z.infer<typeof scoreSchema>;
@@ -125,50 +127,6 @@ interface MetricOwner {
 	scoring: ScoringRole;
 }
 
-/** The report fields the shared honesty checks read. */
-interface HonestReportFields {
-	metrics: Record<string, MetricValue>;
-	completeness: "complete" | "incomplete";
-	score: Score;
-}
-
-/**
- * Shared §6.4 honesty checks (both versions): metric keys match their ids,
- * `completeness` equals the metric-state rollup (§3.3 — provider states
- * never roll in), and every contribution traces to a metric present on the
- * report (§7).
- */
-function validateMeasurementHonesty(report: HonestReportFields, ctx: z.RefinementCtx): void {
-	for (const [key, metric] of Object.entries(report.metrics)) {
-		if (key !== metric.id) {
-			ctx.addIssue({
-				code: "custom",
-				message: `metrics key "${key}" must equal the metric id "${metric.id}"`,
-				path: ["metrics", key, "id"],
-			});
-		}
-	}
-	const rolledUp = rollUpCompleteness(Object.values(report.metrics).map((metric) => metric.state));
-	if (report.completeness !== rolledUp) {
-		ctx.addIssue({
-			code: "custom",
-			message: `completeness "${report.completeness}" does not match the metric-state rollup "${rolledUp}"`,
-			path: ["completeness"],
-		});
-	}
-	for (const [i, contribution] of report.score.contributions.entries()) {
-		for (const metricId of contribution.metricIds) {
-			if (!(metricId in report.metrics)) {
-				ctx.addIssue({
-					code: "custom",
-					message: `contribution "${contribution.dimension}" references unknown metric "${metricId}"`,
-					path: ["score", "contributions", i, "metricIds"],
-				});
-			}
-		}
-	}
-}
-
 /**
  * The pre-provider report (schema `1.0.0`, §16.6): the original §6.4 shape.
  * Stored artifacts keep their original interpretation — no evidence area (a
@@ -182,6 +140,17 @@ export const preProviderAuditReportSchema = z
 	})
 	.superRefine((report, ctx) => {
 		validateMeasurementHonesty(report, ctx);
+		if (
+			report.score.index === null ||
+			report.score.unknownDimensions !== undefined ||
+			report.score.contributions.some((entry) => entry.points === null)
+		) {
+			ctx.addIssue({
+				code: "custom",
+				message: "historical reports retain their numeric partial-score contract",
+				path: ["score"],
+			});
+		}
 		if (report.score.partial !== (report.completeness === "incomplete")) {
 			ctx.addIssue({
 				code: "custom",
@@ -316,6 +285,7 @@ export const evidenceAuditReportSchema = z
 		schemaVersion: z.enum([
 			PRE_IDENTITY_SCHEMA_VERSION,
 			SCOPED_IDENTITY_SCHEMA_VERSION,
+			PRE_WITHHELD_SCHEMA_VERSION,
 			SCHEMA_VERSION,
 		]),
 		...reportBody,
@@ -324,6 +294,19 @@ export const evidenceAuditReportSchema = z
 	})
 	.superRefine((report, ctx) => {
 		validateMeasurementHonesty(report, ctx);
+		if (report.schemaVersion === SCHEMA_VERSION) {
+			validateCurrentScore(report, ctx);
+		} else if (
+			report.score.index === null ||
+			report.score.unknownDimensions !== undefined ||
+			report.score.contributions.some((entry) => entry.points === null)
+		) {
+			ctx.addIssue({
+				code: "custom",
+				message: "historical reports retain their numeric partial-score contract",
+				path: ["score"],
+			});
+		}
 		const owners = validateMetricOwnership(report.evidence.analyses, report.metrics, ctx);
 		validateScoreContributors(report.score.contributions, owners, ctx);
 		validateCompletenessIndependence(report, ctx);

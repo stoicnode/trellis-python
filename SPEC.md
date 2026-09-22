@@ -583,7 +583,7 @@ their original interpretation.
 
 ```jsonc
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.4.0",
   "analyzerVersion": "0.2.0",
   "scoringVersion": "0.1.0-provisional",
   "repo": { "root": "/abs/path", "identity": "…" },
@@ -596,9 +596,10 @@ their original interpretation.
   "completeness": "complete",       // rolled up from metric states
   "metrics": { /* §6.1 by id, raw values separate from contributions */ },
   "score": {
-    "index": 27,                    // 0–100, LOWER IS BETTER — not a percentage
+    "index": 27,                    // 0–100, LOWER IS BETTER — not a percentage; null when withheld
     "direction": "lower-is-better",
-    "partial": false,               // true when a required dimension is incomplete
+    "partial": false,               // true with a withheld headline when a required dimension is incomplete
+    "unknownDimensions": [],        // required native dimensions without complete analysis
     "contributions": [ /* per-dimension points, traceable to raw metrics */ ]
   },
   "findings": [ /* §6.2, deterministically ordered */ ],
@@ -793,9 +794,10 @@ repo-level by construction.
   exactly to the index. Every point traces to the raw metric ids, values,
   and thresholds in the dimension's explanation.
 - **Missing analysis is never zero debt**: a dimension whose required
-  metrics are `incomplete` (or absent) scores at its full weight and the
-  headline is flagged `partial` (§3.4) — an apparently complete score is
-  never published from partial analysis. A `not-applicable` ratio with
+  metrics are `incomplete` (or absent) has no normalized score or contribution
+  points; the headline `index` is withheld (`null`) and every unknown dimension
+  is named (§3.4). An apparently complete score is never published from partial
+  analysis. A `not-applicable` ratio with
   complete zero counts is a genuinely empty scope and scores 0; the
   companion count metric independently confirms zero debt.
 - **Aggregation**: the formula consumes only summed-mass repo metrics

@@ -93,7 +93,7 @@ export type AuditEvent =
 			readonly results: number;
 			readonly findings: number;
 	  }
-	| { readonly type: "scored"; readonly index: number; readonly partial: boolean };
+	| { readonly type: "scored"; readonly index: number | null; readonly partial: boolean };
 
 /** Optional sink for {@link AuditEvent}s; never affects the assembled report. */
 export type AuditProgress = (event: AuditEvent) => void;

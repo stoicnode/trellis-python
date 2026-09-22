@@ -14,9 +14,9 @@
  *   points, and the contract `score` view references only metrics present
  *   in the input (§6.4 invariant).
  * - **Missing analysis is never zero debt**: a dimension whose required
- *   metrics are `incomplete`, `unsupported`, or absent scores at its full
- *   weight (worst case), and the headline is flagged `partial` — an
- *   apparently complete score is never published from partial analysis
+ *   metrics are `incomplete`, `unsupported`, or absent has no normalized
+ *   value or points, and the headline is withheld — an apparently complete
+ *   score is never published from partial analysis
  *   (§3.4). A `not-applicable` ratio with complete zero counts is a
  *   genuinely empty scope and scores 0; the companion count term (always
  *   finite when measured) independently confirms zero debt.
@@ -52,24 +52,24 @@ export type ScoredTerm = FormulaTerm & {
 	state: AnalysisState | "missing";
 	/** The raw value consumed, or `null` when no value was available. */
 	rawValue: number | null;
-	/** Normalized 0–100 (exact, unrounded); 100 on missing/incomplete (never zero debt). */
-	normalized: number;
+	/** Normalized 0–100 (exact, unrounded), or null when analysis is unknown. */
+	normalized: number | null;
 };
 
 /** `scored` from raw metrics, or `degraded` to the worst case by missing analysis. */
-export type DimensionState = "scored" | "degraded";
+export type DimensionState = "scored" | "unknown";
 
 /** One dimension's traceable contribution to the index. */
 export interface DimensionScore {
 	dimension: string;
 	weight: number;
 	state: DimensionState;
-	/** Exact normalized dimension score (0–100) before weighting. */
-	normalized: number;
+	/** Exact normalized dimension score (0–100) before weighting, or null when unknown. */
+	normalized: number | null;
 	/** Exact weighted points (`weight × normalized`). */
-	exactPoints: number;
+	exactPoints: number | null;
 	/** Apportioned integer points; all dimensions' points sum exactly to the index. */
-	points: number;
+	points: number | null;
 	/** Present input metrics this dimension consumed (sorted). */
 	metricIds: string[];
 	terms: ScoredTerm[];
@@ -84,11 +84,13 @@ export interface SloppinessScore {
 	provisional: true;
 	direction: "lower-is-better";
 	/** The 0–100 sloppiness index — LOWER IS BETTER, never a percentage of bad code (§3.4). */
-	index: number;
+	index: number | null;
 	/** True when missing analysis prevents an apparently complete headline (§3.4). */
 	partial: boolean;
 	/** Required metric ids absent from the input (sorted). */
 	missing: string[];
+	/** Formula dimensions whose required native inputs were not complete. */
+	unknownDimensions: string[];
 	/** Per-dimension contributions, sorted by dimension id. */
 	dimensions: DimensionScore[];
 	/** The contract-shaped §6.4 score (traceable to the report's metrics). */
@@ -106,14 +108,14 @@ function scoreTerm(term: FormulaTerm, metric: MetricValue | undefined): ScoredTe
 		...term,
 	};
 	if (metric === undefined) {
-		return { ...base, present: false, state: "missing", rawValue: null, normalized: 100 };
+		return { ...base, present: false, state: "missing", rawValue: null, normalized: null };
 	}
 	if (metric.state === "not-applicable") {
 		return { ...base, present: true, state: metric.state, rawValue: null, normalized: 0 };
 	}
 	if (metric.state !== "complete" || metric.value === undefined) {
 		const rawValue = metric.value ?? null;
-		return { ...base, present: true, state: metric.state, rawValue, normalized: 100 };
+		return { ...base, present: true, state: metric.state, rawValue, normalized: null };
 	}
 	return {
 		...base,
@@ -132,18 +134,18 @@ function termTrace(term: ScoredTerm): string {
 	const raw = term.rawValue === null ? term.state : formatNumber(term.rawValue);
 	return (
 		`${term.metricId} ${"countScale" in term ? `bounded-log(${raw}, scale=${term.countScale})` : `${raw}/${formatNumber(term.saturatesAt)}`} ` +
-		`→ ${formatNumber(term.normalized)} (×${term.share})`
+		`→ ${term.normalized === null ? "unknown" : formatNumber(term.normalized)} (×${term.share})`
 	);
 }
 
 /** The explanation for a degraded dimension (missing analysis is never zero debt). */
-function degradedExplanation(dimension: string, terms: readonly ScoredTerm[]): string {
+function unknownExplanation(dimension: string, terms: readonly ScoredTerm[]): string {
 	const causes = terms
 		.filter((term) => term.state !== "complete" && term.state !== "not-applicable")
 		.map((term) => `${term.metricId} ${term.state}`)
 		.join(", ");
 	return (
-		`${dimension} degraded (${causes}): scored at maximum 100 — ` +
+		`${dimension} unknown (${causes}): headline withheld — ` +
 		"missing analysis is never treated as zero debt"
 	);
 }
@@ -158,18 +160,18 @@ function scoreDimension(
 		(term) => term.state !== "complete" && term.state !== "not-applicable",
 	);
 	const normalized = degraded
-		? 100
-		: terms.reduce((sum, term) => sum + term.share * term.normalized, 0);
+		? null
+		: terms.reduce((sum, term) => sum + term.share * (term.normalized ?? 0), 0);
 	const explanation = degraded
-		? degradedExplanation(dimension.dimension, terms)
-		: `${dimension.dimension} = weight ${dimension.weight} × normalized ${formatNumber(normalized)} [${terms.map(termTrace).join("; ")}]`;
+		? unknownExplanation(dimension.dimension, terms)
+		: `${dimension.dimension} = weight ${dimension.weight} × normalized ${formatNumber(normalized ?? 0)} [${terms.map(termTrace).join("; ")}]`;
 	return {
 		dimension: dimension.dimension,
 		weight: dimension.weight,
-		state: degraded ? "degraded" : "scored",
+		state: degraded ? "unknown" : "scored",
 		normalized,
-		exactPoints: dimension.weight * normalized,
-		points: 0, // filled by apportionment in scoreSloppiness
+		exactPoints: normalized === null ? null : dimension.weight * normalized,
+		points: null, // filled only for complete dimensions below
 		metricIds: terms
 			.filter((term) => term.present)
 			.map((term) => term.metricId)
@@ -200,17 +202,47 @@ export function scoreSloppiness(metrics: readonly MetricValue[]): SloppinessScor
 			dimension.terms.filter((term) => !term.present).map((term) => term.metricId),
 		)
 		.sort();
-	const partial = metrics.some((metric) => metric.state === "incomplete") || missing.length > 0;
-	const total = scored.reduce((sum, dimension) => sum + dimension.exactPoints, 0);
-	const index = Math.min(100, Math.max(0, roundHalfUp(total)));
-	const apportioned = apportionPoints(
-		total,
-		scored.map((dimension) => ({ key: dimension.dimension, exact: dimension.exactPoints })),
-	);
+	const unknownDimensions = scored
+		.filter((dimension) => dimension.state === "unknown")
+		.map((dimension) => dimension.dimension);
+	if (unknownDimensions.length === 0 && metrics.some((metric) => metric.state === "incomplete")) {
+		unknownDimensions.push("native-analysis");
+	}
+	const partial = unknownDimensions.length > 0;
+	const total = partial
+		? null
+		: scored.reduce((sum, dimension) => sum + (dimension.exactPoints ?? 0), 0);
+	const index = total === null ? null : Math.min(100, Math.max(0, roundHalfUp(total)));
+	const apportioned =
+		total === null
+			? new Map<string, number>()
+			: apportionPoints(
+					total,
+					scored.map((dimension) => ({
+						key: dimension.dimension,
+						exact: dimension.exactPoints ?? 0,
+					})),
+				);
 	const dimensions = scored.map((dimension) => ({
 		...dimension,
-		points: apportioned.get(dimension.dimension) ?? 0,
+		points:
+			dimension.exactPoints === null
+				? null
+				: partial
+					? roundHalfUp(dimension.exactPoints)
+					: (apportioned.get(dimension.dimension) ?? 0),
 	}));
+	const existingDimensions = new Set(dimensions.map((dimension) => dimension.dimension));
+	const unknownContributions = unknownDimensions
+		.filter((dimension) => !existingDimensions.has(dimension))
+		.map((dimension) => ({
+			dimension,
+			points: null,
+			metricIds: metrics
+				.filter((metric) => metric.state === "incomplete")
+				.map((metric) => metric.id)
+				.sort(),
+		}));
 	return {
 		scoringVersion: SCORING_VERSION,
 		provisional: true,
@@ -218,16 +250,21 @@ export function scoreSloppiness(metrics: readonly MetricValue[]): SloppinessScor
 		index,
 		partial,
 		missing,
+		unknownDimensions,
 		dimensions,
 		score: {
 			index,
 			direction: "lower-is-better",
 			partial,
-			contributions: dimensions.map((dimension) => ({
-				dimension: dimension.dimension,
-				points: dimension.points,
-				metricIds: dimension.metricIds,
-			})),
+			contributions: [
+				...dimensions.map((dimension) => ({
+					dimension: dimension.dimension,
+					points: dimension.points,
+					metricIds: dimension.metricIds,
+				})),
+				...unknownContributions,
+			],
+			unknownDimensions,
 		},
 	};
 }

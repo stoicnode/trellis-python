@@ -9,6 +9,15 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ## [Unreleased]
 
+### Changed
+
+- Native audits with incomplete required scoring analysis now withhold the
+  numerical sloppiness headline. Complete dimension metrics and contributions
+  remain visible, while unknown dimensions are explicit; policies, comparison,
+  fleet, and history never invent a score delta. Schema 1.4.0 and scoring
+  0.3.0-provisional retain readable historical artifacts and migrate stored
+  partial headlines to `NULL` (trellis-stage5).
+
 ## [0.3.0] — 2026-09-19
 
 ### Added

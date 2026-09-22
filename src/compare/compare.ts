@@ -75,7 +75,8 @@ export function compareReports(
 		isSupportedSchemaVersion(baseline.schemaVersion) &&
 		isSupportedSchemaVersion(current.schemaVersion);
 	const evidence = readable ? compareEvidence(baseline, current) : { providers: [] };
-	if (!compatibility.comparable) return { compatibility, evidence };
+	if (!compatibility.comparable || baseline.score.index === null || current.score.index === null)
+		return { compatibility, evidence };
 	return {
 		compatibility,
 		evidence,

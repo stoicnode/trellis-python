@@ -76,6 +76,7 @@ export type PolicyKind =
 /** Machine-readable reason codes (see the module docblock and `policy-evidence.ts`). */
 export type PolicyReasonCode =
 	| "index-exceeds-max"
+	| "index-withheld"
 	| "budget-exceeded"
 	| "budget-metric-unknown"
 	| "budget-metric-unevaluable"
@@ -120,6 +121,14 @@ const MAX_LISTED_LOCATIONS = 5;
 
 function assessMaxIndex(report: AuditReport, maxIndex: number): PolicyResult {
 	const result: PolicyResult = { policy: "max-index", status: "pass", reasons: [] };
+	if (report.score.index === null) {
+		result.status = "fail";
+		result.reasons.push({
+			code: "index-withheld",
+			message: "sloppiness index is withheld because required native analysis is incomplete",
+		});
+		return result;
+	}
 	if (report.score.index > maxIndex) {
 		result.status = "fail";
 		result.reasons.push({

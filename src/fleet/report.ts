@@ -36,7 +36,11 @@ function padStart(s: string, width: number): string {
 
 /** The sloppiness index `12/100`, or `—` for an errored target. */
 function indexCell(e: FleetEntry): string {
-	return e.ok ? `${e.report.score.index}/100` : "—";
+	return e.ok
+		? e.report.score.index === null
+			? "incomplete"
+			: `${e.report.score.index}/100`
+		: "—";
 }
 
 /** The completeness state: `complete`, or `partial` for the flagged headline (§3.4). */

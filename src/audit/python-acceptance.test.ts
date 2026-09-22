@@ -248,6 +248,8 @@ describe("mixed-language, partial-analysis and history acceptance", () => {
 		expect(report.completeness).toBe("incomplete");
 		expect(python?.parseFailureFiles).toBe(1);
 		expect(report.score.partial).toBe(true);
+		expect(report.score.index).toBeNull();
+		expect(report.score.unknownDimensions?.length ?? 0).toBeGreaterThan(0);
 	});
 
 	test("keeps Python baselines, policy and SQLite history on the shared run service", async () => {

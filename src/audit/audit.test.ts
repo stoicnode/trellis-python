@@ -165,7 +165,7 @@ describe("auditWorkspace determinism over a changing worktree", () => {
 			state: "complete",
 			value: 1,
 		});
-		expect(after.score.index).toBeGreaterThan(before.score.index);
+		expect(after.score.index ?? 0).toBeGreaterThan(before.score.index ?? 0);
 	});
 });
 
@@ -269,8 +269,8 @@ describe("auditWorkspace findings and score", () => {
 			}
 		}
 		expect(
-			report.score.contributions.reduce((sum, contribution) => sum + contribution.points, 0),
-		).toBe(report.score.index);
+			report.score.contributions.reduce((sum, contribution) => sum + (contribution.points ?? 0), 0),
+		).toBe(report.score.index ?? 0);
 		expectFindingsValid(report);
 	});
 

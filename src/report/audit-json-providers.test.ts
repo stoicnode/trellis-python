@@ -278,8 +278,8 @@ describe("renderAuditJson determinism and stable fields", () => {
 		"keeps native score contributions native: they sum to the index and reference no provider metric",
 		async () => {
 			const report = await audit({ jscpd: { mode: "exact" } });
-			const sum = report.score.contributions.reduce((total, c) => total + c.points, 0);
-			expect(sum).toBeCloseTo(report.score.index, 6);
+			const sum = report.score.contributions.reduce((total, c) => total + (c.points ?? 0), 0);
+			expect(sum).toBeCloseTo(report.score.index ?? 0, 6);
 			const nativeIds = new Set(Object.keys(report.metrics));
 			for (const contribution of report.score.contributions) {
 				for (const metricId of contribution.metricIds) {

@@ -127,8 +127,12 @@ export function boundFindings(findings: readonly Finding[], limit: number): Boun
  * can never look like a clean bill.
  */
 export function scoreHeadline(report: AuditReport): string {
-	const partial = report.score.partial ? " · PARTIAL (missing analysis is never zero debt)" : "";
+	const partial = report.score.partial ? " · INCOMPLETE (missing analysis is never zero debt)" : "";
 	const direction = DIRECTION_LABELS[report.score.direction] ?? report.score.direction;
+	if (report.score.index === null) {
+		const unknown = report.score.unknownDimensions?.join(", ") ?? "required dimensions";
+		return `sloppiness index withheld · ${direction} · scoring ${report.scoringVersion}${partial} · unknown: ${unknown}`;
+	}
 	return (
 		`sloppiness index ${formatNumber(report.score.index)}/100 · ` +
 		`${direction} · scoring ${report.scoringVersion}${partial}`

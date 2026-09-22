@@ -187,6 +187,7 @@ async function runTarget(
 		});
 		const driftResult = runDrift(target, defaults, drift);
 		const previousIndex = result.baseline?.score.index ?? null;
+		const currentIndex = result.report.score.index;
 		return {
 			id,
 			path,
@@ -196,7 +197,8 @@ async function runTarget(
 			drift: driftResult.summary,
 			driftError: driftResult.error,
 			previousIndex,
-			indexDelta: previousIndex === null ? null : result.report.score.index - previousIndex,
+			indexDelta:
+				previousIndex === null || currentIndex === null ? null : currentIndex - previousIndex,
 		};
 	} catch (error) {
 		return { id, path, ok: false, error: error instanceof Error ? error.message : String(error) };

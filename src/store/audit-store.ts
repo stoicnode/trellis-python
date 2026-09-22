@@ -19,7 +19,7 @@ export interface StoredAuditRun {
 	analyzerVersion: string;
 	scoringVersion: string;
 	/** The 0–100 sloppiness index (lower is better). */
-	sloppinessIndex: number;
+	sloppinessIndex: number | null;
 	partial: boolean;
 	completeness: Completeness;
 	reportJson: string;
@@ -29,7 +29,7 @@ export interface StoredAuditRun {
 /** One point on a repo's sloppiness trend — same-scale indices only (SPEC §10). */
 export interface SloppinessTrendPoint {
 	auditedAt: string;
-	index: number;
+	index: number | null;
 	partial: boolean;
 	completeness: Completeness;
 }
@@ -78,7 +78,7 @@ interface AuditRunRow {
 	schema_version: string;
 	analyzer_version: string;
 	scoring_version: string;
-	sloppiness_index: number;
+	sloppiness_index: number | null;
 	partial: number;
 	completeness: string;
 	report_json: string;

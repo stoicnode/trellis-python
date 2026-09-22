@@ -258,6 +258,9 @@ describe("scoped hotspot surface acceptance", () => {
 					({ identity: _identity, ...finding }: Finding) => finding,
 				),
 			};
+			const score = { ...(historical.score as Record<string, unknown>) };
+			delete score.unknownDimensions;
+			historical.score = score;
 			if (schemaVersion === "1.0.0") delete historical.evidence;
 			await writeFile(baselinePath, JSON.stringify(historical));
 			const loaded = await loadReportArtifact(baselinePath);
@@ -276,7 +279,7 @@ describe("scoped hotspot surface acceptance", () => {
 					...mode,
 				]);
 				expect(result.code).toBe(2);
-				expect(result.stdout).toContain("fresh schema 1.2.0 baseline");
+				expect(result.stdout).toContain("analyzer versions differ");
 			}
 			const stored = auditReportSchema.parse(historical);
 			persist(db, stored);

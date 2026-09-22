@@ -64,7 +64,8 @@ export interface CompatibilityIssue {
 		| "configuration-unverifiable"
 		| "source-scope-changed"
 		| "scored-measurement"
-		| "scoring-basis";
+		| "scoring-basis"
+		| "withheld-headline";
 	message: string;
 }
 
@@ -330,6 +331,18 @@ export function assessScoredBasis(
 	issues.push(...scoredMeasurementIssues(baseline, current));
 	const scoringBasis = scoringBasisIssue(baseline, current);
 	if (scoringBasis !== null) issues.push(scoringBasis);
+	if (
+		baseline.score.index === null ||
+		current.score.index === null ||
+		baseline.score.partial ||
+		current.score.partial
+	) {
+		issues.push({
+			code: "withheld-headline",
+			message:
+				"a withheld or historical partial sloppiness headline cannot be compared numerically",
+		});
+	}
 
 	return { comparable: issues.length === 0, issues, caveats };
 }

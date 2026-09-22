@@ -17,14 +17,15 @@ function padStart(s: string, width: number): string {
 }
 
 /** A signed index move: `new` for a first run, `+2` (worse) / `0` / `-3` (better) otherwise. */
-function deltaCell(indexDelta: number | null): string {
+function deltaCell(indexDelta: number | null, hasHeadline = true): string {
+	if (!hasHeadline) return "—";
 	if (indexDelta === null) return "new";
 	return indexDelta > 0 ? `+${indexDelta}` : `${indexDelta}`;
 }
 
 /** `partial` for the flagged headline (§3.4), `complete` otherwise. */
-function stateCell(point: { partial: boolean }): string {
-	return point.partial ? "partial" : "complete";
+function stateCell(point: { partial: boolean; index?: number | null }): string {
+	return point.index === null ? "incomplete" : point.partial ? "partial" : "complete";
 }
 
 /** The scope line echoing the `--repo` / `--since` filters. */
@@ -38,7 +39,7 @@ function scopeLine(report: HistoryReport): string {
 function indexPath(runs: readonly AuditRunPoint[]): string {
 	const cells: string[] = [];
 	for (const run of runs) {
-		const cell = `${run.index}${run.partial ? " (partial)" : ""}`;
+		const cell = `${run.index === null ? "incomplete" : run.index}${run.partial ? " (partial)" : ""}`;
 		if (cell !== cells[cells.length - 1]) cells.push(cell);
 	}
 	return cells.join(" → ");
@@ -57,7 +58,7 @@ function pushSnapshot(lines: string[], snapshot: readonly AuditSnapshotEntry[]):
 	);
 	for (const e of snapshot) {
 		lines.push(
-			`  ${pad(e.repo, idWidth)}  ${padStart(`${e.index}/100`, 6)}  ${pad(stateCell(e), 8)}  ${pad(deltaCell(e.indexDelta), 4)}  ${padStart(`${e.runs}`, 4)}  ${pad(e.scoringVersion, 16)}  ${e.auditedAt}`,
+			`  ${pad(e.repo, idWidth)}  ${padStart(e.index === null ? "incomplete" : `${e.index}/100`, 6)}  ${pad(stateCell(e), 8)}  ${pad(deltaCell(e.indexDelta, e.index !== null), 4)}  ${padStart(`${e.runs}`, 4)}  ${pad(e.scoringVersion, 16)}  ${e.auditedAt}`,
 		);
 	}
 }
@@ -71,7 +72,7 @@ function pushRepo(lines: string[], repo: AuditRepoHistory): void {
 	);
 	for (const r of repo.runs) {
 		lines.push(
-			`  ${pad(r.auditedAt, auditedWidth)}  ${padStart(`${r.index}/100`, 6)}  ${pad(stateCell(r), 8)}  ${r.scoringVersion}`,
+			`  ${pad(r.auditedAt, auditedWidth)}  ${padStart(r.index === null ? "incomplete" : `${r.index}/100`, 6)}  ${pad(stateCell(r), 8)}  ${r.scoringVersion}`,
 		);
 	}
 	lines.push(`  trend: ${indexPath(repo.runs)}`);
@@ -111,7 +112,7 @@ function pushMarkdownSnapshot(lines: string[], snapshot: readonly AuditSnapshotE
 	);
 	for (const e of snapshot) {
 		lines.push(
-			`| \`${cell(e.repo)}\` | ${e.index}/100 | ${stateCell(e)} | ${deltaCell(e.indexDelta)} | ${e.runs} | ${e.scoringVersion} | ${e.auditedAt} |`,
+			`| \`${cell(e.repo)}\` | ${e.index === null ? "incomplete" : `${e.index}/100`} | ${stateCell(e)} | ${deltaCell(e.indexDelta, e.index !== null)} | ${e.runs} | ${e.scoringVersion} | ${e.auditedAt} |`,
 		);
 	}
 	lines.push("");
@@ -125,7 +126,9 @@ function pushMarkdownRepo(lines: string[], repo: AuditRepoHistory): void {
 	);
 	lines.push("| Audited | Index | State | Scoring |", "| --- | --- | --- | --- |");
 	for (const r of repo.runs) {
-		lines.push(`| ${r.auditedAt} | ${r.index}/100 | ${stateCell(r)} | ${r.scoringVersion} |`);
+		lines.push(
+			`| ${r.auditedAt} | ${r.index === null ? "incomplete" : `${r.index}/100`} | ${stateCell(r)} | ${r.scoringVersion} |`,
+		);
 	}
 	lines.push("", `Trend: ${indexPath(repo.runs)}`, "");
 }

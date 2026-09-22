@@ -180,6 +180,22 @@ describe("a pre-existing history database", () => {
 				report.run?.auditedAt ?? "",
 			);
 		};
+		const oldPartial = rooted(
+			preProviderReport(
+				{
+					"complexity.average-cc": {
+						id: "complexity.average-cc",
+						state: "incomplete",
+						unit: "count",
+						reason: "historical parser recovery",
+					},
+				},
+				{ index: 100 },
+			),
+			root,
+			"2026-06-30T00:00:00.000Z",
+		);
+		insertAudit(oldPartial);
 		insertAudit(
 			rooted(preProviderReport(undefined, { index: 40 }), root, "2026-07-01T00:00:00.000Z"),
 		);
@@ -199,8 +215,9 @@ describe("a pre-existing history database", () => {
 			const probe = new Database(dbPath, { readonly: true });
 			const version = probe.query<{ user_version: number }, []>("PRAGMA user_version").get();
 			probe.close();
-			expect(version?.user_version).toBe(2);
-			expect(store.auditRuns(identity)).toHaveLength(2);
+			expect(version?.user_version).toBe(3);
+			expect(store.auditRuns(identity).map((run) => run.sloppinessIndex)).toEqual([null, 40, 30]);
+			expect(JSON.parse(store.auditRuns(identity)[0]?.reportJson ?? "{}").score.index).toBe(100);
 			const current = rooted(
 				evidenceReport([jscpdAnalysis(), nativeComplexityAnalysis()], {
 					index: 25,

@@ -47,7 +47,7 @@ const DEFAULT_REPO_ROOT = resolve(import.meta.dir, "..");
 
 const checkSchema = z
 	.object({
-		eq: z.union([z.number(), z.string(), z.boolean()]).optional(),
+		eq: z.union([z.number(), z.string(), z.boolean(), z.null()]).optional(),
 		gt: z.number().optional(),
 		ge: z.number().optional(),
 		lt: z.number().optional(),

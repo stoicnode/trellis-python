@@ -188,7 +188,7 @@ describe("runFleet (stubbed seams)", () => {
 		const report = await runFleet(fleet([target("a")]), deps({ audit, history: true }));
 		const entry = report.entries[0];
 		expect(entry?.ok && entry.previousIndex).toBe(9);
-		expect(entry?.ok && entry.indexDelta).toBe(fixture.report.score.index - 9);
+		expect(entry?.ok && entry.indexDelta).toBe((fixture.report.score.index ?? 0) - 9);
 	});
 });
 

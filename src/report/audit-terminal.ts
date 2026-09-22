@@ -85,7 +85,7 @@ function contributionLines(report: AuditReport): string[] {
 		...contributions.map(
 			(contribution) =>
 				`  ${pad(contribution.dimension, dimensionWidth)}  ` +
-				`${padStart(formatNumber(contribution.points), 3)} pts · ${contribution.metricIds.join(", ")}`,
+				`${contribution.points === null ? "unknown" : `${padStart(formatNumber(contribution.points), 3)} pts`} · ${contribution.metricIds.join(", ")}`,
 		),
 	];
 }

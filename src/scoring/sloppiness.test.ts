@@ -99,8 +99,8 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 		];
 		for (const fixture of fixtures) {
 			const result = scoreSloppiness(fixture);
-			const sum = result.score.contributions.reduce((total, c) => total + c.points, 0);
-			expect(sum).toBe(result.index);
+			const sum = result.score.contributions.reduce((total, c) => total + (c.points ?? 0), 0);
+			expect(sum).toBe(result.index ?? 0);
 			expect(result.index).toBeGreaterThanOrEqual(0);
 			expect(result.index).toBeLessThanOrEqual(100);
 		}
@@ -115,7 +115,7 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 			);
 			for (const [position, index] of indexes.entries()) {
 				const previous = indexes[position - 1];
-				if (previous !== undefined) expect(index).toBeGreaterThanOrEqual(previous);
+				if (previous !== undefined) expect(index ?? 0).toBeGreaterThanOrEqual(previous ?? 0);
 			}
 		}
 	});
@@ -134,18 +134,29 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 });
 
 describe("scoreSloppiness — missing-analysis policy", () => {
-	test("an incomplete required metric degrades its dimension to full weight, never zero debt", () => {
+	test("an incomplete required metric withholds its dimension and headline, never zero debt", () => {
 		const result = scoreSloppiness([
 			...productionMetrics({}).filter((m) => m.id !== "duplication.density.production"),
 			incomplete("duplication.density.production"),
 		]);
 		const duplication = result.dimensions.find((d) => d.dimension === "duplication");
-		expect(duplication?.state).toBe("degraded");
-		expect(duplication?.normalized).toBe(100);
-		expect(duplication?.points).toBe(30); // full 0.3 weight
-		expect(result.index).toBe(30);
+		expect(duplication?.state).toBe("unknown");
+		expect(duplication?.normalized).toBeNull();
+		expect(duplication?.points).toBeNull();
+		expect(result.index).toBeNull();
 		expect(result.partial).toBe(true);
 		expect(result.score.partial).toBe(true);
+		expect(result.score.unknownDimensions).toEqual(["duplication"]);
+		expect(result.score.contributions).toEqual(
+			expect.arrayContaining([
+				{
+					dimension: "duplication",
+					points: null,
+					metricIds: ["duplication.density.production", "duplication.groups.production"],
+				},
+				{ dimension: "complexity-erosion", points: 0, metricIds: expect.any(Array) },
+			]),
+		);
 		expect(duplication?.explanation).toMatch(/never treated as zero debt/);
 	});
 
@@ -154,8 +165,8 @@ describe("scoreSloppiness — missing-analysis policy", () => {
 			...productionMetrics({}).filter((m) => m.id !== "erosion.eroded-share.production"),
 			incomplete("erosion.eroded-share.production", 0.01),
 		]);
-		expect(result.dimensions[0]?.normalized).toBe(100);
-		expect(result.index).toBe(50); // full 0.5 weight of complexity-erosion
+		expect(result.dimensions[0]?.normalized).toBeNull();
+		expect(result.index).toBeNull();
 		expect(result.partial).toBe(true);
 	});
 
@@ -164,7 +175,7 @@ describe("scoreSloppiness — missing-analysis policy", () => {
 			productionMetrics({}).filter((m) => !m.id.startsWith("import-cycle.")),
 		);
 		expect(result.missing).toEqual(["import-cycle.density", "import-cycle.groups"]);
-		expect(result.index).toBe(20); // full 0.2 weight
+		expect(result.index).toBeNull();
 		expect(result.partial).toBe(true);
 		const cycles = result.dimensions.find((d) => d.dimension === "import-cycle");
 		expect(cycles?.metricIds).toEqual([]);
@@ -176,7 +187,7 @@ describe("scoreSloppiness — missing-analysis policy", () => {
 			...productionMetrics({}),
 			incomplete("complexity.cc.p90.test"),
 		]);
-		expect(result.index).toBe(0);
+		expect(result.index).toBeNull();
 		expect(result.partial).toBe(true);
 	});
 
@@ -211,8 +222,8 @@ describe("scoreSloppiness — counts and densities are both retained", () => {
 			result.dimensions[0]?.terms.find((t) => t.metricId === "erosion.eroded-count.production");
 		expect(countTerm(before)?.normalized).toBeCloseTo(28.849176, 5);
 		expect(countTerm(after)?.normalized).toBe(countTerm(before)?.normalized); // counts are not diluted
-		expect(after.index).toBeLessThan(before.index); // only the density term moved
-		expect(after.index).toBeGreaterThan(0); // and the count term still weighs in
+		expect(after.index ?? 0).toBeLessThan(before.index ?? 0); // only the density term moved
+		expect(after.index ?? 0).toBeGreaterThan(0); // and the count term still weighs in
 		// Both the count and the density metric remain traceable on the contribution.
 		expect(after.dimensions[0]?.metricIds).toEqual([
 			"erosion.eroded-count.production",

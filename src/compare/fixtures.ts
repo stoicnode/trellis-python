@@ -202,7 +202,7 @@ export function jscpdAnalysis(overrides: AnalysisOverrides = {}): ReportAnalysis
 
 /** Optional report-level knobs for the report builders. */
 export interface ReportSpec {
-	schemaVersion?: "1.1.0" | "1.2.0";
+	schemaVersion?: "1.1.0" | "1.2.0" | "1.3.0" | "1.4.0";
 	/** Merged over the default metrics (one complete metric per native-owned id). */
 	metrics?: Record<string, MetricValue>;
 	/** The headline index (default 10). */
@@ -210,6 +210,32 @@ export interface ReportSpec {
 	findings?: Finding[];
 	analyzerVersion?: string;
 	scoringVersion?: string;
+}
+
+function evidenceScore(
+	schemaVersion: NonNullable<ReportSpec["schemaVersion"]>,
+	partial: boolean,
+	index: number,
+	scoredIds: string[],
+) {
+	const contributions =
+		scoredIds.length === 0
+			? []
+			: [
+					{ dimension: "test.dimension", points: index, metricIds: scoredIds },
+					...(schemaVersion === SCHEMA_VERSION && partial
+						? [{ dimension: "native-analysis", points: null, metricIds: scoredIds }]
+						: []),
+				];
+	return {
+		index: schemaVersion === SCHEMA_VERSION && partial ? null : index,
+		direction: "lower-is-better" as const,
+		partial,
+		contributions,
+		...(schemaVersion === SCHEMA_VERSION
+			? { unknownDimensions: partial ? ["native-analysis"] : [] }
+			: {}),
+	};
 }
 
 /** A minimal valid evidence-carrying (1.1.0) report carrying `analyses` (sorted into evidence-area order). */
@@ -230,24 +256,18 @@ export function evidenceReport(
 				.flatMap((analysis) => analysis.metricIds),
 		),
 	].sort();
+	const partial = rollUpScoreCompleteness(analyses, metrics) === "incomplete";
+	const schemaVersion = spec.schemaVersion ?? SCHEMA_VERSION;
 	const index = spec.index ?? 10;
 	return auditReportSchema.parse({
-		schemaVersion: spec.schemaVersion ?? SCHEMA_VERSION,
+		schemaVersion,
 		analyzerVersion: spec.analyzerVersion ?? ANALYZER_VERSION,
 		scoringVersion: spec.scoringVersion ?? SCORING_VERSION,
 		repo: { root: "/abs/path" },
 		sourceCoverage: { production: { files: 2, sloc: 200 }, test: { files: 1, sloc: 50 } },
 		completeness: rollUpCompleteness(Object.values(metrics).map((metric) => metric.state)),
 		metrics,
-		score: {
-			index,
-			direction: "lower-is-better",
-			partial: rollUpScoreCompleteness(analyses, metrics) === "incomplete",
-			contributions:
-				scoredIds.length > 0
-					? [{ dimension: "test.dimension", points: index, metricIds: scoredIds }]
-					: [],
-		},
+		score: evidenceScore(schemaVersion, partial, index, scoredIds),
 		findings: spec.findings ?? [],
 		safeguards: [],
 		evidence: {

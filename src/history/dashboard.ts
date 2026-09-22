@@ -8,7 +8,7 @@ export interface AuditSnapshotEntry {
 	/** Repository identity (`<label>#<hash>`, SPEC §10). */
 	repo: string;
 	/** The 0–100 sloppiness index (lower is better) of the latest run. */
-	index: number;
+	index: number | null;
 	/** True when the latest run's headline is flagged partial (§3.4). */
 	partial: boolean;
 	completeness: Completeness;
@@ -23,7 +23,7 @@ export interface AuditSnapshotEntry {
 /** One point on a repo's scored-basis-compatible sloppiness series. */
 export interface AuditRunPoint {
 	auditedAt: string;
-	index: number;
+	index: number | null;
 	partial: boolean;
 	completeness: Completeness;
 	scoringVersion: string;
@@ -89,7 +89,10 @@ function snapshotEntry(
 		scoringVersion: latest.scoringVersion,
 		auditedAt: latest.auditedAt,
 		runs: runCount,
-		indexDelta: previous === undefined ? null : latest.sloppinessIndex - previous.sloppinessIndex,
+		indexDelta:
+			previous === undefined || latest.sloppinessIndex === null || previous.sloppinessIndex === null
+				? null
+				: latest.sloppinessIndex - previous.sloppinessIndex,
 	};
 }
 

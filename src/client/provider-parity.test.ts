@@ -323,18 +323,19 @@ describe("client SDK provider-capable parity (SPEC §16.4, §13.1)", () => {
 		expect(current.report.evidence.completeness).toBe("incomplete");
 		// The pre-provider (1.0.0) artifact: the same measurement body minus
 		// the evidence area — exactly what an older trellis wrote for this run.
-		const { evidence: _drop, ...body } = current.report;
-		const old = auditReportSchema.parse({ ...body, schemaVersion: "1.0.0" });
+		const { evidence: _drop, score, ...body } = current.report;
+		const { unknownDimensions: _unknown, ...legacyScore } = score;
+		const old = auditReportSchema.parse({ ...body, score: legacyScore, schemaVersion: "1.0.0" });
 		const oldPath = join(dbDir, "old.json");
 		const currentPath = join(dbDir, "current.json");
 		writeFileSync(oldPath, renderAuditJson(old));
 		writeFileSync(currentPath, renderAuditJson(current.report));
 		const sdk = await client.compare(oldPath, currentPath);
 		expect(sdk.policy).toBeNull();
-		// Provider absence remains honest, but native identity provenance is incompatible.
-		expect(sdk.comparison.compatibility.comparable).toBe(false);
-		expect(sdk.comparison.compatibility.issues.map((issue) => issue.code)).toContain(
-			"schema-version",
+		// Provider absence remains honest and does not fragment an otherwise compatible native basis.
+		expect(sdk.comparison.compatibility.comparable).toBe(true);
+		expect(sdk.comparison.compatibility.caveats.map((issue) => issue.code)).toContain(
+			"schema-span",
 		);
 		// The pre-provider side reads as unrequested — never a regression.
 		const sonarjs = sdk.comparison.evidence.providers.find((p) => p.providerId === "sonarjs");
@@ -344,7 +345,7 @@ describe("client SDK provider-capable parity (SPEC §16.4, §13.1)", () => {
 			"never as a regression",
 		);
 		const cli = await runCli(["compare", oldPath, currentPath, "--json"]);
-		expect(cli.code).toBe(2);
+		expect(cli.code).toBe(0);
 		expect(sdk.comparison).toEqual(JSON.parse(cli.stdout));
 	}, 20_000);
 

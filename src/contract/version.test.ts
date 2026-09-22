@@ -29,12 +29,12 @@ describe("contract version constants", () => {
 
 describe("version-aware schema reading (§16.6)", () => {
 	test("reads the pre-provider version and the current version, oldest first", () => {
-		expect(SUPPORTED_SCHEMA_VERSIONS).toEqual(["1.0.0", "1.1.0", "1.2.0", "1.3.0"]);
+		expect(SUPPORTED_SCHEMA_VERSIONS).toEqual(["1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0"]);
 		expect(PRE_PROVIDER_SCHEMA_VERSION).toBe("1.0.0");
 	});
 
 	test("accepts exactly the supported versions", () => {
-		for (const version of ["1.0.0", "1.1.0", "1.2.0", "1.3.0"]) {
+		for (const version of ["1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0"]) {
 			expect(isSupportedSchemaVersion(version)).toBe(true);
 		}
 		for (const version of ["0.9.0", "1.0.1", "1.4.0", "2.0.0", "", "1.1"]) {
