@@ -33,9 +33,11 @@ describe("open-source benchmark baseline", () => {
 		}
 		const byId = Object.fromEntries(record.fixtures.map((fixture) => [fixture.id, fixture]));
 		expect(byId["parser-recovery"]?.completeness).toBe("incomplete");
-		expect(byId["parser-recovery"]?.diagnosticCodes).toContain("PY-SYNTAX");
+		expect(byId["parser-recovery"]?.diagnostics.flatMap((entry) => entry.codes)).toContain(
+			"PY-SYNTAX",
+		);
 		expect(byId.indentation?.completeness).toBe("incomplete");
-		expect(byId.indentation?.diagnosticCodes).toContain("PY-INDENT");
+		expect(byId.indentation?.diagnostics.flatMap((entry) => entry.codes)).toContain("PY-INDENT");
 		expect(byId["static-import-uncertainty"]?.unresolvedReasons).toEqual({
 			"non-literal-dynamic": 1,
 		});
@@ -51,6 +53,7 @@ describe("open-source benchmark baseline", () => {
 		]) {
 			expect(byId["resource-exhaustion"]?.metrics[id]).toMatchObject({
 				state: "incomplete",
+				value: null,
 				reason: expect.stringContaining("match-work budget"),
 			});
 		}

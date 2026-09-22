@@ -57,10 +57,10 @@ export interface FixtureRecord {
 	snapshot: { expected: string; actual: string; matches: boolean };
 	completeness: AuditReport["completeness"];
 	sourceCoverage: AuditReport["sourceCoverage"];
-	metrics: Record<string, { state: string; reason?: string }>;
+	metrics: Record<string, { state: string; value: number | null; reason?: string }>;
 	scoreContributions: AuditReport["score"]["contributions"];
 	unresolvedReasons: Record<string, number>;
-	diagnosticCodes: string[];
+	diagnostics: Array<{ path: string; codes: string[] }>;
 	measurement: { durationMs: number; peakRssMb: number };
 }
 export interface OssBenchmarkRecord {
@@ -91,16 +91,16 @@ async function files(root: string, current = root): Promise<string[]> {
 	return nested.flat().sort();
 }
 
-async function pythonDiagnosticCodes(root: string): Promise<string[]> {
+async function pythonDiagnostics(root: string): Promise<Array<{ path: string; codes: string[] }>> {
 	const paths = (await files(root)).filter((path) => path.endsWith(".py"));
-	const codes = await Promise.all(
-		paths.map(async (path) =>
-			parsePython(path, await readFile(resolve(root, path), "utf8")).diagnostics.map(
+	return Promise.all(
+		paths.map(async (path) => ({
+			path,
+			codes: parsePython(path, await readFile(resolve(root, path), "utf8")).diagnostics.map(
 				(diagnostic) => diagnostic.code,
 			),
-		),
+		})),
 	);
-	return codes.flat().sort();
 }
 
 /** SHA-256 of sorted `path<TAB>file<TAB>file-sha256` lines. */
@@ -169,7 +169,11 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 		const metrics = Object.fromEntries(
 			Object.values(result.report.metrics).map((metric) => [
 				metric.id,
-				{ state: metric.state, ...(metric.reason === undefined ? {} : { reason: metric.reason }) },
+				{
+					state: metric.state,
+					value: metric.value ?? null,
+					...(metric.reason === undefined ? {} : { reason: metric.reason }),
+				},
 			]),
 		);
 		fixtures.push({
@@ -180,7 +184,7 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 			metrics,
 			scoreContributions: result.report.score.contributions,
 			unresolvedReasons: unresolvedReasons(result.report),
-			diagnosticCodes: await pythonDiagnosticCodes(fixtureRoot),
+			diagnostics: await pythonDiagnostics(fixtureRoot),
 			measurement,
 		});
 	}
@@ -334,6 +338,36 @@ export async function auditPinnedRepositories(
 	return { records, mismatches: failures };
 }
 
+/** Post-fix Python acceptance is separate from the frozen historical baseline. */
+export async function auditPostFixPython(_root: string, externalRoot: string): Promise<unknown[]> {
+	const ids = ["requests", "flask", "rich"];
+	return Promise.all(
+		ids.map(async (id) => {
+			const report = (
+				await runWorkspaceAudit(resolve(externalRoot, id), {
+					now: new Date("2026-09-22T00:00:00.000Z"),
+				})
+			).report;
+			const python = report.languageCoverage?.find((row) => row.language === "python");
+			const measured = [
+				"complexity.functions.production",
+				"erosion.mass.production",
+				"duplication.density.production",
+			];
+			const incomplete = measured.filter(
+				(metric) => report.metrics[metric]?.state === "incomplete",
+			);
+			return {
+				id,
+				discoveredPythonFiles: python?.discoveredFiles,
+				parseFailureFiles: python?.parseFailureFiles,
+				incomplete,
+				ok: python?.parseFailureFiles === 0 && incomplete.length === 0,
+			};
+		}),
+	);
+}
+
 /** Explicit preparation entry point; normal tests never call it or need Python/external inputs. */
 export async function main(
 	args: string[],
@@ -354,17 +388,22 @@ export async function main(
 	const reAudit = args.includes("--reaudit")
 		? await auditPinnedRepositories(root, preparedRoot)
 		: undefined;
+	const pythonAcceptance = args.includes("--python-acceptance")
+		? await auditPostFixPython(root, preparedRoot)
+		: undefined;
 	write(
 		`${JSON.stringify({
 			repositories: loadOssBenchmarkManifest(root).baselines,
 			integrity,
 			artifactMismatches,
 			...(reAudit === undefined ? {} : { reAudit }),
+			...(pythonAcceptance === undefined ? {} : { pythonAcceptance }),
 		})}\n`,
 	);
 	return integrity.length === 0 &&
 		artifactMismatches.length === 0 &&
-		(reAudit?.mismatches.length ?? 0) === 0
+		(reAudit?.mismatches.length ?? 0) === 0 &&
+		(pythonAcceptance?.every((entry) => (entry as { ok: boolean }).ok) ?? true)
 		? 0
 		: 1;
 }
