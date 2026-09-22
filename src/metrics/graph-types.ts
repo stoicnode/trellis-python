@@ -35,13 +35,15 @@
  *   tsconfig path mapping, or a workspace-package specifier that fails to
  *   resolve is an `unresolved` edge with a machine-checkable
  *   {@link UnresolvedReason} — distinguishable from externals, and rolled up
- *   as `incomplete` coverage (SPEC §3.3).
+ *   as `incomplete` coverage when the unknown target could be in the scored
+ *   source graph (SPEC §3.3). Python runtime-selected and absent targets are
+ *   retained as findings without inventing a graph edge.
  */
 import type { Completeness, Finding, MetricValue, Range, SourceSet } from "../contract/index.ts";
 import type { ImportSiteKind } from "../syntax/import-sites.ts";
 
 /** The versioned graph policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const GRAPH_POLICY_VERSION = "1.1.0";
+export const GRAPH_POLICY_VERSION = "1.2.0";
 
 export const GRAPH_POLICY = {
 	version: GRAPH_POLICY_VERSION,
@@ -49,6 +51,8 @@ export const GRAPH_POLICY = {
 	typeOnlyEdges: "retained-distinct",
 	/** Only string-literal dynamic imports become edges; non-literal specifiers are unresolved. */
 	dynamicImports: "literal-only",
+	/** Python cycle scoring covers declared source targets, not runtime-selected or absent modules. */
+	pythonCycleScope: "declared-source-targets",
 	/** A file importing itself records a self-edge; cycle policy downstream decides its meaning. */
 	selfEdges: "retained",
 	/** External packages are recorded by name and never resolved into (local files/config only). */
@@ -107,6 +111,17 @@ export interface GraphEdge {
 	resolution: EdgeResolution;
 }
 
+/** Unknown edges that can still conceal a declared local cycle in the measured source inventory. */
+export function blocksCycleScore(edge: GraphEdge): boolean {
+	if (edge.resolution.status !== "unresolved") return false;
+	if (
+		edge.from.endsWith(".py") &&
+		(edge.resolution.reason === "non-literal-dynamic" || edge.resolution.reason === "no-target")
+	)
+		return false;
+	return true;
+}
+
 /** Every classified file is a node, in the syntax inventory's (sorted) order. */
 export interface GraphNode {
 	/** Repo-relative POSIX path. */
@@ -146,7 +161,7 @@ export interface DependencyGraph {
 	externals: ExternalPackage[];
 	/** Tsconfigs consulted for alias resolution, sorted by path. */
 	configs: GraphConfig[];
-	/** `"incomplete"` when edges are unresolved or files carried parse diagnostics (SPEC §3.3). */
+	/** `"incomplete"` when scored edges remain unknown or files carried parse diagnostics. */
 	completeness: Completeness;
 }
 

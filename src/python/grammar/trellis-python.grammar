@@ -1,5 +1,6 @@
 @precedence {
   cond,
+  withParen,
   trail,
   power @right,
   prefix,
@@ -66,7 +67,7 @@ LiteralPattern {
   @specialize[@name=Boolean]<identifier, "True" | "False">
 }
 
-PatternArgList { "(" commaSep<pattern | KeywordPattern { VariableName "=" pattern }> ")" }
+PatternArgList { "(" commaSep<pattern | KeywordPattern { VariableName "=" pattern }>? ")" }
 
 SequencePattern { "[" commaSep<pattern> "]" | "(" commaSep<pattern> ")" }
 
@@ -119,11 +120,16 @@ compoundStatement {
   WhileStatement { kw<"while"> testNamed Body elseClause? } |
   ForStatement { kw<"async">? kw<"for"> commaSep<"*"? expression> kw<"in"> commaSep<test> Body elseClause? } |
   TryStatement |
-  WithStatement { kw<"async">? kw<"with"> commaSep<test (kw<"as"> withTarget)?> Body } |
+  WithStatement { kw<"async">? kw<"with"> (!withParen WithParenItems (kw<"as"> withTarget)? | withItems) Body } |
   FunctionDefinition |
   ClassDefinition |
   DecoratedStatement { Decorator+ (ClassDefinition | FunctionDefinition) } |
   MatchStatement
+}
+
+withItems { commaSep<test (kw<"as"> withTarget)?> }
+WithParenItems {
+  "(" test (kw<"as"> withTarget)? (!withParen "," test (kw<"as"> withTarget)?)* ","? !withParen ")"
 }
 
 elseClause { kw<"else"> Body }

@@ -34,7 +34,7 @@
 import type { DependencyGraph } from "./graph-types.ts";
 
 /** The versioned cycle policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const CYCLE_POLICY_VERSION = "1.0.0";
+export const CYCLE_POLICY_VERSION = "1.1.0";
 
 export const CYCLE_POLICY = {
 	version: CYCLE_POLICY_VERSION,

@@ -37,7 +37,7 @@ describe("buildSyntaxInventory", () => {
 		await put("src/math.test.ts", "test('add', () => {});\n");
 
 		const inventory = await build();
-		expect(inventory.compilerVersion).toBe(`${ts.version}-python.1.1.18-trellis.1`);
+		expect(inventory.compilerVersion).toBe(`${ts.version}-python.1.1.18-trellis.2`);
 		expect(inventory.completeness).toBe("complete");
 		expect(inventory.diagnostics).toEqual([]);
 		expect(

@@ -228,14 +228,20 @@ describe("mixed-language, partial-analysis and history acceptance", () => {
 		expect(report.metrics["complexity.functions.production"]?.state).toBe("incomplete");
 	});
 
-	test("marks dynamic Python imports as located incomplete graph coverage", async () => {
+	test("scores declared Python cycles while locating unknown runtime imports", async () => {
 		const root = await fixtureCopy("python-project");
 		const path = join(root, "src", "dynamic.py");
 		await writeFile(path, "module_name = 'unknown'\nvalue = __import__(module_name)\n");
 		const report = await auditWorkspace(root, { now: NOW });
 		const python = languageCoverage(report).find((row) => row.language === "python");
-		expect(report.completeness).toBe("incomplete");
-		expect(report.score.partial).toBe(true);
+		expect(report.completeness).toBe("complete");
+		expect(report.score.partial).toBe(false);
+		expect(report.score.index).not.toBeNull();
+		expect(report.metrics["graph.edges.unresolved"]).toMatchObject({
+			state: "complete",
+			value: 1,
+		});
+		expect(report.metrics["import-cycle.groups"]?.state).toBe("complete");
 		expect(python).toMatchObject({ dynamicImports: 1, unresolvedImports: 1 });
 		expect(
 			report.findings.some(

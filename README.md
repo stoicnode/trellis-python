@@ -106,7 +106,8 @@ hotspot. Anonymous or duplicate identities remain conservative new/resolved
 pairs. The current analyzer emits schema 1.4.0 and uses bounded suffix-array
 duplication analysis. Historical reports remain readable; crossing an analyzer
 or scoring-semantic transition requires a fresh baseline. The scoring contract
-is 0.3.0-provisional: withheld-headline semantics changed, while formula weights
+is 0.4.0-provisional: Python cycle scores cover declared source targets, while
+runtime-selected and absent-target imports remain located evidence. Formula weights
 and the 100-token / 3-line clone thresholds are unchanged. See the
 [identity and compatibility rules](docs/hotspot-identity.md) and
 [native engine acceptance](docs/research/native-duplication/acceptance.md).

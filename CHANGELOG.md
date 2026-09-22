@@ -11,6 +11,13 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Python audits now score cycles over declared source targets while retaining
+  runtime-selected and absent-target imports as located unresolved evidence.
+  Parser and resolver repairs plus a 250-million-unit bounded duplicate-work
+  ceiling make all 12 pinned Python package scopes score-complete across three
+  repeat runs. Scoring 0.4.0-provisional requires a fresh baseline; formula
+  weights and clone thresholds are unchanged. See
+  `docs/python-score-calibration.md`.
 - Native audits with incomplete required scoring analysis now withhold the
   numerical sloppiness headline. Complete dimension metrics and contributions
   remain visible, while unknown dimensions are explicit; policies, comparison,

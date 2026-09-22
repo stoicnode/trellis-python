@@ -4,7 +4,7 @@ import {
   newline as newlineToken, eof, newlineBracketed, blankLineStart, indent, dedent, printKeyword,
   ParenthesizedExpression, TupleExpression, ComprehensionExpression,
   tupleTarget, listTarget,
-  PatternArgList, SequencePattern, MappingPattern, TypeParamList,
+  PatternArgList, SequencePattern, MappingPattern, TypeParamList, WithParenItems,
   ArrayExpression, ArrayComprehensionExpression, ArgList, ParamList, importList, subscript,
   DictionaryExpression, DictionaryComprehensionExpression, SetExpression, SetComprehensionExpression,
   String as StringTerm, FormatString, FormatReplacement, nestedFormatReplacement,
@@ -26,7 +26,7 @@ const bracketed = new Set([
   ArrayExpression, ArrayComprehensionExpression, subscript,
   SetExpression, SetComprehensionExpression, FormatString, FormatReplacement, nestedFormatReplacement,
   DictionaryExpression, DictionaryComprehensionExpression,
-  SequencePattern, MappingPattern, PatternArgList, TypeParamList
+  SequencePattern, MappingPattern, PatternArgList, TypeParamList, WithParenItems
 ])
 
 function isLineBreak(ch) {

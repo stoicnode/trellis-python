@@ -129,9 +129,14 @@ describe("native duplication semantic oracle", () => {
 		});
 	}
 
-	test("records forty-copy exhaustion without treating partial old output as truth", () => {
+	test("records forty-copy exhaustion under the historical cap without treating partial output as truth", () => {
 		const streams = repeatedStreams(40);
-		expect(detectClones(streams).exhaustion).toEqual({ kind: "match-work", limit: 100_000_000 });
+		expect(
+			detectClones(streams, { maxTokens: 2_000_000, maxMatchWork: 100_000_000 }).exhaustion,
+		).toEqual({
+			kind: "match-work",
+			limit: 100_000_000,
+		});
 		expect(() => exhaustiveGroups(streams)).toThrow("oracle input exceeds 2500 tokens");
 	});
 

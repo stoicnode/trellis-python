@@ -26,7 +26,7 @@
  *   graph. The density is `not-applicable` only for a node-free graph
  *   (a 0/0 ratio is meaningless).
  * - Unresolved graph coverage accompanies the results: when the dependency
- *   graph is `incomplete` (unresolved edges or parse diagnostics), every
+ *   graph is `incomplete` (unknown scored edges or parse diagnostics), every
  *   cycle metric is `incomplete` with the partial values measured over the
  *   resolved edges and a reason carrying the graph's own incompleteness
  *   reasons; `detail.unresolvedEdges` keeps the unresolved-edge count

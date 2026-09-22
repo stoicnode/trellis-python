@@ -18,8 +18,9 @@
  *   distinct packages. Externals are recorded, never resolved into
  *   (versioned policy `externalPackages: "recorded-never-resolved"`).
  * - `graph.edges.unresolved` — local-intent edges that failed to resolve;
- *   `incomplete` with the count and a reason when non-zero (SPEC §3.3:
- *   unresolved imports are an incompleteness cause).
+ *   count and located findings are always retained. The metric is
+ *   `incomplete` only when an unknown edge could join two scored nodes;
+ *   Python runtime-selected and absent targets are observed-only evidence.
  *
  * State rules (SPEC §3.3 — the existing analyzer pattern): files with parse
  * diagnostics may hide import sites, so their presence makes every edge
@@ -38,6 +39,7 @@ import { createPythonGraphResolver } from "../python/resolve.ts";
 import type { SyntaxInventory } from "../syntax/index.ts";
 import { createGraphResolver } from "./graph-resolve.ts";
 import {
+	blocksCycleScore,
 	type DependencyGraph,
 	type DependencyGraphAnalysis,
 	type ExternalPackage,
@@ -92,8 +94,9 @@ function stateAndValue(
 function graphMetrics(graph: DependencyGraph, diagnosticFiles: number): MetricValue[] {
 	const edges = graph.edges;
 	const unresolved = countBy(edges, (edge) => edge.resolution.status === "unresolved");
+	const blocking = countBy(edges, blocksCycleScore);
 	const localReason = incompletenessReason(0, diagnosticFiles);
-	const unresolvedReason = incompletenessReason(unresolved, diagnosticFiles);
+	const unresolvedReason = incompletenessReason(blocking, diagnosticFiles);
 	const local = edges.filter((edge) => edge.resolution.status === "local");
 	const metrics: MetricValue[] = [
 		{ id: "graph.files", unit: "count", state: "complete", value: graph.nodes.length },
@@ -121,7 +124,11 @@ function graphMetrics(graph: DependencyGraph, diagnosticFiles: number): MetricVa
 			id: "graph.edges.unresolved",
 			unit: "count",
 			...stateAndValue(unresolved, unresolvedReason),
-			detail: { policyVersion: graph.policyVersion },
+			detail: {
+				policyVersion: graph.policyVersion,
+				blockingEdges: blocking,
+				observedOnlyEdges: unresolved - blocking,
+			},
 		},
 	];
 	return metrics.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

@@ -103,7 +103,8 @@ function localTargets(resolutions: readonly EdgeResolution[]): string[] {
 function knownPrefix(index: ModuleIndex, module: string): boolean {
 	const parts = module.split(".");
 	for (let length = parts.length; length > 0; length -= 1) {
-		if (index.byModule.has(parts.slice(0, length).join("."))) return true;
+		if (index.byModule.get(parts.slice(0, length).join("."))?.some((entry) => entry.isPackage))
+			return true;
 	}
 	return false;
 }

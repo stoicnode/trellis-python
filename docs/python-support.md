@@ -35,16 +35,19 @@ when present, otherwise the package containing the imported symbol. A top
 level name absent locally is external; a missing descendant of a known local
 package or failed relative import is unresolved. Ambiguous module owners are
 unresolved. Dynamic `__import__` and `importlib.import_module` calls, including
-simple aliases, are located limitations and make cycle coverage incomplete.
+simple aliases, are located limitations outside the declared-source cycle
+score. They remain visible as unresolved findings and counts. Ambiguous local
+module owners still make cycle coverage incomplete.
 Arbitrary dataflow, `sys.path` mutation, installed packages and imports
 between Python and TypeScript are not resolved.
 
 Reports include `languageCoverage` rows with discovered/analyzed files, parse
 failures, source lines, unresolved imports and dynamic imports. An unresolved
-import or parser recovery never silently becomes a clean graph score; required
-incomplete dimensions receive their documented partial score contribution.
-Schema 1.3.0 records language coverage, analyzer 0.4.0 records the broader
-source population, and scoring remains 0.2.0-provisional. Recreate baselines
+import remains visible even when its absent or runtime-selected target cannot
+join the declared-source graph. Parser recovery and ambiguous local targets
+still make required dimensions incomplete.
+Schema 1.4.0 records withheld headlines, analyzer 0.4.0 records the broader
+source population, and scoring is 0.4.0-provisional. Recreate baselines
 made by older analyzer versions before using regression policy. Historical
 reports remain readable.
 

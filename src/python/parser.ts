@@ -2,7 +2,6 @@
  * Python's in-process Lezer adapter. It turns one recovered concrete tree
  * into normalized facts; no Python interpreter or project code is invoked.
  */
-
 import type { Tree } from "@lezer/common";
 import { HOTSPOT_IDENTITY_VERSION, type Range, type SourceSet } from "../contract/index.ts";
 import type {
@@ -14,9 +13,10 @@ import type {
 } from "../syntax/types.ts";
 import { parser } from "./grammar/trellis-parser.ts";
 import { pythonIndentationDiagnostics } from "./layout.ts";
+import { isTriviaRecovery } from "./trivia-recovery.ts";
 
 /** The pinned parser identity carried by the normalized inventory. */
-export const PYTHON_PARSER_VERSION = "1.1.18-trellis.1";
+export const PYTHON_PARSER_VERSION = "1.1.18-trellis.2";
 
 interface Node {
 	name: string;
@@ -379,19 +379,22 @@ export function parsePython(
 } {
 	const tree = parser.parse(text);
 	const starts = lineStarts(text);
-	const diagnostics: ParseDiagnostic[] = [];
+	const root = nodeFromCursor(tree.cursor());
+	const errors: Node[] = [];
 	const visit = (node: Node): void => {
-		if (node.error || node.name === "⚠") {
-			diagnostics.push({
-				path,
-				range: range(starts, node.from, Math.max(node.from + 1, node.to)),
-				code: "PY-SYNTAX",
-				message: "Python parser recovered from invalid syntax",
-			});
-		}
+		if (node.error || node.name === "⚠") errors.push(node);
 		for (const child of node.children) visit(child);
 	};
-	visit(nodeFromCursor(tree.cursor()));
-	diagnostics.push(...pythonIndentationDiagnostics(path, text, tree));
+	visit(root);
+	const layout = pythonIndentationDiagnostics(path, text, tree);
+	const recoveredTrivia =
+		errors.length === 1 && layout.length === 0 && isTriviaRecovery(root, errors[0] ?? root, text);
+	const diagnostics: ParseDiagnostic[] = (recoveredTrivia ? [] : errors).map((node) => ({
+		path,
+		range: range(starts, node.from, Math.max(node.from + 1, node.to)),
+		code: "PY-SYNTAX",
+		message: "Python parser recovered from invalid syntax",
+	}));
+	diagnostics.push(...layout);
 	return { tree, diagnostics };
 }

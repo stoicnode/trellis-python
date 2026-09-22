@@ -79,6 +79,11 @@ describe("Python structural adapter", () => {
 			"trailing = 3.",
 			"power = 10.**2",
 			"exponent = 1.e2",
+			"if first \\\n    and second:\n    use()\n",
+			"match message:\n    case str() | bytes() | bytearray():\n        out = message\n",
+			"with (first() as one, second() as two):\n    use(one, two)\n",
+			"with (first(), second() as two):\n    use(two)\n",
+			"with raises(Error,\n            match='first ' 'second'):\n    pass\n",
 			[
 				"match command:",
 				"    case {'kind': 'copy', 'items': [first, *rest]}:",
@@ -103,6 +108,14 @@ describe("Python structural adapter", () => {
 
 		for (const source of invalidSources)
 			expect(parsePython("src/invalid.py", source).diagnostics.length).toBeGreaterThan(0);
+	});
+
+	test("does not turn repeated top-level documentation dividers into syntax failures", () => {
+		const divider = `add_newdoc("a", "b", """${"word ".repeat(150)}""")\n\n###\n# title\n###\n\n`;
+		expect(parsePython("src/docs.py", divider.repeat(100)).diagnostics).toEqual([]);
+		expect(
+			parsePython("src/broken.py", "def missing():\n# divider\nvalue = 1\n").diagnostics.length,
+		).toBeGreaterThan(0);
 	});
 
 	test.each([
@@ -294,6 +307,25 @@ describe("Python import adapter", () => {
 			expect.objectContaining({ status: "unresolved", reason: "non-literal-dynamic" }),
 		]);
 		expect(measuredSelection(inventory).map((file) => file.path)).toEqual(["src/main.ts"]);
+	});
+
+	test("does not mistake an external package for a child of a local module file", async () => {
+		const root = await workspace({
+			"mypy.py": "value = 1\n",
+			"plugin.py": "import mypy.nodes\n",
+		});
+		const inventory = await discoverSourceInventory(root);
+		const source = "import mypy.nodes\n";
+		const site = collectPythonImportSites(
+			parsePython("plugin.py", source).tree,
+			source,
+			"plugin.py",
+		)[0];
+		if (site === undefined) throw new Error("expected import site");
+		expect(createPythonGraphResolver(inventory).resolve("plugin.py", site)).toEqual({
+			status: "external",
+			packageName: "mypy",
+		});
 	});
 
 	test("marks colliding root and src module names ambiguous", async () => {

@@ -127,8 +127,11 @@ clean.
 Every measurement and every report carries an explicit state:
 
 - `complete` — the measurement ran over its full intended scope.
-- `incomplete` — part of the scope could not be analyzed (parse errors,
-  unresolved imports, resource exhaustion). The report says what and where;
+- `incomplete` — part of the scored scope could not be analyzed (parse errors,
+  unresolved imports that could join scored source nodes, resource exhaustion).
+  Python imports with runtime-selected or absent targets remain located
+  observations outside the declared-source cycle score. The report says what
+  and where;
   an incomplete required dimension prevents publishing an apparently
   complete headline score (§7).
 - `unsupported` — the source is outside the TypeScript/TSX/Python analyzed
@@ -363,7 +366,7 @@ Semantics fixed by this decision:
 - **Bounded feasibility (work accounting v2, analyzer 0.2.3)**: collection,
   indexing, extraction, materialization, containment and line accounting share
   deterministic guards. Per source set: **2,000,000 normalized tokens**,
-  **100,000,000 work units**, 100,000 streams, 32,000,000 numeric scratch cells,
+  **250,000,000 work units**, 100,000 streams, 32,000,000 numeric scratch cells,
   200,000 retained groups and 1,000,000 retained member occurrences. Existing
   `maxTokens`/`maxMatchWork` callers may lower the two limits; non-finite,
   fractional, negative or above-ceiling values are operational errors. The
@@ -468,7 +471,7 @@ versioned calibration (§16.5).
   classified scope are `out-of-scope` edges, not nodes.)*
 - **Edges are typed**: runtime vs. type-only edges retain their identity;
   whether they are scored separately is fixed by the (versioned) graph
-  policy. *(Landed, trellis-d214: `GRAPH_POLICY` version `1.0.0` in
+  policy. *(Landed, trellis-d214: `GRAPH_POLICY` version `1.2.0` in
   `src/metrics/graph-types.ts` — type-only edges retained-distinct,
   literal-only dynamic imports, self-edges retained, externals
   recorded-never-resolved.)*
@@ -479,7 +482,7 @@ versioned calibration (§16.5).
   cross-package cycles without double-counting. Disjoint, overlapping,
   acyclic, and self-import cases have specified, tested outcomes.
   *(Landed, trellis-cbde: `src/metrics/cycles.ts` + `analyze-cycles.ts`
-  under `CYCLE_POLICY` version `1.0.0`. Runtime and type-only edges form
+  under `CYCLE_POLICY` version `1.1.0`. Runtime and type-only edges form
   two separate subgraphs — a pair linked runtime one way and type-only the
   other is not a cycle in either — and the two classes are **scored
   separately**; a group cyclic in both appears once per class. A retained
@@ -490,9 +493,17 @@ versioned calibration (§16.5).
   while module counts stay per-package, so the repo-level affected-module
   union never double-counts. Emits `import-cycle.groups` /
   `import-cycle.modules` / `import-cycle.density` and one located
-  `import-cycle` finding per group; incomplete graph coverage (unresolved
-  edges, parse diagnostics) rolls every cycle metric up `incomplete` with
+  `import-cycle` finding per group; incomplete scored graph coverage (unresolved
+  edges that could join declared nodes, parse diagnostics) rolls every cycle
+  metric up `incomplete` with
   the graph's reasons and a machine-readable `unresolvedEdges` count.)*
+
+  Python runtime-selected imports and imports with no discovered target remain
+  located unresolved findings and counts. They do not make the cycle metric
+  incomplete because the scored graph is limited to declared source targets.
+  Ambiguous owners remain blocking unknown edges. TypeScript unresolved local
+  intent remains blocking. This scope change is graph policy 1.2.0 and scoring
+  version 0.4.0-provisional; older baselines require a fresh comparison.
 
 ### 5.5 Safeguards (hook/check inspection — separate from the score)
 
@@ -726,7 +737,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.3.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.4.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.

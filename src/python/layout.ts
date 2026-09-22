@@ -26,6 +26,7 @@ function markInterior(lines: Set<number>, first: number, last: number): void {
 interface BracketScanState {
 	depth: number;
 	escaped: boolean;
+	explicitContinuation: boolean;
 	quote: "'" | '"' | null;
 	triple: boolean;
 }
@@ -71,9 +72,17 @@ function bracketDepthChange(character: string): number {
 
 function advancePhysicalLine(lines: Set<number>, state: BracketScanState, line: number): number {
 	const nextLine = line + 1;
-	if (state.depth > 0) lines.add(nextLine);
+	if (state.depth > 0 || state.explicitContinuation) lines.add(nextLine);
 	state.escaped = false;
+	state.explicitContinuation = false;
 	return nextLine;
+}
+
+function isExplicitContinuation(text: string, index: number): boolean {
+	return (
+		text[index] === "\\" &&
+		(text[index + 1] === "\n" || text.slice(index + 1, index + 3) === "\r\n")
+	);
 }
 
 /**
@@ -84,7 +93,13 @@ function advancePhysicalLine(lines: Set<number>, state: BracketScanState, line: 
  */
 function bracketContinuationLines(text: string): Set<number> {
 	const lines = new Set<number>();
-	const state: BracketScanState = { depth: 0, escaped: false, quote: null, triple: false };
+	const state: BracketScanState = {
+		depth: 0,
+		escaped: false,
+		explicitContinuation: false,
+		quote: null,
+		triple: false,
+	};
 	let line = 1;
 	for (let index = 0; index < text.length; index += 1) {
 		const character = text[index] ?? "";
@@ -98,6 +113,10 @@ function bracketContinuationLines(text: string): Set<number> {
 		}
 		if (character === "#") {
 			index = skipComment(text, index);
+			continue;
+		}
+		if (isExplicitContinuation(text, index)) {
+			state.explicitContinuation = true;
 			continue;
 		}
 		if (startsQuote(character)) {
@@ -197,7 +216,7 @@ export function pythonIndentationDiagnostics(
 		const lineNumber = offset + 1;
 		const startsSuite = suites.has(lineNumber);
 		if (strings.has(lineNumber) || continuations.has(lineNumber)) {
-			if (!strings.has(lineNumber) && startsSuite) requiresIndent = true;
+			if (startsSuite) requiresIndent = true;
 			continue;
 		}
 		if (line.trim() === "" || line.trimStart().startsWith("#")) continue;

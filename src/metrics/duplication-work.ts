@@ -1,6 +1,6 @@
-/** Work-accounting v2, frozen in docs/research/native-duplication (trellis-271c).
+/** Work-accounting v2, accepted in docs/research/native-duplication (trellis-271c).
  * Every charge precedes the operation. Numeric allocation also charges zero initialization.
- * No production caller uses this candidate guard until the parity-gated cutover.
+ * The work ceiling was raised for pinned Python scopes; other resource caps remain unchanged.
  */
 export type DuplicationPhase =
 	| "input"
@@ -11,7 +11,7 @@ export type DuplicationPhase =
 
 export const DUPLICATION_LIMITS = {
 	maxTokens: 2_000_000,
-	maxMatchWork: 100_000_000,
+	maxMatchWork: 250_000_000,
 	maxStreams: 100_000,
 	maxWorkingCells: 32_000_000,
 	maxGroups: 200_000,

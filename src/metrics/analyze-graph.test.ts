@@ -204,6 +204,20 @@ describe("analyzeDependencyGraph over the workspace fixture", () => {
 });
 
 describe("analyzeDependencyGraph incompleteness surfacing", () => {
+	test("keeps absent Python module targets visible outside the declared-source cycle score", async () => {
+		await put("pkg/__init__.py", "");
+		await put("pkg/app.py", "from .missing import value\n");
+		const { analysis } = await analyze();
+		const unresolved = byId(analysis.metrics).get("graph.edges.unresolved");
+		expect(analysis.graph.completeness).toBe("complete");
+		expect(unresolved).toMatchObject({
+			state: "complete",
+			value: 1,
+			detail: { blockingEdges: 0, observedOnlyEdges: 1 },
+		});
+		expect(analysis.findings[0]?.facts?.reason).toBe("no-target");
+	});
+
 	test("unresolved local edges are incomplete, found, and distinguishable from externals", async () => {
 		await put("package.json", JSON.stringify({ name: "app", workspaces: ["packages/*"] }));
 		await put("packages/core/package.json", JSON.stringify({ name: "@acme/core" }));

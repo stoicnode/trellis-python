@@ -1,8 +1,52 @@
 # Python score calibration: pinned open-source survey
 
-Status: **measurement and tool triangulation complete; headline-score calibration
-inconclusive** (2026-09-22). This is a research record for the provisional
-`0.3.0-provisional` scoring formula, not a quality ranking of the projects.
+Status: **all 12 pinned scopes now have repeatable headline scores; external
+quality calibration remains open** (2026-09-22). This is a research record for
+the provisional `0.4.0-provisional` scoring contract, not an adjudicated quality
+ranking of the projects.
+
+## Repaired, three-run measurement
+
+The same pinned trees, package scopes and configuration now produce complete
+native scores. Parser repairs cover explicit continuations, empty class
+patterns, parenthesized `with` items and a root-level comment recovery artifact.
+Python resolution no longer treats a plain local module as a package prefix
+(`pydantic/mypy.py` previously shadowed external `mypy.*`). The graph score
+now covers declared source targets: runtime-selected imports and imports with
+no discovered target remain located unresolved evidence, while ambiguous
+targets and parse errors still withhold the score. The bounded duplicate-work
+ceiling is 250 million units per source set, raised from 100 million after
+complete NumPy test and SQLAlchemy production passes measured 194,260,365 and
+135,068,260 units respectively. Token, scratch-cell, stream and output caps
+remain unchanged.
+
+The artifact is `/tmp/trellis-python-unwithheld-final.json`, produced by the
+same command below with `--runs 3`; sensitivity output is
+`/tmp/trellis-python-unwithheld-sensitivity.json`. Every scope's three payload
+fingerprints matched. All 12 have zero parse-failure files and complete score
+dimensions. The score is for each listed package scope, not for its repository
+or unsupported language files.
+
+| Package scope | Index | Unresolved (dynamic) | Median audit / peak RSS |
+| --- | ---: | ---: | ---: |
+| Click | 58 | 0 (0) | 175 ms / 227 MiB |
+| Requests | 46 | 2 (2) | 108 ms / 209 MiB |
+| Flask | 59 | 2 (2) | 132 ms / 218 MiB |
+| Rich | 77 | 3 (3) | 554 ms / 286 MiB |
+| NumPy | 79 | 74 (13) | 3,249 ms / 734 MiB |
+| SQLAlchemy | 80 | 41 (41) | 2,093 ms / 535 MiB |
+| Pydantic | 78 | 5 (5) | 532 ms / 278 MiB |
+| attrs | 45 | 1 (1) | 93 ms / 205 MiB |
+| Jinja | 57 | 4 (4) | 203 ms / 232 MiB |
+| packaging | 69 | 1 (1) | 214 ms / 231 MiB |
+| dateutil | 42 | 2 (1) | 127 ms / 215 MiB |
+| Sniffio | 0 | 0 (0) | 25 ms / 156 MiB |
+
+Formula-only sensitivity has 66 eligible project pairs. Across the 20
+non-baseline scenarios, at most five pairs reverse; this is relative stability
+under those perturbations, not evidence of external validity. No blind human
+maintenance labels or threshold precision/recall exist. A score of 50 remains
+an operator policy choice, not an empirically validated boundary.
 
 ## Design and reproduction
 
@@ -45,7 +89,8 @@ is an analyzer-before snapshot, not a before/after claim about target code.
 
 ## Coverage and score observations
 
-The table reflects the analyzer **after** the number-token repair. `Production
+The historical table below reflects the analyzer **after** the number-token repair but
+**before** the repairs above. `Production
 files / all .py` distinguishes scoring scope from discovered Python files;
 SLOC is production only. Unresolved includes dynamic imports in parentheses.
 Any unknown score dimension withholds the index; no partial sum is presented as
@@ -140,7 +185,7 @@ Lizard function-span corroboration, jscpd Python clone candidates, and
 Import Linter declared architecture contracts. Wily's Git history is a
 separate opt-in surface. None warrants a scored backend replacement today.
 
-## Calibration decision
+## Initial calibration decision (superseded by the repaired measurement above)
 
 Retain `0.3.0-provisional` and the existing formula. The directional fixtures
 pass, but the open-source observations cannot estimate between-project ranking

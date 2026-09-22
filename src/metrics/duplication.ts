@@ -70,13 +70,13 @@ export interface DuplicationBudget {
 	maxMatchWork: number;
 }
 
-/** Frozen input/work ceilings; callers may lower them, never disable or raise them.
+/** Bounded input/work ceilings; callers may lower them, never disable or raise them.
  * Work-accounting v2 charges the complete pipeline, not legacy pair comparisons.
  * Numerical resource acceptance is docs/research/native-duplication/acceptance.md.
  */
 export const DEFAULT_DUPLICATION_BUDGET: DuplicationBudget = {
 	maxTokens: 2_000_000,
-	maxMatchWork: 100_000_000,
+	maxMatchWork: 250_000_000,
 };
 
 /** Which budget tripped, and at what limit (SPEC §3.3 `incomplete` reason). */
