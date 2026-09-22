@@ -23,6 +23,9 @@ describe("isUnsupportedSource", () => {
 		expect(isUnsupportedSource("main.py")).toBe(false);
 		expect(isUnsupportedSource("App.SWIFT")).toBe(true);
 		expect(isUnsupportedSource("component.jsx")).toBe(true);
+		expect(isUnsupportedSource("typing.pyi")).toBe(true);
+		expect(isUnsupportedSource("extension.pyx")).toBe(true);
+		expect(isUnsupportedSource("extension.pxd")).toBe(true);
 		expect(isUnsupportedSource("README.md")).toBe(false);
 		expect(isUnsupportedSource("Makefile")).toBe(false);
 	});

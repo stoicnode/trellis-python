@@ -393,7 +393,7 @@ export function toSourceCoverage(inventory: SourceInventory): SourceCoverage {
 	if (inventory.unsupported.files > 0) {
 		coverage.unsupported = {
 			files: inventory.unsupported.files,
-			note: "non-TS sources, not analyzed",
+			note: "unsupported source files, not analyzed",
 		};
 	}
 	return coverage;

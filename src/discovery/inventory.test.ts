@@ -173,11 +173,17 @@ describe("discoverSourceInventory classification scopes", () => {
 		await put("package.json", JSON.stringify({ name: "poly" }));
 		await put("src/index.ts", "export {}\n");
 		await put("scripts/gen.py", "print(1)\n");
+		await put("scripts/types.pyi", "def f() -> None: ...\n");
+		await put("src/extension.pyx", "cdef int count\n");
+		await put("src/extension.pxd", "cdef int count\n");
 		await put("ios/package.json", JSON.stringify({ name: "ios" }));
 		await put("ios/App.swift", "import UIKit\n");
 
 		const inv = await discoverSourceInventory(repo);
-		expect(inv.unsupported).toEqual({ files: 1, byExtension: { ".swift": 1 } });
+		expect(inv.unsupported).toEqual({
+			files: 4,
+			byExtension: { ".pxd": 1, ".pyi": 1, ".pyx": 1, ".swift": 1 },
+		});
 		expect(
 			inv.files.some((file) => file.path === "scripts/gen.py" && file.language === "python"),
 		).toBe(true);

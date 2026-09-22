@@ -51,6 +51,8 @@ afterEach(async () => {
 describe("Python discovery and normalized audit acceptance", () => {
 	test("discovers Python production and test files while excluding environments and builds", async () => {
 		const root = await fixtureCopy("python-project");
+		await mkdir(join(root, "dist"));
+		await writeFile(join(root, "dist/generated.py"), "generated = True\n");
 		const inventory = await discoverSourceInventory(root);
 		const paths = inventory.files.map((file) => file.path);
 
@@ -176,7 +178,10 @@ describe("mixed-language, partial-analysis and history acceptance", () => {
 		const baseline = await auditWorkspace(root, { now: NOW });
 		await writeFile(join(root, "external.go"), "package main\nfunc main() {}\n");
 		const report = await auditWorkspace(root, { now: NOW });
-		expect(report.sourceCoverage.unsupported).toMatchObject({ files: 1 });
+		expect(report.sourceCoverage.unsupported).toEqual({
+			files: 1,
+			note: "unsupported source files, not analyzed",
+		});
 		expect(report.metrics).toEqual(baseline.metrics);
 		expect(report.score).toEqual(baseline.score);
 	});
