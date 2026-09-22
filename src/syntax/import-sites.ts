@@ -15,6 +15,8 @@ export type ImportSiteKind = "import" | "re-export" | "dynamic";
 export interface ImportSite {
 	kind: ImportSiteKind;
 	typeOnly: boolean;
+	/** Python static execution context when the binding pass can classify it. */
+	execution?: { deferred: boolean; conditional: boolean };
 	/** The specifier as written; `null` for a non-literal dynamic import. */
 	specifier: string | null;
 	/** 1-based range of the specifier (of the argument expression when non-literal). */
@@ -28,6 +30,8 @@ export interface ImportSite {
 		level: number;
 		/** Imported names without aliases; `*` records a star import. */
 		imported: string[];
+		/** Literal package argument for a relative Python dynamic import. */
+		packageName?: string | null;
 	};
 }
 

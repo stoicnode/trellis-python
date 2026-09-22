@@ -5,6 +5,16 @@ quality calibration remains open** (2026-09-22). This is a research record for
 the provisional `0.4.0-provisional` scoring contract, not an adjudicated quality
 ranking of the projects.
 
+Analyzer 0.8.0's literal dynamic-import correction has a separate 16-scope,
+three-run record in
+[`corpus/index-utility/p13-dynamic/`](../corpus/index-utility/p13-dynamic/summary.json).
+It resolves 29 recognized production calls on the pinned Python scopes;
+variable and unsupported calls remain located. Packaging's index rises from
+70 to 72 because a newly visible import adds one production cycle. Scores
+across scoring versions are side-by-side development evidence, not compatible
+baselines or independent quality labels. The table below is the older 0.4.0
+survey and retains its original measurement context.
+
 ## Repaired, three-run measurement
 
 The same pinned trees, package scopes and configuration now produce complete

@@ -106,6 +106,8 @@ function graphMetrics(graph: DependencyGraph, diagnosticFiles: number): MetricVa
 			...stateAndValue(local.length, localReason),
 			detail: {
 				typeOnly: countBy(local, (edge) => edge.typeOnly),
+				deferred: countBy(local, (edge) => edge.execution?.deferred === true),
+				conditional: countBy(local, (edge) => edge.execution?.conditional === true),
 				reExports: countBy(local, (edge) => edge.kind === "re-export"),
 				dynamic: countBy(local, (edge) => edge.kind === "dynamic"),
 				outOfScope: countBy(edges, (edge) => edge.resolution.status === "out-of-scope"),
@@ -134,6 +136,48 @@ function graphMetrics(graph: DependencyGraph, diagnosticFiles: number): MetricVa
 	return metrics.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
+/** Located recognized dynamic calls have a separate observation count and no score weight. */
+function observationMetrics(graph: DependencyGraph, syntax: SyntaxInventory): MetricValue[] {
+	const sourceSets = new Map(graph.nodes.map((node) => [node.path, node.sourceSet]));
+	return (["production", "test"] as const).flatMap((sourceSet) => {
+		const dynamic = graph.edges.filter(
+			(edge) =>
+				edge.kind === "dynamic" &&
+				edge.from.endsWith(".py") &&
+				sourceSets.get(edge.from) === sourceSet,
+		);
+		const diagnosticFiles = syntax.files.filter(
+			(file) =>
+				file.language === "python" && file.sourceSet === sourceSet && file.diagnostics.length > 0,
+		).length;
+		const reason =
+			diagnosticFiles === 0
+				? undefined
+				: `${diagnosticFiles} ${sourceSet} Python file(s) had parse diagnostics`;
+		const detail = { scope: "recognized-python-dynamic-calls", fullRuntimeGraph: false };
+		return [
+			{
+				id: `graph.observation.dynamic.resolved.${sourceSet}`,
+				unit: "count" as const,
+				...stateAndValue(
+					countBy(dynamic, (edge) => edge.resolution.status !== "unresolved"),
+					reason,
+				),
+				detail,
+			},
+			{
+				id: `graph.observation.dynamic.unresolved.${sourceSet}`,
+				unit: "count" as const,
+				...stateAndValue(
+					countBy(dynamic, (edge) => edge.resolution.status === "unresolved"),
+					reason,
+				),
+				detail,
+			},
+		];
+	});
+}
+
 /** One `graph.unresolved-import` finding per unresolved edge (SPEC §6.2). */
 function unresolvedFindings(edges: readonly GraphEdge[]): Finding[] {
 	const findings: Finding[] = [];
@@ -149,11 +193,41 @@ function unresolvedFindings(edges: readonly GraphEdge[]): Finding[] {
 				specifier: edge.specifier,
 				edgeKind: edge.kind,
 				typeOnly: edge.typeOnly,
+				...(edge.execution === undefined ? {} : edge.execution),
 				reason,
 			},
 		});
 	}
 	return findings;
+}
+
+/** Resolved Python dynamic calls stay located even when no cycle contains them. */
+function resolvedDynamicFindings(edges: readonly GraphEdge[]): Finding[] {
+	return edges.flatMap((edge) => {
+		if (
+			edge.kind !== "dynamic" ||
+			!edge.from.endsWith(".py") ||
+			edge.resolution.status === "unresolved"
+		)
+			return [];
+		const target =
+			edge.resolution.status === "external" ? edge.resolution.packageName : edge.resolution.target;
+		return [
+			{
+				kind: "graph.dynamic-import",
+				path: edge.from,
+				range: edge.range,
+				summary: `resolved dynamic import '${edge.specifier}' to ${target}`,
+				facts: {
+					specifier: edge.specifier,
+					resolution: edge.resolution.status,
+					target,
+					typeOnly: edge.typeOnly,
+					...(edge.execution === undefined ? {} : edge.execution),
+				},
+			},
+		];
+	});
 }
 
 /** A production dependency on test code stays visible outside the scored graph. */
@@ -194,6 +268,7 @@ export function analyzeDependencyGraph(
 			from: file.path,
 			kind: site.kind,
 			typeOnly: site.typeOnly,
+			...(site.execution === undefined ? {} : { execution: site.execution }),
 			specifier: site.specifier,
 			range: site.range,
 			resolution: (file.language === "python" ? pythonResolver : resolver).resolve(file.path, site),
@@ -217,13 +292,20 @@ export function analyzeDependencyGraph(
 		completeness: "complete",
 		diagnosticPaths,
 	};
-	const metrics = graphMetrics(graph, diagnosticFiles);
+	const metrics = [
+		...graphMetrics(graph, diagnosticFiles),
+		...observationMetrics(graph, syntax),
+	].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 	graph.completeness = metrics.some((metric) => metric.state === "incomplete")
 		? "incomplete"
 		: "complete";
 	return {
 		graph,
 		metrics,
-		findings: [...unresolvedFindings(edges), ...productionTestFindings(graph)],
+		findings: [
+			...unresolvedFindings(edges),
+			...resolvedDynamicFindings(edges),
+			...productionTestFindings(graph),
+		],
 	};
 }

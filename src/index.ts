@@ -6,4 +6,4 @@
  * typed SDK over the domain core lands under `src/client/` (SPEC §13.1).
  */
 
-export const VERSION = "0.7.0";
+export const VERSION = "0.8.0";

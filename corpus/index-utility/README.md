@@ -22,6 +22,19 @@ recorded in the summary. They contain numeric reports and synthetic probe
 source generated for this evaluation; no third-party source was copied, so
 no additional source-license obligations attach to these artifacts.
 
+P1.3's analyzer 0.8.0 measurement is retained in
+[`p13-dynamic/`](p13-dynamic/summary.json): the same 16 pinned scopes, three
+fresh-process runs each, with all payload fingerprints stable and all scores
+complete. Its compressed raw result is hashed in the summary. Fifteen scopes
+retain their 0.7.0 index; packaging moves from 70 to 72 when a provable
+literal import exposes one additional production cycle. These are side-by-side
+measurements across scoring versions, not a compatible report comparison.
+[`self-audit/p13-dynamic/`](self-audit/p13-dynamic/manifest.json) retains the
+two-analyzer by two-source Trellis self-audit, source/configuration fingerprints,
+compatible within-analyzer comparisons and three-run current payload hashes.
+All four self-audit cells score 39; the added source raises raw production
+erosion mass, with no new complexity hotspot in the dynamic-import code.
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

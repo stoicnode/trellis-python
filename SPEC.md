@@ -535,6 +535,24 @@ versioned calibration (§16.5).
   workspaces, so scoring 0.6.0-provisional requires another fresh baseline;
   formula weights remain unchanged. `.pyi` is not included.
 
+  Analyzer 0.8.0 and graph policy 1.5.0 resolve binding-confirmed Python
+  `importlib.import_module` calls with plain literal module names, including
+  literal relative names with a literal `package` argument. A one-argument,
+  absolute, literal `__import__` is also supported; its other argument forms
+  remain unresolved because its return and import semantics differ. Rebound
+  aliases, variable arguments and ambiguous source-root ownership never
+  fabricate a local edge. Python graph edges carry `typeOnly`, `deferred` and
+  `conditional` context without excluding architectural dependencies from
+  cycle measurement. `graph.observation.dynamic.{resolved,unresolved}` metrics
+  are split by production/test and count only recognized Python dynamic calls;
+  they do not claim full runtime-graph coverage. The unresolved production
+  metric is eligible for a declarative `policy.budgets` maximum, including
+  zero. A runtime-selected import stays located and does not withhold the
+  declared-static-scope cycle score; a production parse failure or ambiguous
+  local owner still withholds the scored cycle dimension. Scoring
+  0.8.0-provisional changes measurements for provable literal calls, retains
+  the existing formula weights, and requires a fresh compatible baseline.
+
 ### 5.5 Safeguards (hook/check inspection — separate from the score)
 
 Safeguards inspect **configuration**, never execution, over a small
@@ -767,7 +785,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.7.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.8.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.

@@ -2,7 +2,9 @@
 import type { Tree, TreeCursor } from "@lezer/common";
 import type { Range } from "../contract/index.ts";
 import type { ImportSite } from "../syntax/import-sites.ts";
-import { scanPythonBindings } from "./bindings.ts";
+import { fromCursor } from "./binding-tree.ts";
+import { type DynamicCallKind, scanPythonBindings } from "./bindings.ts";
+import { pythonDynamicLiteral } from "./dynamic-literals.ts";
 
 interface Leaf {
 	name: string;
@@ -169,19 +171,68 @@ function plainImportSites(text: string, cursor: TreeCursor, typeOnly: boolean): 
 	return sites;
 }
 
-function callDynamicSite(text: string, cursor: TreeCursor, typeOnly: boolean): LocatedSite {
-	const parts = leaves(cursor);
-	const arg = dynamicArgument(parts);
+function callDynamicSite(
+	text: string,
+	cursor: TreeCursor,
+	typeOnly: boolean,
+	kind: DynamicCallKind,
+	execution: ImportSite["execution"],
+): LocatedSite {
+	const literal = pythonDynamicLiteral(fromCursor(cursor), text, kind);
+	const arg = literal === null ? dynamicArgument(leaves(cursor)) : undefined;
+	const position = dynamicPosition(text, cursor, literal, arg);
 	return {
 		start: cursor.from,
 		site: {
 			kind: "dynamic",
 			typeOnly,
-			specifier: null,
-			range: rangeAt(text, arg?.from ?? cursor.from, arg?.to ?? cursor.to),
-			python: { form: "dynamic", module: null, level: 0, imported: [] },
+			execution,
+			specifier: literal?.specifier ?? null,
+			range: position,
+			python: dynamicPythonFacts(literal),
 		},
 	};
+}
+
+function dynamicPosition(
+	text: string,
+	cursor: TreeCursor,
+	literal: ReturnType<typeof pythonDynamicLiteral>,
+	arg: Leaf | undefined,
+): Range {
+	const from = literal?.from ?? arg?.from ?? cursor.from;
+	const to = literal?.to ?? arg?.to ?? cursor.to;
+	return rangeAt(text, from, to);
+}
+
+function dynamicPythonFacts(
+	literal: ReturnType<typeof pythonDynamicLiteral>,
+): NonNullable<ImportSite["python"]> {
+	return {
+		form: "dynamic",
+		module: literal?.module ?? null,
+		level: literal?.level ?? 0,
+		imported: [],
+		packageName: literal?.packageName ?? null,
+	};
+}
+
+function appendDynamicSite(
+	sites: LocatedSite[],
+	text: string,
+	cursor: TreeCursor,
+	bindings: ReturnType<typeof scanPythonBindings>,
+): void {
+	if (cursor.name !== "CallExpression") return;
+	const dynamic = bindings.dynamicCalls.get(cursor.from);
+	if (dynamic === undefined) return;
+	const context = bindings.contexts.get(cursor.from);
+	sites.push(
+		callDynamicSite(text, cursor, context?.typeOnly ?? false, dynamic, {
+			deferred: context?.deferred ?? false,
+			conditional: context?.conditional ?? false,
+		}),
+	);
 }
 
 function importStatementSites(text: string, cursor: TreeCursor, typeOnly: boolean): LocatedSite[] {
@@ -200,19 +251,21 @@ export function collectPythonImportSites(tree: Tree, text: string, _path: string
 	const cursor = tree.cursor();
 	const visit = (): void => {
 		if (cursor.name === "ImportStatement") {
-			sites.push(
-				...importStatementSites(
-					text,
-					cursor,
-					bindings.contexts.get(cursor.from)?.typeOnly ?? false,
-				),
-			);
+			const context = bindings.contexts.get(cursor.from);
+			for (const located of importStatementSites(text, cursor, context?.typeOnly ?? false))
+				sites.push({
+					...located,
+					site: {
+						...located.site,
+						execution: {
+							deferred: context?.deferred ?? false,
+							conditional: context?.conditional ?? false,
+						},
+					},
+				});
 			return;
 		}
-		if (cursor.name === "CallExpression" && bindings.dynamicCalls.has(cursor.from))
-			sites.push(
-				callDynamicSite(text, cursor, bindings.contexts.get(cursor.from)?.typeOnly ?? false),
-			);
+		appendDynamicSite(sites, text, cursor, bindings);
 		if (cursor.firstChild()) {
 			do visit();
 			while (cursor.nextSibling());

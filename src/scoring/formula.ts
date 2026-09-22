@@ -3,7 +3,7 @@
  * constants and pure math helpers.
  *
  * `SCORING_FORMULA` pins every normalization threshold, term share, and
- * dimension weight under {@link SCORING_VERSION} (`0.7.0-provisional`).
+ * dimension weight under {@link SCORING_VERSION} (`0.8.0-provisional`).
  * The formula is **provisional** pending calibration against the fixed
  * corpus (SPEC §14); any recalibration bumps the scoring version and its
  * test expectations together. The formula takes **no configuration input**:

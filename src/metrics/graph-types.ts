@@ -43,13 +43,13 @@ import type { Completeness, Finding, MetricValue, Range, SourceSet } from "../co
 import type { ImportSiteKind } from "../syntax/import-sites.ts";
 
 /** The versioned graph policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const GRAPH_POLICY_VERSION = "1.4.0";
+export const GRAPH_POLICY_VERSION = "1.5.0";
 
 export const GRAPH_POLICY = {
 	version: GRAPH_POLICY_VERSION,
 	/** Type-only edges keep their identity and are never merged with runtime edges. */
 	typeOnlyEdges: "retained-distinct",
-	/** Only string-literal dynamic imports become edges; non-literal specifiers are unresolved. */
+	/** Binding-confirmed literal dynamic imports become edges; variable targets stay unresolved. */
 	dynamicImports: "literal-only",
 	/** Python cycle scoring covers declared source targets, not runtime-selected or absent modules. */
 	pythonCycleScope: "declared-source-targets",
@@ -106,6 +106,8 @@ export interface GraphEdge {
 	kind: EdgeKind;
 	/** True for `import type` / `export type … from` / type-position `import("…")`. */
 	typeOnly: boolean;
+	/** Python execution context; absence means this adapter did not classify it. */
+	execution?: { deferred: boolean; conditional: boolean };
 	/** The specifier as written; `null` only for non-literal dynamic imports. */
 	specifier: string | null;
 	/** 1-based range of the specifier (of the argument expression when non-literal). */

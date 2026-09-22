@@ -298,6 +298,10 @@ const GRAPH_METRICS = [
 	"graph.edges.local",
 	"graph.edges.unresolved",
 	"graph.files",
+	"graph.observation.dynamic.resolved.production",
+	"graph.observation.dynamic.resolved.test",
+	"graph.observation.dynamic.unresolved.production",
+	"graph.observation.dynamic.unresolved.test",
 ] as const;
 
 /** The import-cycle analyzer's metric ids (mirrors its output, sorted). */

@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "slice": "P1.3 Python literal dynamic imports and graph observation",
+  "targetBeforeRevision": "b270a4bd6d6def49588cdd9faa890902f932e125",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "a5b8d9ac3fe93e1160b2b902cac522ecd0c8ed3148e94eed4c88f807c8ecd907",
+  "sourceAfterSha256": "508353dc5ddc6363dd9108418485ddf3f4f0b9dac148bb268996ab7e10031e63",
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "afterThreeRunPayloadFingerprints": [
+    "0c82df62ecd393aa84a8ab467e1392306ec419e7ef99dc21fc660e56c5d37e3e",
+    "0c82df62ecd393aa84a8ab467e1392306ec419e7ef99dc21fc660e56c5d37e3e",
+    "0c82df62ecd393aa84a8ab467e1392306ec419e7ef99dc21fc660e56c5d37e3e"
+  ],
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "61ff8152b1148f9844e2570a65acb480d461cb825c9779d089532612eb765e4c",
+      "analyzerVersion": "0.7.0",
+      "scoringVersion": "0.7.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22977.996,
+      "productionCloneDensity": 0.03401,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013453,
+      "unresolvedDynamicProduction": null
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "042c164b46e3104791a9bda39dd3276dc0d86f7186275cb7048670b6195d0e8b",
+      "analyzerVersion": "0.7.0",
+      "scoringVersion": "0.7.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23399.607,
+      "productionCloneDensity": 0.033673,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013393,
+      "unresolvedDynamicProduction": null
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "418c366295c1607ee5a9109431a363fb73287b365457512c7dc987f404311103",
+      "analyzerVersion": "0.8.0",
+      "scoringVersion": "0.8.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22977.996,
+      "productionCloneDensity": 0.03401,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013453,
+      "unresolvedDynamicProduction": 0
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "f55be60fd276b29287877c0e364e5e377d4b9916eb29bf4c6e190006f701afa2",
+      "analyzerVersion": "0.8.0",
+      "scoringVersion": "0.8.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23399.607,
+      "productionCloneDensity": 0.033673,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013393,
+      "unresolvedDynamicProduction": 0
+    }
+  },
+  "comparisons": {
+    "oldAnalyzer": "compare-dynamic-old-analyzer.md",
+    "newAnalyzer": "compare-dynamic-new-analyzer.md"
+  },
+  "observation": "Both analyzers measure the old and new target snapshots at index 39; the new analyzer adds zero recognized Python dynamic calls to Trellis. Production erosion mass rises with added source, but no new dynamic-literals complexity hotspots are reported."
+}

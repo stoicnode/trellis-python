@@ -166,6 +166,26 @@ function resolveRelative(
 	);
 }
 
+/** `importlib.import_module` resolves relative to its literal package argument. */
+function resolveRelativePackage(
+	index: ModuleIndex,
+	level: number,
+	module: string,
+	packageName: string | null | undefined,
+): EdgeResolution {
+	if (packageName === null || packageName === undefined)
+		return unresolved("no-target", "relative dynamic import has no proven package argument");
+	const parts = packageName.split(".");
+	const up = level - 1;
+	if (up >= parts.length)
+		return unresolved("no-target", "relative dynamic import escapes its literal package");
+	const target = [
+		...parts.slice(0, parts.length - up),
+		...(module === "" ? [] : module.split(".")),
+	].join(".");
+	return resolveAbsolute(index, target);
+}
+
 function childModule(module: string, imported: readonly string[]): string | null {
 	if (imported.length !== 1 || imported[0] === "*") return null;
 	const child = imported[0];
@@ -208,7 +228,7 @@ export function createPythonGraphResolver(source: SourceInventory): GraphResolve
 	const index = buildModuleIndex(source);
 	return {
 		resolve(fromPath, site): EdgeResolution {
-			if (site.specifier === null || site.python?.form === "dynamic") {
+			if (site.specifier === null) {
 				return {
 					status: "unresolved",
 					reason: "non-literal-dynamic",
@@ -218,6 +238,10 @@ export function createPythonGraphResolver(source: SourceInventory): GraphResolve
 			const python = site.python;
 			if (python === undefined)
 				return { status: "external", packageName: packageName(site.specifier) };
+			if (python.form === "dynamic")
+				return python.level > 0
+					? resolveRelativePackage(index, python.level, python.module ?? "", python.packageName)
+					: resolveAbsolute(index, python.module ?? site.specifier);
 			if (python.form === "from") return resolveFrom(index, fromPath, python);
 			return resolveAbsolute(index, python.module ?? site.specifier);
 		},

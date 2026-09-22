@@ -11,6 +11,14 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Binding-confirmed Python literal dynamic imports now resolve to discovered
+  targets, including literal relative `importlib.import_module` packages and
+  supported one-argument absolute `__import__` calls. Graph evidence retains
+  deferred/conditional context and separates resolved from unresolved
+  recognized Python dynamic calls by source set. Declarative metric budgets
+  can gate unresolved observation. Analyzer 0.8.0, graph policy 1.5.0 and
+  scoring 0.8.0-provisional require fresh baselines for affected workspaces;
+  formula weights are unchanged.
 - Confirmed Python `typing.overload` declarations now count as signatures
   attached to one executable implementation; orphan declarations are located
   unscored findings. Rebound decorators and conditional implementations retain
