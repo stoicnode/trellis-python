@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "repositories": [
+    {
+      "id": "click",
+      "remote": "https://github.com/pallets/click.git",
+      "commit": "3cbaa76b6014be7427d1ab06b4af40f01e7c278e",
+      "tree": "b8c174fe04ce2f9bd96a686f49a5b4cc12225c0c",
+      "scopes": [
+        {
+          "id": "click-package",
+          "path": "src/click"
+        }
+      ]
+    },
+    {
+      "id": "requests",
+      "remote": "https://github.com/psf/requests.git",
+      "commit": "611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60",
+      "tree": "10caa09e09cd366febe74c2afa345939ffd5691f",
+      "scopes": [
+        {
+          "id": "requests-package",
+          "path": "src/requests"
+        }
+      ]
+    },
+    {
+      "id": "flask",
+      "remote": "https://github.com/pallets/flask.git",
+      "commit": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+      "tree": "d46b1a2a2cc4219b0ad5060ab618e9f5ae635680",
+      "scopes": [
+        {
+          "id": "flask-package",
+          "path": "src/flask"
+        }
+      ]
+    },
+    {
+      "id": "rich",
+      "remote": "https://github.com/Textualize/rich.git",
+      "commit": "9d8f9a372cc5916fd4781fec207ced7ddac2f08f",
+      "tree": "93aa807db25b745b28e18bf7f96f8173b564016e",
+      "scopes": [
+        {
+          "id": "rich-package",
+          "path": "rich"
+        }
+      ]
+    },
+    {
+      "id": "numpy",
+      "remote": "https://github.com/numpy/numpy.git",
+      "commit": "0714bda057b351ee14e25d486b7d559b231d19e6",
+      "tree": "de4ab2a4c80ded638f21be056e478a17f34be3e3",
+      "scopes": [
+        {
+          "id": "numpy-python-package",
+          "path": "numpy",
+          "source": {
+            "classify": {
+              "**/_tests/**": "test",
+              "**/tests/**": "test"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sqlalchemy",
+      "remote": "https://github.com/sqlalchemy/sqlalchemy.git",
+      "commit": "6e870776cbf298b541877af9b6caf73bc86b379e",
+      "tree": "10323cd99d2e211d4dc39ed4ddc9d1b9d9ef5836",
+      "scopes": [
+        {
+          "id": "sqlalchemy-package",
+          "path": "lib/sqlalchemy"
+        }
+      ]
+    },
+    {
+      "id": "pydantic",
+      "remote": "https://github.com/pydantic/pydantic.git",
+      "commit": "915896d163835a57fd7987180087409a3229bd71",
+      "tree": "1a07fecd53ca2bbc50037cc37121b508236ae41d",
+      "scopes": [
+        {
+          "id": "pydantic-package",
+          "path": "pydantic"
+        }
+      ]
+    },
+    {
+      "id": "attrs",
+      "remote": "https://github.com/python-attrs/attrs.git",
+      "commit": "8f767776326faaed11e6c2974798787f6e19b343",
+      "tree": "d3d1aeff675c0eeb417b170cb93d1fb87ab78ac1",
+      "scopes": [
+        {
+          "id": "attrs-source",
+          "path": "src"
+        }
+      ]
+    },
+    {
+      "id": "jinja",
+      "remote": "https://github.com/pallets/jinja.git",
+      "commit": "5ef70112a1ff19c05324ff889dd30405b1002044",
+      "tree": "9cc8b01ae238ef334ec9ccfac656c703dc862331",
+      "scopes": [
+        {
+          "id": "jinja-package",
+          "path": "src/jinja2"
+        }
+      ]
+    },
+    {
+      "id": "packaging",
+      "remote": "https://github.com/pypa/packaging.git",
+      "commit": "10590c194edb33c82f84a127883d6097c56b7840",
+      "tree": "d5d997debc6fc2e129584b1d84ae48d6cc6dd2d3",
+      "scopes": [
+        {
+          "id": "packaging-package",
+          "path": "src/packaging"
+        }
+      ]
+    },
+    {
+      "id": "dateutil",
+      "remote": "https://github.com/dateutil/dateutil.git",
+      "commit": "48bd1af97e71baf8e96fce5b663d589caac8f147",
+      "tree": "815bff85ccd5a6272d576581ac1653ba54873b31",
+      "scopes": [
+        {
+          "id": "dateutil-package",
+          "path": "src/dateutil"
+        }
+      ]
+    },
+    {
+      "id": "sniffio",
+      "remote": "https://github.com/python-trio/sniffio.git",
+      "commit": "6996e05d9b9debe32f42f709c8041e744f850478",
+      "tree": "5278d093ff2ca7c7a902b20fae4da2667ceff528",
+      "scopes": [
+        {
+          "id": "sniffio-package",
+          "path": "sniffio"
+        }
+      ]
+    },
+    {
+      "id": "tanstack-query",
+      "commit": "129955c8fd8e96b61b8cb8b40e1dac3828b4cbee",
+      "tree": "b82a77f46b162d7eacfad56488f9202a8cf3cde9",
+      "scopes": [
+        {
+          "id": "tanstack-query-focused",
+          "path": "packages/query-core"
+        }
+      ]
+    },
+    {
+      "id": "zustand",
+      "commit": "b57db4f86ef179285da216eeb291266da82c361c",
+      "tree": "b6e553438d47e555433acce49e55bd96f5881d10",
+      "scopes": [
+        {
+          "id": "zustand-focused",
+          "path": "src"
+        }
+      ]
+    },
+    {
+      "id": "ts-pattern",
+      "commit": "c92ca435c7e1827e0fd55c539080ef1bfd6fe3f0",
+      "tree": "33a0d368912976a831621e8b17c2e53a8261ba4e",
+      "scopes": [
+        {
+          "id": "ts-pattern-focused",
+          "path": "src"
+        }
+      ]
+    },
+    {
+      "id": "ky",
+      "commit": "0d59458a0a58e1c3d7c6db0ab17ed5c7cd671e47",
+      "tree": "42acc7a566e812c5533f7992a95d02ff4b55395f",
+      "scopes": [
+        {
+          "id": "ky-focused",
+          "path": "source"
+        }
+      ]
+    }
+  ]
+}
