@@ -60,6 +60,10 @@ export class DuplicationWork {
 	peakCells = 0;
 	groups = 0;
 	occurrences = 0;
+	/** Extraction telemetry used to profile interval overlap under the fixed caps. */
+	extractionIntervals = 0;
+	extractionIntervalOccurrences = 0;
+	extractionRank = 0;
 	private nextCheckpoint = 0;
 	private failure?: DuplicationLimitError;
 	inputTokens = 0;

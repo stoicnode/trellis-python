@@ -107,6 +107,32 @@ on the pinned snapshots, with repeatable byte-identical measurements and a docum
 runtime/memory budget. If an input still exceeds a hard bound, the result stays
 located `incomplete`; no partial groups are published as complete.
 
+### Phase 4 execution record (2026-09-22)
+
+The bounded extractor now builds one charged min/max segment tree over left contexts
+in suffix-array rank order. Within an LCP interval, suffix-array order makes equal
+right contexts contiguous. It binary-searches each right-context partition, queries
+the left-context ranges outside that partition, and materializes only members that
+have a differently left-contexted member outside it. This preserves the former
+two-sided context rule without repeatedly constructing left/right/pair maps over
+overlapping intervals. The tree, binary searches, range queries and retained members
+remain charged; its numeric cells remain within the existing 32M cap.
+
+Representative fresh macOS runs used the pinned snapshots and
+`/usr/bin/time -l env PATH=/tmp/trellis-python-tooling/node_modules/.bin:$PATH bun /tmp/trellis-dup-profile.ts <repo>`.
+Peak RSS is the operating-system maximum; reported wall time includes discovery and parsing.
+
+| Repository | Before | After |
+|---|---|---|
+| date-fns `766dea9` | 489,181 tokens; exhausted extraction at 100M work (36.09M extraction); 2,952 groups / 19,617 occurrences retained at stop; ~1.11s; 729.6 MiB peak RSS | complete: 79.52M work (14.40M extraction), 6,967 intermediate groups / 47,914 occurrences, 1,063 final groups; 0.86s; 428.3 MiB peak RSS |
+| Rich `9d8f9a3` | 193,850 tokens; exhausted extraction at 100M work (73.64M extraction); 181 groups / 12,851 occurrences retained at stop; ~0.95s; 280.7 MiB peak RSS | complete: 50.51M work (19.84M extraction), 5,052 intermediate groups / 197,156 occurrences, 104 final groups; 0.67s; 222.5 MiB peak RSS |
+
+The profile telemetry records date-fns' 138,885 intervals / 1,452,275 interval
+occurrences and Rich's 25,459 intervals / 13,806,186 interval occurrences. The
+independent small-input oracle, 2/10/40-copy controls, periodic repetitions, forced
+limits and cancellation checks continue to pass; repeated complete runs produce
+byte-identical measurements.
+
 ### 5. Stop presenting incomplete audits as numerical rankings
 
 - Use SPEC §3.4's permitted **withheld** headline when any required scoring

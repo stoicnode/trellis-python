@@ -28,6 +28,9 @@ export interface CandidateDetection {
 		peakCells: number;
 		groups: number;
 		occurrences: number;
+		extractionIntervals: number;
+		extractionIntervalOccurrences: number;
+		extractionRank: number;
 	};
 }
 
@@ -100,6 +103,9 @@ function result(
 			peakCells: work.peakCells,
 			groups: work.groups,
 			occurrences: work.occurrences,
+			extractionIntervals: work.extractionIntervals,
+			extractionIntervalOccurrences: work.extractionIntervalOccurrences,
+			extractionRank: work.extractionRank,
 		},
 	};
 }
