@@ -222,14 +222,16 @@ describe("Python import adapter", () => {
 		});
 	});
 
-	test("distinguishes external dotted modules, package symbols, and missing local children", async () => {
+	test("distinguishes local and external dotted modules, package symbols, and missing children", async () => {
 		const source = [
 			"from pygments.style import Style",
+			"from pkg.child import value",
 			"from pkg import exported_symbol",
 			"from pkg.missing import value",
 		].join("\n");
 		const root = await workspace({
 			"src/pkg/__init__.py": "exported_symbol = 1\n",
+			"src/pkg/child.py": "value = 1\n",
 			"src/pkg/main.py": source,
 		});
 		const inventory = await discoverSourceInventory(root);
@@ -241,6 +243,7 @@ describe("Python import adapter", () => {
 		const resolver = createPythonGraphResolver(inventory);
 		expect(sites.map((site) => resolver.resolve("src/pkg/main.py", site))).toEqual([
 			{ status: "external", packageName: "pygments" },
+			{ status: "local", target: "src/pkg/child.py" },
 			{ status: "local", target: "src/pkg/__init__.py" },
 			expect.objectContaining({ status: "unresolved", reason: "no-target" }),
 		]);
