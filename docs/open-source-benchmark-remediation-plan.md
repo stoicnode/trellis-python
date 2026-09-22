@@ -168,3 +168,23 @@ CLI and SDK deep-equal tests, saved comparison, fleet, and history cover both st
 `bun run check:all` pass. Native CLI/SDK/fleet parity, offline/no-write behavior,
 determinism, compatibility, and the pinned benchmark acceptance all pass. Keep each
 phase focused and commit separately; push only on request.
+
+### Phase 6 execution record (2026-09-22)
+
+The read-only `--acceptance --runs 3` mode now checks every pinned full and focused
+scope in a fresh process, hashes the report measurement payload without run metadata,
+and emits completeness, runtime/RSS, unresolved-reason counts and source-located
+hotspot/clone evidence. All ten scopes were repeatable. Requests, Flask and Rich now
+have zero Python parse failures; date-fns and Rich duplication complete within the
+existing bounds. The four complete focused scopes retain indexes 27, 39, 45 and 47.
+The six full repositories with remaining dynamic or unavailable-build graph edges
+withhold their numerical headlines rather than appearing as 100. The detailed
+distribution, locations, residuals and calibration decision are in
+[`open-source-benchmark-acceptance.md`](open-source-benchmark-acceptance.md).
+
+The controlled corpus pairs remain the calibration refactors: clone removal changes
+16 to 0, branch growth changes 0 to 26, and cycle introduction changes 0 to 12 with
+unrelated metrics unchanged. The same harness explicitly checks their cleanup
+directions: function simplification 26 to 0 and cycle break 12 to 0. They and the
+benchmark evidence do not justify a new threshold or weight: scoring stays
+`0.3.0-provisional`, safeguards and test code add no score credit.

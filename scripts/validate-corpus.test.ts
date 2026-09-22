@@ -30,6 +30,8 @@ describe("loadManifest", () => {
 			"clone-removal",
 			"branch-growth",
 			"cycle-introduction",
+			"function-simplification",
+			"cycle-break",
 			"dilution",
 		]);
 		// Every pair endpoint names a declared entry.
@@ -233,7 +235,10 @@ describe("runCorpusValidation", () => {
 			mode: "in-process",
 		});
 		expect(record.entries).toHaveLength(11);
-		expect(record.pairs).toHaveLength(4);
+		expect(record.pairs).toHaveLength(6);
+		expect(record.pairs.map((pair) => pair.id)).toEqual(
+			expect.arrayContaining(["function-simplification", "cycle-break"]),
+		);
 		expect(record.ok).toBe(true);
 		for (const pair of record.pairs) {
 			expect(pair.failures).toEqual([]);

@@ -4,6 +4,8 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { runWorkspaceAudit } from "../src/audit/index.ts";
+import { auditPinnedAcceptance, pinnedFindingEvidence } from "./oss-benchmark-acceptance.ts";
+import { readPreparationArgs } from "./oss-benchmark-cli.ts";
 import {
 	auditPinnedRepositories,
 	auditPostFixPython,
@@ -119,6 +121,13 @@ describe("open-source benchmark baseline", () => {
 		const dynamicRoot = resolve(ROOT, "fixtures/static-import-uncertainty");
 		const dynamic = (await runWorkspaceAudit(dynamicRoot)).report;
 		expect(unresolvedReasons(dynamic)).toEqual({ "non-literal-dynamic": 1 });
+		const finding = dynamic.findings[0];
+		if (finding === undefined) throw new Error("missing dynamic import finding");
+		expect(pinnedFindingEvidence(finding)).toMatchObject({
+			kind: "graph.unresolved-import",
+			path: "src/dynamic.ts",
+			range: { start: 2, end: 2 },
+		});
 	});
 
 	test("freezes the pinned external baseline and audits every distilled taxonomy fixture", async () => {
@@ -180,6 +189,9 @@ describe("open-source benchmark baseline", () => {
 		expect(measured.id).toBe("static-import-uncertainty");
 		expect(measured.measurement.peakRssMb).toBeGreaterThan(0);
 		expect(measured.snapshot.matches).toBe(true);
+		expect(() => measureFixtureInChildProcess(ROOT, "missing")).toThrow(
+			"fixture measurement child failed",
+		);
 	});
 
 	test("verifies and re-audits an offline pinned checkout through the preparation command", async () => {
@@ -206,7 +218,68 @@ describe("open-source benchmark baseline", () => {
 		expect(verifyPinnedRepositories(manifestRoot, preparedRoot)).toEqual([]);
 		await writeFile(join(repoRoot, "index.ts"), "export const value = 2;\n");
 		expect(verifyPinnedRepositories(manifestRoot, preparedRoot)[0]).toContain("dirty");
+		expect(verifyPinnedRepositories(manifestRoot, join(preparedRoot, "missing"))[0]).toContain(
+			"unavailable",
+		);
 		expect((await auditPinnedRepositories(manifestRoot, preparedRoot)).records).toEqual([]);
+	});
+
+	test("records repeatable pinned acceptance evidence without comparing it to the frozen baseline", async () => {
+		const { manifestRoot, preparedRoot } = await preparedMiniRepository();
+		const acceptance = await auditPinnedAcceptance(manifestRoot, preparedRoot, 3);
+		expect(acceptance.ok).toBe(true);
+		expect(acceptance.runs).toBe(3);
+		expect(acceptance.entries).toHaveLength(1);
+		expect(acceptance.entries[0]).toMatchObject({
+			id: "mini",
+			repeatable: true,
+			medianMs: expect.any(Number),
+			peakRssMb: expect.any(Number),
+			summary: {
+				completeness: "complete",
+				parseFailures: 0,
+				unresolvedReasons: {},
+			},
+		});
+		const output: string[] = [];
+		expect(
+			await main(
+				["--prepared-root", preparedRoot, "--acceptance", "--runs", "3"],
+				(text) => output.push(text),
+				manifestRoot,
+			),
+		).toBe(0);
+		expect(JSON.parse(output[0] ?? "{}").acceptance.entries[0].repeatable).toBe(true);
+		await writeFile(join(preparedRoot, "mini", "index.ts"), "export const value = 2;\n");
+		const dirty = await auditPinnedAcceptance(manifestRoot, preparedRoot, 3);
+		expect(dirty).toMatchObject({ ok: false, entries: [] });
+		expect(dirty.integrity[0]).toContain("dirty");
+		expect(await auditPostFixPython(manifestRoot, preparedRoot)).toEqual([
+			expect.objectContaining({ ok: false }),
+		]);
+		await expect(auditPinnedAcceptance(manifestRoot, preparedRoot, 0)).rejects.toThrow(
+			"positive integer",
+		);
+		await expect(main(["--prepared-root", preparedRoot], () => {}, manifestRoot)).rejects.toThrow(
+			"usage:",
+		);
+		expect(() =>
+			readPreparationArgs(["--prepared-root", preparedRoot, "--acceptance", "--runs", "0"], true),
+		).toThrow("positive integer");
+	});
+
+	test("returns baseline mismatches as evidence instead of revising the frozen expectation", async () => {
+		const { manifestRoot, artifactRoot } = await preparedMiniRepository();
+		await writeFile(
+			join(artifactRoot, "mini.json"),
+			JSON.stringify({
+				completeness: "complete",
+				findings: [{ kind: "graph.unresolved-import", facts: { reason: "no-target" } }],
+			}),
+		);
+		const mismatches = await verifyBaselineArtifacts(manifestRoot, artifactRoot);
+		expect(mismatches).toHaveLength(1);
+		expect(mismatches[0]).toContain("mini: baseline revision mismatch");
 	});
 
 	test("accepts parser-complete pinned Python roots without invoking Python", async () => {

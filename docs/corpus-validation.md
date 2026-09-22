@@ -134,11 +134,15 @@ normalized contributions also remain constant:
   Test debt is visible and never offsets or inflates production debt
   (SPEC §3.1).
 - **Incomplete-analysis handling.** `incomplete-parse` (one syntax-error
-  file) yields `completeness: incomplete`, a `partial` headline, and
+  file) yields `completeness: incomplete`, a withheld headline, and
   `incomplete` states with reasons on the affected complexity, erosion,
-  duplication, and cycle metrics — and the index is published flagged at
-  100 (incomplete dimensions score at full weight, never as zero debt,
-  SPEC §7). Remaining analyzers' findings stay usable.
+  duplication, and cycle metrics. Completed analyzers' raw findings stay
+  usable, but missing analysis supplies neither invented zero debt nor a
+  numerical rank (schema 1.4.0 / scoring 0.3.0-provisional).
+
+The historical table above records the former partial-headline semantics.
+Current behavior is covered by the same fixture and by the
+[open-source benchmark acceptance](open-source-benchmark-acceptance.md).
 
 ## Calibration decision (evidence → change)
 

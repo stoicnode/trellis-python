@@ -219,6 +219,42 @@
 			}
 		},
 		{
+			"id": "function-simplification",
+			"before": "branch-grown",
+			"after": "branch-base",
+			"expectDecrease": [
+				"complexity.cc.max.production",
+				"erosion.eroded-count.production",
+				"erosion.eroded-share.production"
+			],
+			"expectUnchanged": [
+				"duplication.groups.production",
+				"duplication.duplicated-lines.production",
+				"import-cycle.groups"
+			],
+			"indexDelta": {
+				"max": -1
+			}
+		},
+		{
+			"id": "cycle-break",
+			"before": "cyclic",
+			"after": "acyclic",
+			"expectDecrease": [
+				"import-cycle.density",
+				"import-cycle.groups",
+				"import-cycle.modules"
+			],
+			"expectUnchanged": [
+				"complexity.cc.max.production",
+				"erosion.eroded-count.production",
+				"duplication.groups.production"
+			],
+			"indexDelta": {
+				"max": -1
+			}
+		},
+		{
 			"id": "dilution",
 			"before": "dilution-base",
 			"after": "dilution-grown",

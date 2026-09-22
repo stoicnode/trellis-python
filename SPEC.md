@@ -1051,6 +1051,14 @@ and optional history. Package smoke tests verify the installed CLI and its asset
 See [release acceptance](docs/release-acceptance.md) and
 [corpus validation](docs/corpus-validation.md) for evidence and limitations.
 
+The separate [open-source benchmark acceptance](docs/open-source-benchmark-acceptance.md)
+re-audits operator-prepared pinned TypeScript and Python repositories three
+times in fresh processes. It fingerprints the measurement payload, records
+runtime/RSS and source-located hotspots, and never changes default audit or CI
+requirements. Incomplete full-repository graph coverage withholds the
+headline; the benchmark does not treat popular projects as presumed low debt
+or use safeguards/tests as score credit.
+
 trellis audits itself offline. A regression in its own sloppiness index is a
 real failure; safeguards and optional provider evidence never offset the score.
 

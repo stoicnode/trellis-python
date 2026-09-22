@@ -17,6 +17,8 @@ import { z } from "zod";
 import { runWorkspaceAudit } from "../src/audit/index.ts";
 import type { AuditReport } from "../src/contract/index.ts";
 import { parsePython } from "../src/python/parser.ts";
+import { auditPinnedAcceptance } from "./oss-benchmark-acceptance.ts";
+import { readPreparationArgs } from "./oss-benchmark-cli.ts";
 
 const MEASUREMENT_SCRIPT = resolve(import.meta.dir, "oss-benchmark-measure.ts");
 
@@ -176,14 +178,15 @@ export function verifyPinnedRepositories(root: string, externalRoot: string): st
 	return manifest.repositories.flatMap((repository) => {
 		try {
 			const checkout = resolve(externalRoot, repository.id);
+			const options = { encoding: "utf8" as const, stdio: "pipe" as const };
 			const actual = execFileSync("git", ["-C", checkout, "rev-parse", "HEAD"], {
-				encoding: "utf8",
+				...options,
 			}).trim();
 			const tree = execFileSync("git", ["-C", checkout, "rev-parse", "HEAD^{tree}"], {
-				encoding: "utf8",
+				...options,
 			}).trim();
 			const dirty = execFileSync("git", ["-C", checkout, "status", "--porcelain"], {
-				encoding: "utf8",
+				...options,
 			}).trim();
 			return actual === repository.commit && tree === repository.tree && dirty === ""
 				? []
@@ -349,22 +352,19 @@ export async function main(
 	write: (text: string) => void = console.log,
 	root = resolve(import.meta.dir, "../corpus/oss-benchmark"),
 ): Promise<number> {
-	const preparedIndex = args.indexOf("--prepared-root");
-	const artifactIndex = args.indexOf("--artifact-root");
-	if (preparedIndex < 0 || artifactIndex < 0) {
-		throw new Error("usage: --prepared-root <repos> --artifact-root <artifacts> [--reaudit]");
-	}
-	const preparedRoot = args[preparedIndex + 1];
-	const artifactRoot = args[artifactIndex + 1];
-	if (preparedRoot === undefined || artifactRoot === undefined)
-		throw new Error("prepared roots need values");
+	const acceptanceRequested = args.includes("--acceptance");
+	const { preparedRoot, artifactRoot, runs } = readPreparationArgs(args, acceptanceRequested);
 	const integrity = verifyPinnedRepositories(root, preparedRoot);
-	const artifactMismatches = await verifyBaselineArtifacts(root, artifactRoot);
+	const artifactMismatches =
+		artifactRoot === undefined ? [] : await verifyBaselineArtifacts(root, artifactRoot);
 	const reAudit = args.includes("--reaudit")
 		? await auditPinnedRepositories(root, preparedRoot)
 		: undefined;
 	const pythonAcceptance = args.includes("--python-acceptance")
 		? await auditPostFixPython(root, preparedRoot)
+		: undefined;
+	const acceptance = acceptanceRequested
+		? await auditPinnedAcceptance(root, preparedRoot, runs)
 		: undefined;
 	write(
 		`${JSON.stringify({
@@ -373,12 +373,14 @@ export async function main(
 			artifactMismatches,
 			...(reAudit === undefined ? {} : { reAudit }),
 			...(pythonAcceptance === undefined ? {} : { pythonAcceptance }),
+			...(acceptance === undefined ? {} : { acceptance }),
 		})}\n`,
 	);
 	return integrity.length === 0 &&
 		artifactMismatches.length === 0 &&
 		(reAudit?.mismatches.length ?? 0) === 0 &&
-		(pythonAcceptance?.every((entry) => (entry as { ok: boolean }).ok) ?? true)
+		(pythonAcceptance?.every((entry) => (entry as { ok: boolean }).ok) ?? true) &&
+		(acceptance?.ok ?? true)
 		? 0
 		: 1;
 }

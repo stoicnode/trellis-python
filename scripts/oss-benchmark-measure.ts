@@ -1,8 +1,11 @@
 #!/usr/bin/env bun
+import { createHash } from "node:crypto";
 /** Fresh-process measurements for the read-only OSS benchmark harness. */
 import { resolve } from "node:path";
 import { runWorkspaceAudit } from "../src/audit/index.ts";
+import { measurementPayload } from "../src/contract/index.ts";
 import { DEFAULT_DUPLICATION_BUDGET } from "../src/metrics/index.ts";
+import { pinnedFindingEvidence } from "./oss-benchmark-acceptance.ts";
 import {
 	equalReasonCounts,
 	type FixtureRecord,
@@ -99,6 +102,55 @@ async function measurePinned(root: string, externalRoot: string, id: string): Pr
 	};
 }
 
+/** Measure one pinned scope without comparing it to the frozen historical baseline. */
+async function measurePinnedAcceptance(
+	root: string,
+	externalRoot: string,
+	id: string,
+): Promise<unknown> {
+	const baseline = loadOssBenchmarkManifest(root).baselines.find((entry) => entry.id === id);
+	if (baseline === undefined) throw new Error(`unknown pinned acceptance scope: ${id}`);
+	const startedAt = performance.now();
+	const report = (
+		await runWorkspaceAudit(
+			resolve(externalRoot, baseline.repository ?? baseline.id, baseline.path ?? "."),
+			{ now: new Date("2026-09-22T00:00:00.000Z") },
+		)
+	).report;
+	const payloadFingerprint = createHash("sha256")
+		.update(JSON.stringify(measurementPayload(report)))
+		.digest("hex");
+	const ranked = report.findings.filter(
+		(finding) =>
+			finding.kind === "complexity.hotspot" ||
+			finding.kind === "duplication.clone-group" ||
+			finding.kind === "import-cycle",
+	);
+	return {
+		id,
+		payloadFingerprint,
+		summary: {
+			completeness: report.completeness,
+			score: report.score,
+			sourceCoverage: report.sourceCoverage,
+			parseFailures: (report.languageCoverage ?? []).reduce(
+				(sum, row) => sum + row.parseFailureFiles,
+				0,
+			),
+			unresolvedReasons: unresolvedReasons(report),
+			incompleteMetrics: Object.values(report.metrics)
+				.filter((metric) => metric.state === "incomplete")
+				.map((metric) => metric.id),
+			hotspots: ranked.slice(0, 10).map(pinnedFindingEvidence),
+			cloneGroups: report.findings
+				.filter((finding) => finding.kind === "duplication.clone-group")
+				.slice(0, 10)
+				.map(pinnedFindingEvidence),
+		},
+		measurement: { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() },
+	};
+}
+
 if (import.meta.main) {
 	const [mode, root, externalRoot, id] = process.argv.slice(2);
 	if (mode === "fixture" && root !== undefined && externalRoot !== undefined) {
@@ -114,9 +166,18 @@ if (import.meta.main) {
 		id !== undefined
 	) {
 		measurePinned(root, externalRoot, id).then((record) => console.log(JSON.stringify(record)));
+	} else if (
+		mode === "acceptance" &&
+		root !== undefined &&
+		externalRoot !== undefined &&
+		id !== undefined
+	) {
+		measurePinnedAcceptance(root, externalRoot, id).then((record) =>
+			console.log(JSON.stringify(record)),
+		);
 	} else {
 		throw new Error(
-			"usage: oss-benchmark-measure.ts fixture <root> <id> | pinned <root> <repos> <id>",
+			"usage: oss-benchmark-measure.ts fixture <root> <id> | pinned|acceptance <root> <repos> <id>",
 		);
 	}
 }

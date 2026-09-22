@@ -17,6 +17,12 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
   fleet, and history never invent a score delta. Schema 1.4.0 and scoring
   0.3.0-provisional retain readable historical artifacts and migrate stored
   partial headlines to `NULL` (trellis-stage5).
+- Added the opt-in, read-only open-source benchmark acceptance harness. It
+  verifies pinned prepared checkouts, runs every full and focused scope three
+  times in fresh processes, fingerprints deterministic measurement payloads,
+  and records runtime, RSS, completeness, unresolved-edge reasons, and
+  source-located hotspot/clone evidence. The 2026-09-22 record leaves
+  provisional scoring weights unchanged (trellis-stage6).
 
 ## [0.3.0] — 2026-09-19
 

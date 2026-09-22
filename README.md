@@ -33,9 +33,11 @@ directories outside Git.
 - **Import cycles.** Groups of modules connected by circular dependencies.
 - **Safeguards.** How hooks and quality checks are configured and connected, reported separately from the score.
 
-The headline is a **0–100 sloppiness index. Lower is better.** Each
-contribution traces back to raw measurements. Findings include file locations
-so you can inspect the code behind them.
+When all required analysis completes, the headline is a **0–100 sloppiness
+index. Lower is better.** Each contribution traces back to raw measurements.
+If a required dimension is incomplete, Trellis withholds the number and names
+the unknown dimensions instead of publishing a misleading rank. Findings
+include file locations so you can inspect the code behind them.
 
 The index measures production code. Test code is analyzed separately, and
 safeguard configuration never offsets structural debt.
@@ -101,10 +103,11 @@ trellis compare /tmp/before.json /tmp/after.json
 Named hotspots keep their identity across comment and line shifts; replacing
 a function or adding the same method name in another class creates a new
 hotspot. Anonymous or duplicate identities remain conservative new/resolved
-pairs. The current analyzer emits schema 1.3.0 and uses bounded suffix-array
+pairs. The current analyzer emits schema 1.4.0 and uses bounded suffix-array
 duplication analysis. Historical reports remain readable; crossing an analyzer
-transition requires a fresh baseline. Scoring and the 100-token /
-3-line clone thresholds are unchanged. See the
+or scoring-semantic transition requires a fresh baseline. The scoring contract
+is 0.3.0-provisional: withheld-headline semantics changed, while formula weights
+and the 100-token / 3-line clone thresholds are unchanged. See the
 [identity and compatibility rules](docs/hotspot-identity.md) and
 [native engine acceptance](docs/research/native-duplication/acceptance.md).
 
@@ -202,9 +205,9 @@ Audits never execute the project's tests, builds, linters, or hooks.
 Safeguard findings describe configuration and wiring; they do not establish
 that those checks pass.
 
-Missing dependencies can limit import resolution. Parse failures and
-analysis limits remain visible. An incomplete required scoring dimension
-receives its full score contribution and marks the headline partial.
+Missing dependencies can limit import resolution. Parse failures and analysis
+limits remain visible. An incomplete required scoring dimension withholds the
+headline, retains completed raw metrics, and names every unknown dimension.
 
 The scoring formula is provisional. The index is a weighted measure of
 structural debt, not a percentage of bad code. Compare reports with
@@ -218,6 +221,7 @@ compatible analyzer, scoring, and configuration identities.
 - [Product contract and configuration](SPEC.md)
 - [Architecture](docs/architecture.md)
 - [Corpus validation](docs/corpus-validation.md)
+- [Open-source benchmark acceptance](docs/open-source-benchmark-acceptance.md)
 - [Scoring calibration](docs/count-calibration.md)
 - [Release acceptance and known limitations](docs/release-acceptance.md)
 - [Release and operations runbook](RUNBOOK.md)
