@@ -106,7 +106,9 @@ export function hotspotFindings(report: AuditReport): Finding[] {
 /** Located evidence that is not a ranked hotspot (unresolved imports, broken safeguard references). */
 export function otherFindings(report: AuditReport): Finding[] {
 	const kinds = new Set<string>(HOTSPOT_KINDS);
-	return report.findings.filter((finding) => !kinds.has(finding.kind));
+	return report.findings.filter(
+		(finding) => !kinds.has(finding.kind) && finding.kind !== "documentation.excessive",
+	);
 }
 
 /** A bounded view over a finding list; the total is always reported beside the shown slice. */

@@ -75,6 +75,16 @@ validated debt labels. The four-cell Trellis self-audit is under
 [`self-audit/p31-scopes/`](self-audit/p31-scopes/manifest.json); all cells
 score 39, with old and new analyzers run against both source snapshots.
 
+P3.2's reporting-only corpus run is retained in
+[`p32-reporting/`](p32-reporting/summary.json): three runs for each pinned
+scope, all payloads and indexes byte-identical to P3.1. The
+[`self-audit/p32-reporting/`](self-audit/p32-reporting/manifest.json) record
+keeps the four before/after cells. Trellis's own index moves from 39 to 38
+because new presentation code increases clean source denominators; the raw
+production erosion mass rises while the eroded-function count stays at 41.
+The new comparison display shows that concentration effect explicitly. It
+must not be read as a cleanup of existing structural debt.
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

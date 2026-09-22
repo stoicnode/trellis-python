@@ -66,6 +66,7 @@ describe("trellis compare", () => {
 		expect(stdout).toContain("comparable: yes");
 		expect(stdout).toMatch(/index: 0\/100 → \d+\/100 \(\+\d+\) · lower is better/);
 		expect(stdout).toContain("metric deltas:");
+		expect(stdout).toContain("change explanation");
 		expect(stdout).toMatch(/findings: \d+ new · \d+ resolved · \d+ persistent/);
 	}, 20_000);
 
@@ -77,6 +78,9 @@ describe("trellis compare", () => {
 		expect(comparison.score.delta).toBeGreaterThan(0);
 		expect(Array.isArray(comparison.metrics)).toBe(true);
 		expect(Array.isArray(comparison.findings.new)).toBe(true);
+		expect(["changed", "unchanged", "unknown"]).toContain(comparison.sourceInput);
+		expect(Array.isArray(comparison.explanation.dimensionChanges)).toBe(true);
+		expect(Array.isArray(comparison.explanation.denominatorChanges)).toBe(true);
 	}, 20_000);
 
 	test("--md emits a markdown summary", async () => {
@@ -84,6 +88,7 @@ describe("trellis compare", () => {
 		expect(code).toBe(0);
 		expect(stdout).toContain("# trellis compare —");
 		expect(stdout).toContain("## Index");
+		expect(stdout).toContain("## Change explanation");
 	}, 20_000);
 
 	test("a tripped --config policy exits 2 with the comparison still emitted", async () => {

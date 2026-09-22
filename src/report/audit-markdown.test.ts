@@ -58,7 +58,8 @@ describe("renderAuditMarkdown across the render fixtures", () => {
 		const fixture = fixtures.get("sloppy");
 		if (fixture === undefined) throw new Error("fixture sloppy not built");
 		const output = renderAuditMarkdown(fixture.report);
-		const hotspotRows = output
+		const hotspotSection = output.split("## Hotspots")[1]?.split("\n## ")[0] ?? "";
+		const hotspotRows = hotspotSection
 			.split("\n")
 			.filter((line) =>
 				line.match(/^\| (complexity\.hotspot|duplication\.clone-group|import-cycle) \| src\//),

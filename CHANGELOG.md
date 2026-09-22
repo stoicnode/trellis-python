@@ -11,6 +11,13 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Added
 
+- Audit summaries now place absolute burden beside density, name saturated
+  score terms and graph observation limits, and separate excessive
+  documentation warnings from structural hotspots. Comparable JSON,
+  terminal and Markdown diffs expose exact dimension point changes, density
+  denominator changes, persistent-finding severity changes and selected
+  source-snapshot status. An unchanged integer index no longer hides raw
+  movement in the human summaries.
 - Native advisory executable-scope analysis now locates decisions in module
   and class initialization and control nesting from depth 3, including
   functions below the scored hotspot threshold. Definition-time expressions

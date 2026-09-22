@@ -14,6 +14,7 @@ import {
 	sortedMetrics,
 } from "./audit-format.ts";
 import { providerAnalysesSection } from "./audit-markdown-providers.ts";
+import { auditReviewMarkdown } from "./audit-review.ts";
 import { cloneReviewContext } from "./clone-context.ts";
 
 /** Options for {@link renderAuditMarkdown}. */
@@ -91,6 +92,7 @@ export function renderAuditMarkdown(
 			`| ${contribution.dimension} | ${contribution.points ?? "unknown"} | ${contribution.metricIds.join(", ")} |`,
 		);
 	}
+	lines.push(...auditReviewMarkdown(report, findingLimit));
 
 	lines.push("", "## Metrics", "", "| metric | value |", "|---|---|");
 	for (const metric of sortedMetrics(report)) {

@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "slice": "P3.2 burden, scope and change reporting",
+  "targetBeforeRevision": "f48c56b",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "4a32b3fd5e90c50d9a3b7175fd2d3668e8b56a32909c6ab2ede8636ca2ab3fd2",
+  "sourceAfterSha256": "6d81361b024a3d754e1682f6134923029dfc11dc9352468860cc93bc37bde7ed",
+  "configuration": {
+    "mode": "default",
+    "configFile": "trellis.yaml"
+  },
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "08ada669c2fcb332bcd8934e3088849a13bdabbd9b6bcfd3d2f1c83a80377e8a",
+      "uncompressedSha256": "28fe8e259285c32909056e16d505e6afd4d522c4bd18093a0c29c3fc4ef69328",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25303.293,
+      "productionCloneDensity": 0.032053,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17,
+      "productionInitializationDecisions": 66
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "7f408ad59d9d7c835915e3f7faf721bc29bf2ff9e141dac8e1de581f9061da01",
+      "uncompressedSha256": "6a773787fe21af00c8792c63c1c9fcbad494c30318f2e2a09320781d454a1b99",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 38,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25918.668,
+      "productionCloneDensity": 0.031486,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17,
+      "productionInitializationDecisions": 66
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "cb352c9ceaf54eb0526f38adf28ce1bf237effa55231eee5c8b9d0e1b8872f7b",
+      "uncompressedSha256": "e204ecf8f7e4e966c56791076849b7b2502bfc81a86fe6ecaab4bd500a28dc20",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25303.293,
+      "productionCloneDensity": 0.032053,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17,
+      "productionInitializationDecisions": 66
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "63dd190097126d125acf5d80e7b6826ef90115377b54a2e1d17bd269d0534ae3",
+      "uncompressedSha256": "61fb7f18433aee2d41edb56694728a5e350fbc104995336071608f27f720e8bd",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 38,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25918.668,
+      "productionCloneDensity": 0.031486,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17,
+      "productionInitializationDecisions": 66
+    }
+  },
+  "afterThreeRunPayloadFingerprints": [
+    "9077eef1df4c4e2decac4c9cd5a45f3559829f3fb23521eec5a427bc342a1478",
+    "9077eef1df4c4e2decac4c9cd5a45f3559829f3fb23521eec5a427bc342a1478",
+    "9077eef1df4c4e2decac4c9cd5a45f3559829f3fb23521eec5a427bc342a1478"
+  ],
+  "review": {
+    "interpretation": "All four self-audit cells use the same 0.9.0 measurement semantics. Source edits add 615.375 raw production erosion mass with no additional eroded function; the rounded index moves 39 to 38 because density denominators grow. This is a concentration effect, not evidence that existing structural debt was removed. The new comparison view exposes the exact points and denominator movement."
+  }
+}

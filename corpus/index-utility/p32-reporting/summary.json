@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "manifest": "../manifest.json",
+  "purpose": "P3.2 report and comparison presentation; measurement code and scoring formula unchanged",
+  "priorArtifact": "../p31-scopes/current-measurements.json.gz",
+  "currentArtifact": {
+    "compressedPath": "current-measurements.json.gz",
+    "sha256": "83fcf05fa6cc0cc2661ed2b878f90e2e38ef38b86d669479c59c871722e91ac3",
+    "uncompressedSha256": "067d2632344d0aec3c9ec40af1c61951aa0a1d1713cce6d13ed7c43b68cd850d",
+    "analyzerVersion": "0.9.0",
+    "scoringVersion": "0.9.0-provisional",
+    "scopeCount": 16,
+    "runsPerScope": 3,
+    "ok": true
+  },
+  "scopes": [
+    {
+      "repository": "click",
+      "scope": "click-package",
+      "index": 60,
+      "priorIndex": 60,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 259.03887499999996,
+      "maxPeakRssMb": 253.03125
+    },
+    {
+      "repository": "requests",
+      "scope": "requests-package",
+      "index": 46,
+      "priorIndex": 46,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 157.892042,
+      "maxPeakRssMb": 230.609375
+    },
+    {
+      "repository": "flask",
+      "scope": "flask-package",
+      "index": 60,
+      "priorIndex": 60,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 189.134208,
+      "maxPeakRssMb": 238.34375
+    },
+    {
+      "repository": "rich",
+      "scope": "rich-package",
+      "index": 77,
+      "priorIndex": 77,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 843.337417,
+      "maxPeakRssMb": 461.875
+    },
+    {
+      "repository": "numpy",
+      "scope": "numpy-python-package",
+      "index": 83,
+      "priorIndex": 83,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 4795.331666,
+      "maxPeakRssMb": 911.65625
+    },
+    {
+      "repository": "sqlalchemy",
+      "scope": "sqlalchemy-package",
+      "index": 81,
+      "priorIndex": 81,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 3247.16425,
+      "maxPeakRssMb": 681.421875
+    },
+    {
+      "repository": "pydantic",
+      "scope": "pydantic-package",
+      "index": 80,
+      "priorIndex": 80,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 828.3181669999999,
+      "maxPeakRssMb": 357.3125
+    },
+    {
+      "repository": "attrs",
+      "scope": "attrs-source",
+      "index": 46,
+      "priorIndex": 46,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 142.66362499999997,
+      "maxPeakRssMb": 233.5625
+    },
+    {
+      "repository": "jinja",
+      "scope": "jinja-package",
+      "index": 59,
+      "priorIndex": 59,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 306.891542,
+      "maxPeakRssMb": 254.265625
+    },
+    {
+      "repository": "packaging",
+      "scope": "packaging-package",
+      "index": 72,
+      "priorIndex": 72,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 318.782042,
+      "maxPeakRssMb": 246.4375
+    },
+    {
+      "repository": "dateutil",
+      "scope": "dateutil-package",
+      "index": 43,
+      "priorIndex": 43,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 199.55849999999998,
+      "maxPeakRssMb": 232.984375
+    },
+    {
+      "repository": "sniffio",
+      "scope": "sniffio-package",
+      "index": 0,
+      "priorIndex": 0,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 39.23387499999998,
+      "maxPeakRssMb": 160.09375
+    },
+    {
+      "repository": "tanstack-query",
+      "scope": "tanstack-query-focused",
+      "index": 47,
+      "priorIndex": 47,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 650.5901670000001,
+      "maxPeakRssMb": 419.375
+    },
+    {
+      "repository": "zustand",
+      "scope": "zustand-focused",
+      "index": 27,
+      "priorIndex": 27,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 84.44720799999999,
+      "maxPeakRssMb": 183.40625
+    },
+    {
+      "repository": "ts-pattern",
+      "scope": "ts-pattern-focused",
+      "index": 39,
+      "priorIndex": 39,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 124.72512499999999,
+      "maxPeakRssMb": 204.78125
+    },
+    {
+      "repository": "ky",
+      "scope": "ky-focused",
+      "index": 45,
+      "priorIndex": 45,
+      "payloadMatchesP31": true,
+      "deterministic": true,
+      "complete": true,
+      "medianWallTimeMs": 127.372875,
+      "maxPeakRssMb": 202.984375
+    }
+  ],
+  "review": {
+    "indexChanges": 0,
+    "payloadChanges": 0,
+    "interpretation": "All 16 target measurements are byte-identical to P3.1. The slice adds human and JSON comparison context without changing audit measurement."
+  }
+}

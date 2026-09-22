@@ -15,6 +15,7 @@
 import type { MetricDelta, MetricSide, ReportComparison } from "../compare/index.ts";
 import type { AuditReport, Finding } from "../contract/index.ts";
 import { findingLocation, formatNumber, repoLabel } from "./audit-format.ts";
+import { comparisonReviewMarkdown, comparisonReviewTerminal } from "./compare-review.ts";
 
 /** Options for the comparison renderers. */
 export interface ComparisonRenderOptions {
@@ -160,6 +161,7 @@ export function renderComparisonTerminal(
 		`trellis compare · ${repoLabel(baseline)} → ${repoLabel(current)}`,
 		...compatibilityLines(comparison),
 		...terminalScoreLine(comparison, current),
+		...comparisonReviewTerminal(comparison),
 		...terminalMetricLines(comparison, options.metricLimit ?? DEFAULT_METRIC_LIMIT),
 		...terminalFindingLines(comparison, options.findingLimit ?? DEFAULT_FINDING_LIMIT),
 	];
@@ -236,6 +238,7 @@ export function renderComparisonMarkdown(
 		"",
 		...compatibilityLines(comparison).map((line) => line.trimStart()),
 		...markdownScoreSection(comparison, current),
+		...comparisonReviewMarkdown(comparison),
 		...markdownMetricSection(comparison, options.metricLimit ?? DEFAULT_METRIC_LIMIT),
 		...markdownFindingSection(comparison, options.findingLimit ?? DEFAULT_FINDING_LIMIT),
 	];

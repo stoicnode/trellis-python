@@ -277,6 +277,14 @@ marks ambiguous owners explicitly and never feeds the scoring formula. Its
 depth conventions and metric definitions are in
 [`docs/executable-scopes.md`](docs/executable-scopes.md).
 
+Terminal and Markdown reports expose production absolute burden alongside
+density and its observed denominator, current formula saturation, production
+graph scope versus workspace observations, unsupported files and separate
+advisory documentation review. Comparable report diffs carry exact dimension
+point changes, denominator changes, persistent-finding severity changes and
+native source-snapshot status in structured JSON; renderers use those core
+facts. See [`docs/report-interpretation.md`](docs/report-interpretation.md).
+
 Analyzer 0.9.0 identifies only first-statement Python string expressions in
 module, class and function suites as docstrings. Physical code-line counts
 remain in source coverage and `complexity.functions.*.detail.sloc`;

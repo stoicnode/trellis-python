@@ -42,6 +42,7 @@ import {
 	type ScoreDelta,
 } from "./diff.ts";
 import { compareEvidence, type EvidenceComparison } from "./evidence.ts";
+import { type ComparisonExplanation, explainComparison, sourceInputChange } from "./explain.ts";
 
 /** The result of comparing two report artifacts (see the module docblock). */
 export interface ReportComparison {
@@ -55,6 +56,10 @@ export interface ReportComparison {
 	 */
 	metrics?: MetricDelta[];
 	findings?: FindingComparison;
+	/** Whether the native selected source contents differ, even for incompatible reports. */
+	sourceInput: "changed" | "unchanged" | "unknown";
+	/** Source, exact formula, denominator and persistent-finding context when comparable. */
+	explanation?: ComparisonExplanation;
 	/** The per-provider evidence-basis comparison (§16.6) — independent of the scored basis. */
 	evidence: EvidenceComparison;
 }
@@ -74,6 +79,14 @@ function documentationIdentity(report: AuditReport): string | null {
 
 function isDocumentationFinding(finding: AuditReport["findings"][number]): boolean {
 	return finding.kind === "documentation.excessive";
+}
+
+function readableSourceInput(
+	baseline: AuditReport,
+	current: AuditReport,
+	readable: boolean,
+): "changed" | "unchanged" | "unknown" {
+	return readable ? sourceInputChange(baseline, current) : "unknown";
 }
 
 /**
@@ -107,11 +120,21 @@ export function compareReports(
 	// Evidence verdicts are only decidable over readable schema versions; an
 	// uninterpretable pair carries its hard refusal and no evidence at all.
 	const evidence = readable ? compareEvidence(baseline, current) : { providers: [] };
+	const sourceInput = readableSourceInput(baseline, current, readable);
 	if (!compatibility.comparable || baseline.score.index === null || current.score.index === null)
-		return { compatibility: adjustedCompatibility, evidence };
+		return { compatibility: adjustedCompatibility, evidence, sourceInput };
+	const findings = compareFindings(
+		documentationChanged
+			? baseline.findings.filter((finding) => !isDocumentationFinding(finding))
+			: baseline.findings,
+		documentationChanged
+			? current.findings.filter((finding) => !isDocumentationFinding(finding))
+			: current.findings,
+	);
 	return {
 		compatibility: adjustedCompatibility,
 		evidence,
+		sourceInput,
 		score: {
 			baseline: baseline.score.index,
 			current: current.score.index,
@@ -120,13 +143,7 @@ export function compareReports(
 		metrics: compareMetrics(baseline, current).filter(
 			(metric) => !documentationChanged || !metric.id.startsWith("documentation."),
 		),
-		findings: compareFindings(
-			documentationChanged
-				? baseline.findings.filter((finding) => !isDocumentationFinding(finding))
-				: baseline.findings,
-			documentationChanged
-				? current.findings.filter((finding) => !isDocumentationFinding(finding))
-				: current.findings,
-		),
+		findings,
+		explanation: explainComparison(baseline, current, findings),
 	};
 }

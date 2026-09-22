@@ -14,6 +14,7 @@ import {
 	scoreHeadline,
 	sortedMetrics,
 } from "./audit-format.ts";
+import { auditReviewTerminal } from "./audit-review.ts";
 import { providerAnalysisLines } from "./audit-terminal-providers.ts";
 import { cloneReviewContext } from "./clone-context.ts";
 
@@ -147,6 +148,7 @@ export function renderAuditTerminal(
 		headerLines(report),
 		coverageLines(report),
 		contributionLines(report),
+		auditReviewTerminal(report, options.findingLimit ?? DEFAULT_HOTSPOT_LIMIT),
 		metricLines(report),
 		boundedFindingLines(
 			"hotspots",

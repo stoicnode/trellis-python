@@ -218,6 +218,11 @@ scored hotspot threshold. It preserves separate production and test metrics
 without changing the index. See the
 [executable scope guide](docs/executable-scopes.md) for ownership and depth rules.
 
+Audit and comparison summaries now pair absolute burden with density, label
+production graph scope and observation limits, and show exact score changes
+that rounding can hide. Documentation warnings have a separate advisory
+section. See [reading reports](docs/report-interpretation.md).
+
 Clone reports also carry advisory `duplication.candidate.*` metrics for
 independent executable copies. They classify syntax context and count
 non-overlapping token occurrences, including copies that share a physical
