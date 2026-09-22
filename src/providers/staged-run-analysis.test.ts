@@ -57,6 +57,21 @@ describe("foldStagedAnalysisOutcome", () => {
 			state: "incomplete",
 			reason: "owned scratch cleanup failed: disk error",
 			metrics: complete.metrics,
+			observedCoverage: {
+				analyzedFiles: ["a.ts"],
+				diagnostics: [{ message: "owned scratch cleanup failed: disk error" }],
+			},
+		});
+		expect(
+			fold({
+				kind: "completed",
+				value: { ...complete, state: "incomplete", reason: "partial coverage" },
+				cleanup: { status: "failed", reason: "disk error" },
+			}),
+		).toMatchObject({
+			state: "incomplete",
+			reason: "partial coverage; owned scratch cleanup failed: disk error",
+			metrics: complete.metrics,
 		});
 		expect(
 			fold({ kind: "adapter-failed", error: boom, cleanup: { status: "cleaned" } }),

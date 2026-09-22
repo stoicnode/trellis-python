@@ -3,9 +3,8 @@ import { existsSync } from "node:fs";
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { AnalysisResult } from "../contract/index.ts";
 import type { StagedRunOutcome } from "./staged-run.ts";
-import { degradeForCleanup, withStagedWorkspaceView } from "./staged-run.ts";
+import { withStagedWorkspaceView } from "./staged-run.ts";
 import type { StagedSelectionFile } from "./staging.ts";
 import { InvalidStagingRequestError } from "./staging.ts";
 import type { StagedWorkspaceView } from "./workspace.ts";
@@ -31,52 +30,6 @@ async function releaseDir(dir: string): Promise<void> {
 }
 
 describe("withStagedWorkspaceView", () => {
-	test("degrades complete evidence and appends cleanup notes to incomplete evidence", () => {
-		const complete: AnalysisResult = {
-			provider: {
-				kind: "external",
-				id: "jscpd",
-				toolVersion: "5.2.1",
-				adapterVersion: "1.0.0",
-				mode: "exact",
-				options: {},
-			},
-			state: "complete",
-			analysis: {
-				selection: {
-					sourceSets: ["production"],
-					files: [{ path: "a.ts", fingerprint: "0".repeat(64) }],
-				},
-				parser: { engine: "jscpd.tokenizer", version: "5.2.1" },
-				options: {},
-			},
-			observedCoverage: {
-				analyzedFiles: ["a.ts"],
-				diagnostics: [],
-				unsupported: [],
-			},
-			metrics: [{ id: "provider.jscpd.duplicates", state: "complete", value: 1, unit: "lines" }],
-		};
-		const cleanup = { status: "failed" as const, reason: "disk error" };
-
-		expect(degradeForCleanup(complete, cleanup)).toMatchObject({
-			state: "incomplete",
-			reason: "owned scratch cleanup failed: disk error",
-			metrics: complete.metrics,
-			observedCoverage: {
-				analyzedFiles: ["a.ts"],
-				diagnostics: [{ message: "owned scratch cleanup failed: disk error" }],
-			},
-		});
-		expect(
-			degradeForCleanup({ ...complete, state: "incomplete", reason: "partial coverage" }, cleanup),
-		).toMatchObject({
-			state: "incomplete",
-			reason: "partial coverage; owned scratch cleanup failed: disk error",
-			metrics: complete.metrics,
-		});
-	});
-
 	test("cleans up and returns the adapter value on success", async () => {
 		const { root, files } = await makeRequest();
 		try {
