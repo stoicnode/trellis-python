@@ -43,7 +43,7 @@ import type { Completeness, Finding, MetricValue, Range, SourceSet } from "../co
 import type { ImportSiteKind } from "../syntax/import-sites.ts";
 
 /** The versioned graph policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const GRAPH_POLICY_VERSION = "1.3.0";
+export const GRAPH_POLICY_VERSION = "1.4.0";
 
 export const GRAPH_POLICY = {
 	version: GRAPH_POLICY_VERSION,

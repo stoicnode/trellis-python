@@ -74,9 +74,72 @@ report alone cannot be rescored with facts it never stored.
 
 ## Remaining plan
 
-P1.2–P3.2 and independent formula calibration remain open in
+P1.2 overload association, P1.3–P3.2 and independent formula calibration remain open in
 [`index-improvement-plan.md`](index-improvement-plan.md). The exploratory
 16-scope baseline is development data, not blinded or held-out validation.
 Phase 5 requires independent human review before any formula promotion.
 `ml` and `sd` were unavailable on this host, so tracker and memory entries
 could not be created here.
+
+## Python typing guards (P1.2, first slice)
+
+The shared Lezer binding scanner now recognizes confirmed `TYPE_CHECKING`
+imports, aliases and qualified `typing` imports. It follows nested guards,
+provable negation and the corresponding `else` branch. Assignment and lexical
+shadowing invalidate a binding, so unknown names are not inferred type-only.
+Deferred function bodies require a locally confirmed typing alias because a
+global alias could change before execution.
+The Python import adapter carries these facts into the existing distinct
+runtime/type-only graph edges. A mixed type-only/runtime pair no longer forms
+a runtime cycle. Dynamic import binding facts and overload declarations are
+recorded by this scanner for the following slices; literal resolution and
+overload association are not claimed here. Analyzer 0.6.0, graph policy 1.4.0
+and scoring 0.6.0-provisional identify this measurement change; schema 1.5.0
+and formula weights are unchanged. Baselines from 0.5.0 remain readable but
+are not comparison-compatible with 0.6.0.
+
+The before source revision is `621d0c14a34944965bfaee29d042cbfd2d1aced8`.
+The [four-report manifest](../corpus/index-utility/self-audit/p12-typing/manifest.json)
+records source and configuration hashes, uncompressed report hashes, and three
+equal fixed-clock payload fingerprints. The two same-analyzer comparisons are
+retained alongside it. All four reports are complete:
+
+| Analyzer | Before source | After source | Production eroded functions | Production cycle groups |
+| --- | ---: | ---: | --- | --- |
+| 0.5.0 | 39 | 39 | 37 → 37 | 1 → 1 |
+| 0.6.0 | 39 | 39 | 37 → 37 | 1 → 1 |
+
+Under the new analyzer, implementation code adds 408.164 production erosion
+mass and reduces clone density from 0.034508 to 0.034131 as the denominator
+grows. The unchanged rounded index is not evidence that these changes removed
+debt. No new Python binding-scanner function crosses the CC 11 hotspot
+threshold. The source-scope caveat in both comparisons reflects the new
+source files. No Python files occur in Trellis's own source, so the
+same-source comparison cannot exercise this Python semantic correction; the
+owned Python regression tests do that.
+
+To migrate a 0.5.0 baseline, audit the same target with 0.6.0 and save a new
+report before enabling regression policy. Retain the old artifact and SQLite
+series; use 0.5.0 with its matching baseline for rollback.
+
+### Pinned corpus check
+
+Both analyzers ran all 16 pinned scopes three times from the same prepared
+checkouts. Each scope was complete and fingerprint-stable within its analyzer;
+the [compact side-by-side summary](../corpus/index-utility/p12-typing/summary.json)
+and compressed raw measurements preserve exact values and hashes. No target
+dependencies or project code were executed.
+
+The correction identifies type-only local edges in eight Python scopes:
+Click 16, Requests 24, Flask 30, Rich 87, SQLAlchemy 1,537, Pydantic 128,
+Jinja 23 and Packaging 7. The other four Python scopes
+and all four TypeScript scopes retain zero such new edges. Source coverage and
+graph edge totals do not change. The runtime and type-only partition changes
+cycle groups: Click 1 → 2, Flask 2 → 6, SQLAlchemy 6 → 9 and other group
+movements are in the summary. These are measurement changes on identical
+source, not source-code improvements or regressions. Some rounded indexes
+rise even as cycle density falls because the unchanged provisional formula
+counts both classes' groups. Whether the two classes deserve equal weight is
+the planned Phase 4 experiment. Cross-version scores are displayed for
+inspection only; the comparison service correctly refuses to create deltas
+between these scoring versions.

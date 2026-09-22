@@ -1,7 +1,7 @@
 # Index measurement and calibration improvement plan
 
-Status: in progress; Phase 0 evidence and P1.1 production cycle scope are implemented.
-Remaining phases are pending. Recorded 2026-09-22 against
+Status: in progress; Phase 0 evidence, P1.1 production cycle scope and the
+P1.2 typing-guard slice are implemented. Other slices are pending. Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.
 

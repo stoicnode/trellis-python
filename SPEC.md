@@ -519,6 +519,14 @@ versioned calibration (§16.5).
   measurement correction is scoring 0.5.0-provisional and requires a fresh
   baseline; formula weights are unchanged.
 
+  Analyzer 0.6.0 and graph policy 1.4.0 classify confirmed Python
+  `typing.TYPE_CHECKING` guards as type-only edges, including imported and
+  qualified aliases, nested guards and provable negation. Rebound or shadowed
+  bindings are not inferred to be type-only. Runtime and type-only cycle
+  groups remain separate. This changes scored measurements in some Python
+  workspaces, so scoring 0.6.0-provisional requires another fresh baseline;
+  formula weights remain unchanged. `.pyi` is not included.
+
 ### 5.5 Safeguards (hook/check inspection — separate from the score)
 
 Safeguards inspect **configuration**, never execution, over a small
@@ -751,7 +759,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.5.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.6.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.

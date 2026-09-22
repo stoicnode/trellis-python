@@ -11,6 +11,11 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Confirmed Python `typing.TYPE_CHECKING` guards now retain type-only import
+  identity across aliases, qualified names, nesting and negation. Rebound or
+  shadowed names remain runtime/unknown. Analyzer 0.6.0, graph policy 1.4.0
+  and scoring 0.6.0-provisional require fresh baselines for affected Python
+  workspaces; formula weights are unchanged.
 - Scored import cycles now use a production-induced graph. Test-only cycles,
   imports and parse failures remain visible in workspace evidence without
   diluting or withholding a complete production cycle score. The original

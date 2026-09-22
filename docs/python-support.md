@@ -1,6 +1,6 @@
 # Python analysis in Trellis
 
-Trellis 0.5.0 audits `.py` files alongside TypeScript and TSX with the same
+Trellis 0.6.0 audits `.py` files alongside TypeScript and TSX with the same
 scoring, reporting, comparison, policy, history and fleet pipeline. Python is
 parsed in process with pinned `@lezer/python` 1.1.18; no Python interpreter,
 project import, install or subprocess is needed for the native audit. The
@@ -40,6 +40,16 @@ score. They remain visible as unresolved findings and counts. Ambiguous local
 module owners still make cycle coverage incomplete.
 Arbitrary dataflow, `sys.path` mutation, installed packages and imports
 between Python and TypeScript are not resolved.
+Confirmed `typing.TYPE_CHECKING` guards, including imported aliases,
+qualified `typing` aliases, nested guards and negation, mark their guarded
+imports as type-only. The complementary `else` branch remains runtime when
+provable. Rebound and shadowed names receive no type-only inference. These
+edges remain in graph evidence and form a separate cycle subgraph; a
+type-only/runtime pair is not a runtime cycle. This is a static binding
+classification, not Python execution. Deferred function bodies reconfirm
+typing aliases imported locally; a module alias used from a deferred body is
+treated as unknown because it could be rebound before the body runs. `.pyi`
+files remain unsupported.
 
 Reports include `languageCoverage` rows with discovered/analyzed files, parse
 failures, source lines, unresolved imports and dynamic imports. An unresolved
@@ -47,7 +57,7 @@ import remains visible even when its absent or runtime-selected target cannot
 join the declared-source graph. Parser recovery and ambiguous local targets
 still make required dimensions incomplete.
 Schema 1.5.0 carries production-only cycle metrics beside workspace cycle
-evidence. Analyzer 0.5.0 and scoring 0.5.0-provisional score cycles only over
+evidence. Analyzer 0.6.0 and scoring 0.6.0-provisional score cycles only over
 production modules and their imports; unrelated test files cannot dilute the
 cycle density or withhold its score. Recreate baselines
 made by older analyzer versions before using regression policy. Historical

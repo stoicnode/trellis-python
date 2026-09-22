@@ -26,7 +26,7 @@ import { VERSION } from "../index.ts";
 export const ANALYZER_VERSION = VERSION;
 
 /** Scoring version: the provisional formula (SPEC §7); trellis-00d5 owns the formula itself. */
-export const SCORING_VERSION = "0.5.0-provisional";
+export const SCORING_VERSION = "0.6.0-provisional";
 
 /**
  * Schema version for the §6 report/configuration contract family.
