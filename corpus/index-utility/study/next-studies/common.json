@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "id": "trellis-index-validation-2026-09-22",
+  "status": "design-not-executed",
+  "seed": "trellis-public-maintainer-validation-v1-2026-09-22",
+  "protocol": "../../../../docs/research/index-validation-roadmap.md",
+  "execution": {
+    "acquisition": "explicit research-only network preparation",
+    "measurement": "offline prepared immutable snapshots; no target code execution",
+    "jev": "disabled by default; discovery development only; separate explicit live command",
+    "productionScoreChange": false,
+    "automaticPromotion": false,
+    "newHumanLabels": false
+  },
+  "freeze": {
+    "beforeMeasurement": [
+      "source-lock",
+      "label-ledger",
+      "duplicate-components",
+      "split-ledger",
+      "matched-blocks",
+      "source-classification",
+      "tool-digests",
+      "predictor-definitions",
+      "control-transformations",
+      "analysis-implementation"
+    ],
+    "predictionSealBeforeLabelJoin": true,
+    "mutableRefsAllowedInSealedLock": false,
+    "missingPins": "incomplete; never synthesize hashes",
+    "refinementsMaximum": 1
+  },
+  "sample": {
+    "languages": [
+      "python",
+      "typescript"
+    ],
+    "developmentRepositoriesPerLanguage": 4,
+    "developmentBlocksPerRepository": 8,
+    "validationRepositoriesPerLanguage": 8,
+    "validationBlocksPerRepository": 8,
+    "eventsPerBlock": 2,
+    "reserveRepositoriesPerLanguage": 8,
+    "developmentBlocksTotal": 64,
+    "validationBlocksTotal": 128,
+    "correctnessControlsPerLanguage": 64,
+    "intentionalControlsPerLanguageWhenRequired": 32,
+    "maxEventsPerPullRequestPerDecision": 1,
+    "targetRoles": [
+      "production"
+    ],
+    "tsx": "explicit subtype; no implicit coverage claim"
+  },
+  "matching": {
+    "within": [
+      "repositoryGroup",
+      "language",
+      "sourceRole"
+    ],
+    "beforeExecutableSlocRatio": [
+      0.5,
+      2
+    ],
+    "changedExecutableLinesPlusOneRatio": [
+      0.5,
+      2
+    ],
+    "mergeDateMaximumDays": 730,
+    "distance": "abs(log(Ltarget/Lcontrol))+abs(log((changedTarget+1)/(changedControl+1)))",
+    "tieBreak": [
+      "absoluteDateDistance",
+      "sha256RecordId"
+    ],
+    "withoutReplacement": true,
+    "outcomeDependentMatching": false,
+    "unmatched": "exclude before predictor computation; retain ledger"
+  },
+  "statistics": {
+    "delta": "before-minus-after",
+    "block": "target delta minus neutral delta; SHA256 low-bit orientation swap",
+    "estimator": "conditional logistic regression, no intercept",
+    "loss": "mean binary log loss + 0.01 * sum(beta^2)/2",
+    "scale": "development feature RMS; zero to 1; no centering; clip to [-10,10]",
+    "initialCoefficients": 0,
+    "optimizer": "Newton; backtracking halves until objective decreases",
+    "gradientInfinityTolerance": 1e-08,
+    "maximumIterations": 200,
+    "probabilityClip": [
+      1e-12,
+      0.999999999999
+    ],
+    "nonConvergence": "incomplete",
+    "macroOrder": [
+      "block",
+      "repository",
+      "language-equal-weight"
+    ],
+    "bootstrap": {
+      "replicates": 20000,
+      "method": "language-stratified repository then block bootstrap; shared PR/family stays together",
+      "confidence": 0.95,
+      "primaryFamilyAlpha": 0.01,
+      "tailQuantiles": [
+        0.01,
+        0.99
+      ],
+      "inferenceLimit": "Nominal multiplicity control; cluster bootstrap coverage approximate with eight groups per language"
+    },
+    "transfer": [
+      "fit python development only, test typescript validation",
+      "fit typescript development only, test python validation"
+    ],
+    "missingSensitivity": "augmented p=0.5 when missing; baseline retained when available; both missing p=0.5",
+    "appliesTo": [
+      "C1",
+      "N1",
+      "D1"
+    ],
+    "rankCheck": {
+      "method": "SVD standardized development design matrix",
+      "singularValueTolerance": 1e-10,
+      "minimumAugmentedRankIncrease": 1,
+      "failure": "stop incremental-information claim"
+    },
+    "G1": "direct matched ordering override; common bootstrap only",
+    "addedBurdenCoefficientGate": "all added coefficients >=0 and at least one >0 in frozen development fit; failure refines, never tune against validation"
+  },
+  "thresholds": {
+    "gainNatsMinimum": 0.03,
+    "adjustedGainLowerBoundExclusive": 0,
+    "languagePointGainMinimum": 0,
+    "languageOneSided95LowerBoundExclusive": -0.02,
+    "leaveOneRepositoryOutGainExclusive": 0,
+    "rawTargetDirectionRateMinimumPerLanguage": 0.7,
+    "comparableCoverageMinimumPerLanguageAndLabel": 0.95,
+    "classCoverageGapMaximum": 0.05,
+    "stopIfAdjustedGainUpperBoundBelow": 0.03,
+    "stopIfLanguage95UpperBoundBelow": -0.02,
+    "refine": "complete, no hard failure, missed pass and adjusted upper gain bound >=0.03",
+    "incomplete": "supply/hash/reconstruction/native-context/coverage/convergence failure; no favorable result"
+  },
+  "correctnessNonInferiority": {
+    "delta": "candidate after-before exact index minus authoritative after-before exact index",
+    "oneSided95UpperMeanMaximumPerLanguage": 1,
+    "fractionOverFivePointsMaximum": 0.05,
+    "requireEveryFixImproves": false,
+    "advisoryOnly": "authoritative score equality"
+  },
+  "repeatability": {
+    "samePlatformRuns": 3,
+    "additionalPreparedPlatforms": 1,
+    "fixedClock": "2026-09-22T00:00:00.000Z",
+    "semanticHashMatchRequired": true,
+    "excludeFromSemanticHash": [
+      "timing",
+      "rss",
+      "absoluteCheckoutPath"
+    ],
+    "floatControlTolerance": 1e-12,
+    "fileEnumerationPerturbations": 1,
+    "resourceMetrics": [
+      "medianElapsedMs",
+      "p95ElapsedMs",
+      "maxRssBytes",
+      "workLimitState"
+    ]
+  },
+  "packet": {
+    "completeNativeRepository": true,
+    "neighborLines": 12,
+    "lexicalUsages": 8,
+    "usageSelection": "SHA256(path,NUL,range,NUL,text) ascending",
+    "usageNeighborLines": 3,
+    "fullArchiveTruncation": false,
+    "jevMaximumBytesPerSide": 48000,
+    "oversizeJev": "context-unavailable; retain native event",
+    "blindFields": [
+      "label",
+      "reviewText",
+      "pullRequest",
+      "repositoryName",
+      "beforeAfter",
+      "timestamps",
+      "flags",
+      "metrics",
+      "ruleIds",
+      "measuredCloneLabels"
+    ],
+    "relatedBodyCompression": "byte-identical only, lossless references",
+    "pathMask": "consistent opaque path ids for Jev"
+  },
+  "jevRepeatability": {
+    "enabled": false,
+    "developmentPairs": 24,
+    "sameOrderRepeats": 3,
+    "reversedOrderRepeats": 3,
+    "oneSidePerRequest": true,
+    "requiredIdentity": [
+      "resolvedModel",
+      "rubricSha256",
+      "requestSettingsSha256",
+      "packetSha256"
+    ],
+    "outputs": [
+      "meanAbsoluteScoreDifference",
+      "scoreSd",
+      "pairwiseSpearman",
+      "decisionAgreement",
+      "sufficiencyFlipRate"
+    ],
+    "stopDiscoveryIfMedianSpearmanBelow": 0.8,
+    "stopDiscoveryIfDecisionAgreementBelow": 0.8,
+    "nativeGateDependency": false,
+    "actionable": "evidenceSufficient>=0.5 AND P(maintenance>=2)>=0.5 AND refactorValue>=0.5"
+  },
+  "artifacts": {
+    "schema": "artifact.schema.json",
+    "files": [
+      "source-lock.json",
+      "selection-ledger.jsonl",
+      "events.jsonl",
+      "packets.jsonl",
+      "measurements.jsonl",
+      "predictions.jsonl",
+      "decisions.json",
+      "bootstrap-replicates.json.gz"
+    ],
+    "storage": "explicit portable content-addressed artifact directory outside targets"
+  },
+  "hardStops": [
+    "source mutation",
+    "label/predictor leakage",
+    "split contamination",
+    "missing metric coerced to zero",
+    "invariant failure",
+    "non-repeatable semantic payload",
+    "post-result formula/endpoint change"
+  ],
+  "formulaReplays": {
+    "C1": "authoritative weights and density; replace eroded count with S, scale100",
+    "D1": "authoritative weights; candidate copy count scale15 and candidate density cap0.15",
+    "G1": "authoritative weights/density; same-class B count scale5",
+    "N1": "advisory only; authoritative equality",
+    "A1": "unscored optional evidence; authoritative equality"
+  },
+  "slices": [
+    "language",
+    "repository",
+    "source-role",
+    "le5000/5001to10000/gt10000 production executable SLOC",
+    "TS/TSX",
+    "study-specific subtype"
+  ]
+}

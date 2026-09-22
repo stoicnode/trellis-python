@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "status": "acquisition-specification-not-populated-lock",
+  "cutoff": "2026-09-21T23:59:59Z",
+  "start": "2020-01-01T00:00:00Z",
+  "repositoryUniverse": {
+    "python": [
+      "django/django",
+      "pandas-dev/pandas",
+      "scipy/scipy",
+      "sympy/sympy",
+      "pytest-dev/pytest",
+      "sphinx-doc/sphinx",
+      "scrapy/scrapy",
+      "aio-libs/aiohttp",
+      "encode/starlette",
+      "python-trio/trio",
+      "agronholm/anyio",
+      "pypa/pip",
+      "pypa/hatch",
+      "python-poetry/poetry",
+      "celery/celery",
+      "ansible/ansible",
+      "saltstack/salt",
+      "home-assistant/core",
+      "apache/airflow",
+      "dask/dask",
+      "bokeh/bokeh",
+      "holoviz/panel",
+      "textualize/textual",
+      "pylint-dev/pylint",
+      "jupyterlab/jupyterlab",
+      "ipython/ipython",
+      "jupyter-server/jupyter_server",
+      "PrefectHQ/prefect"
+    ],
+    "typescript": [
+      "microsoft/TypeScript",
+      "microsoft/vscode",
+      "angular/angular",
+      "vuejs/core",
+      "vitejs/vite",
+      "vitest-dev/vitest",
+      "nrwl/nx",
+      "nestjs/nest",
+      "pnpm/pnpm",
+      "yarnpkg/berry",
+      "trpc/trpc",
+      "prisma/prisma",
+      "drizzle-team/drizzle-orm",
+      "apollographql/apollo-client",
+      "reduxjs/redux-toolkit",
+      "ionic-team/capacitor",
+      "withastro/astro",
+      "nuxt/nuxt",
+      "payloadcms/payload",
+      "remotion-dev/remotion",
+      "medusajs/medusa",
+      "typeorm/typeorm",
+      "denoland/deno",
+      "sveltejs/svelte",
+      "vercel/next.js",
+      "solidjs/solid",
+      "excalidraw/excalidraw",
+      "tldraw/tldraw"
+    ]
+  },
+  "discoveryExclusions": {
+    "importRepositoriesFrom": [
+      "../preregistration.json",
+      "../../manifest.json",
+      "../maintenance-pairs.json"
+    ],
+    "additional": [
+      "astral-sh/ruff",
+      "numpy/numpy",
+      "quantumlib/Cirq",
+      "stoicnode/trellis-python",
+      "jayminwest/trellis",
+      "scikit-learn/scikit-learn",
+      "gabeorlanski/scb-check",
+      "PyCQA/bandit",
+      "typescript-eslint/typescript-eslint"
+    ],
+    "smellBench": {
+      "url": "https://huggingface.co/datasets/critical88/SmellBench",
+      "revision": "12604372b4a89a54b39645b6c82557b3b9e68eca",
+      "action": "import every upstream repo identity from rows; missing inventory blocks locking"
+    },
+    "forkPolicy": "GitHub parent/source network plus patch/token duplicate components",
+    "aliases": {
+      "tanstack-query": "TanStack/query",
+      "zustand": "pmndrs/zustand",
+      "ts-pattern": "gvergnaud/ts-pattern",
+      "ky": "sindresorhus/ky"
+    }
+  },
+  "api": {
+    "search": "GET https://api.github.com/search/issues?q=repo:{owner}/{repo} is:pr is:merged merged:{start}..{end} {term}&sort=created&order=asc&per_page=100&page={page}",
+    "detail": [
+      "GET /repos/{owner}/{repo}/pulls/{number}",
+      "GET /repos/{owner}/{repo}/pulls/{number}/reviews",
+      "GET /repos/{owner}/{repo}/pulls/{number}/comments",
+      "GET /repos/{owner}/{repo}/pulls/{number}/files",
+      "GET /repos/{owner}/{repo}/pulls/{number}/commits"
+    ],
+    "pagination": "all pages; recursively bisect dates if search total_count >1000; unresolved truncation is incomplete",
+    "rateLimit": "obey Retry-After; at most 3 retries; persist cursor then incomplete",
+    "limits": {
+      "candidatePrsPerLanguagePerPanel": 5000,
+      "minimumDatePartitionDays": 1
+    },
+    "archive": "raw JSON, request URL, fetch time, response hash; no credentials in output"
+  },
+  "searchTerms": {
+    "complexity": [
+      "\"complexity\"",
+      "\"simplify control flow\"",
+      "\"extract method\""
+    ],
+    "nesting": [
+      "\"nesting\"",
+      "\"guard clause\"",
+      "\"flatten\""
+    ],
+    "clones": [
+      "\"duplicated code\"",
+      "\"duplicate logic\"",
+      "\"deduplicate\""
+    ],
+    "cycles": [
+      "\"circular import\"",
+      "\"circular dependency\"",
+      "\"break cycle\""
+    ],
+    "syntax": [
+      "\"S110\"",
+      "\"PERF403\"",
+      "\"no-extra-non-null-assertion\""
+    ],
+    "neutral": [
+      "\"rename only\"",
+      "\"move only\"",
+      "\"formatting only\"",
+      "\"documentation only\"",
+      "\"test only\""
+    ],
+    "intentional": [
+      "\"intentional\"",
+      "\"keep\"",
+      "\"retain\""
+    ],
+    "correctness": [
+      "\"fix\"",
+      "\"bug\""
+    ]
+  },
+  "labelExtraction": {
+    "authority": [
+      "OWNER",
+      "MEMBER",
+      "COLLABORATOR"
+    ],
+    "positiveRoutes": [
+      "maintainer review suggestion whose old/new target bytes match accepted patch",
+      "maintainer-authored narrow PR with merged_at, eligible intent in title/body and <=3 changed production files, <=200 changed executable lines, one family after C1/N1 collision resolves to N1"
+    ],
+    "required": [
+      "public permalink",
+      "review/PR identity",
+      "maintainer association",
+      "accepted/merged identity",
+      "exact parent and child commits",
+      "explicit intent byte ranges",
+      "unambiguous target range mapping"
+    ],
+    "regexFlags": "case-insensitive; apply to one sentence; never infer negation semantically",
+    "positiveVerb": "\\b(reduce|remove|eliminate|simplify|flatten|break|avoid|deduplicate|replace)\\b",
+    "negationReject": "\\b(not|never|without|unnecessary|do not|don.t|cannot|can.t)\\b",
+    "coOccurringIntents": {
+      "complexity": "\\b(complexity|control flow|branching|complex logic)\\b",
+      "nesting": "\\b(nesting|nested|guard clauses?|early returns?)\\b",
+      "clones": "\\b(duplicat(e|ed|ion)|repeated (code|logic)|copy.past(e|ed))\\b",
+      "cycles": "\\b(circular (imports?|dependenc(y|ies))|dependency cycles?|import cycles?)\\b",
+      "syntax": "\\b(S110|PERF403|no-extra-non-null-assertion)\\b"
+    },
+    "neutral": "explicit rename/move/formatting/documentation/test-only intent AND parse-token/body/graph invariance appropriate to claimed control; validation cannot depend on candidate output",
+    "intentional": "maintainer keep/retain/intentional sentence names target structure with source range; accepted child retains target; otherwise exclude",
+    "mixedPurposeReject": "explicit feature, behavior, API, bug or performance objective alongside structural intent; syntax PERF403 performance is permitted only in the rule-conformance lane",
+    "reviewAcceptance": "accepted suggestion exactly present in merged code; resolved-thread status alone insufficient",
+    "correctness": "merged PR links an issue and names a bug/fix, excludes all structural intent families; correctness evidence recorded as maintainer-accepted, not locally executed test success",
+    "ambiguous": "excluded-with-reason; never ask for a new quality label"
+  },
+  "snapshots": {
+    "before": "accepted review original_commit_id or first parent of one verified squash/merge-result commit",
+    "after": "accepted merged commit; verify target bytes",
+    "mergeProtection": "exclude unrelated base-branch drift; use review parent/child if recoverable; ambiguous merge topology excluded",
+    "sourceClassification": "native discovery defaults at frozen Trellis commit; exclude tests/generated/vendor from primary; retain all classifications; no per-result overrides",
+    "deletionGuard": "Record deleted/public owners and changed API tokens; deletion without mapped replacement or accepted explicit dead-code intent is not a structural positive; dead-code-only intent is outside these studies."
+  },
+  "deduplication": {
+    "exact": [
+      "git stable patch id",
+      "before/after target SHA256"
+    ],
+    "near": "Jaccard of normalized 5-token shingles >=0.80 on either target side or patch; all-pairs exact Jaccard for this bounded census",
+    "normalization": "erase comments/whitespace; alpha-normalize local identifiers by first binding occurrence; preserve literal kind and equality; hash normalizer implementation",
+    "group": "connected components including repository/fork/backport/PR/clone-family links; one split per component"
+  },
+  "split": {
+    "repositoryKey": "canonical fork-root; merge duplicate-connected repositories",
+    "order": "SHA256(common.seed + NUL + panelId + NUL + language + NUL + repositoryKey), bytewise ascending",
+    "qualified": "enough independently labeled matched blocks and controls for panel quotas before calculating predictors",
+    "development": "first 4 eligible groups/language plus all known exploratory groups for mechanics only",
+    "validation": "next 8 eligible groups/language",
+    "reserve": "next 8 eligible groups/language; unread labels/predictors beyond counts; insufficient reserve does not fabricate a confirmation",
+    "crossPanel": "an already opened validation group is development-only for later revised designs; unchanged preregistered panels may share locked groups",
+    "withinRepository": "SHA256(seed + NUL + eventId), bytewise ascending",
+    "failure": "quota shortfall => incomplete; no selecting favorable repositories",
+    "sharedControlFlowPanel": "C1/N1 use one control-flow panel assignment; groups must support both target quotas; PRs meeting both intent families enter N1 only, prior to measurement."
+  },
+  "pinnedDevelopmentSources": [
+    {
+      "id": "ruff",
+      "repository": "astral-sh/ruff",
+      "commit": "caf021af3e5cb9c1480bc42e0981d65908be5f23",
+      "paths": [
+        "crates/ruff_linter/resources/test/fixtures/flake8_bandit/S110.py",
+        "crates/ruff_linter/resources/test/fixtures/perflint/PERF403.py"
+      ],
+      "labels": "typed S110 and stable PERF403 snapshots in existing source record"
+    },
+    {
+      "id": "typescript-eslint",
+      "repository": "typescript-eslint/typescript-eslint",
+      "commit": "33824c112228444e76159ecd317366c8067e40e9",
+      "tree": "0f20eb3996d5c2ff0496c8358e853beaa59745ce",
+      "paths": [
+        "packages/eslint-plugin/tests/rules/no-extra-non-null-assertion.test.ts"
+      ],
+      "labels": "valid/invalid literal test cases; no arbitrary fixture evaluation"
+    },
+    {
+      "id": "bandit",
+      "repository": "PyCQA/bandit",
+      "commit": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "tree": "3d828fb5327b275d63f531860033ed0824f57dc6",
+      "paths": [
+        "examples/try_except_pass.py"
+      ],
+      "labels": "only test-bound expected diagnostics; lineage-shared conformance, not independent validation"
+    }
+  ],
+  "seal": {
+    "resolveRevision": "literal full commit/tree/blob hashes; never main in lock",
+    "requiredHashes": [
+      "archive",
+      "source",
+      "label",
+      "packet",
+      "tool",
+      "normalizer",
+      "selectors"
+    ],
+    "fixtureExtraction": "static parse literal valid/invalid cases and options only; helper-generated cases with unevaluated expressions excluded with count",
+    "license": "record each upstream source notice; redistribute identifiers/hashes unless source terms allow copies; no scb-check rule redistribution",
+    "sourceLockStateUntilComplete": "unsealed"
+  }
+}

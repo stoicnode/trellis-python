@@ -1,0 +1,108 @@
+{
+  "id": "D1",
+  "rank": 2,
+  "panel": "clone-families",
+  "hypothesis": "Independent executable copies add information beyond raw clone groups, complexity, size and nesting without conflating declarations/data.",
+  "unitOfAnalysis": "one PR and its linked clone families in complete production repository",
+  "publicLabelSource": "sources.json clones intent with located accepted duplicate implementation removal",
+  "deterministicPredictors": {
+    "rawGroups": "native production raw clone group count",
+    "rawCovered": "native unique raw clone covered lines",
+    "copies": "native candidate independent-copies.production at locked analyzer",
+    "candidateCovered": "candidate unique covered executable lines",
+    "eligible": "candidate eligible executable lines",
+    "Q": "sum(CC-1)",
+    "S": "complexity linear severity",
+    "N": "sum max(owner.maxControlDepth-2,0)",
+    "L": "production executable SLOC",
+    "B": "class-separated SCC size burden",
+    "rawDensity": "native raw covered-line numerator divided by its native eligible denominator"
+  },
+  "baseline": [
+    "deltaRawGroups",
+    "deltaRawCovered",
+    "deltaRawDensity",
+    "deltaEligible",
+    "deltaQ",
+    "deltaS",
+    "deltaN",
+    "deltaL",
+    "deltaB"
+  ],
+  "augmented": [
+    "deltaRawGroups",
+    "deltaRawCovered",
+    "deltaRawDensity",
+    "deltaEligible",
+    "deltaQ",
+    "deltaS",
+    "deltaN",
+    "deltaL",
+    "deltaB",
+    "deltaCopies",
+    "deltaCandidateCovered"
+  ],
+  "secondary": {
+    "descriptive": [
+      "count-only candidate substitution",
+      "density-only candidate substitution",
+      "density numerator and denominator movement"
+    ]
+  },
+  "additionalPassGates": {
+    "intentionalOrDeclarativeNegativesPerLanguage": 32,
+    "negativeRepositoriesMinimum": 4,
+    "targetClearingRateMinimumPerLanguage": 0.7,
+    "coverageLossMayEarnImprovement": false,
+    "declarativeTargetsPerLanguage": 16,
+    "retainedExecutableEventsPerLanguage": 16,
+    "executableCandidateMatchesOnDeclarativeTargetsMaximum": 0,
+    "retainedUnchangedExecutableCopyDelta": 0
+  },
+  "contextPacket": [
+    "all exact bodies for every linked copy family",
+    "lossless byte-identical dedup only",
+    "statement/token intervals and source roles",
+    "replacement helpers and calls"
+  ],
+  "negativeControls": [
+    "locale/data/schema/export repetition",
+    "self-overlapping windows",
+    "2/10/40 independent executable copies",
+    "literal-kind/equality differences",
+    "whole-copy moves",
+    "clean executable additions",
+    "candidate work-limit failure"
+  ],
+  "jevQuestions": [
+    "Which differences among these related bodies are essential?",
+    "Would sharing implementation introduce coupling?"
+  ],
+  "implementationSteps": [
+    "Recover all publicly linked target ranges.",
+    "Measure complete repository and freeze candidate implementation identity.",
+    "Join cross-snapshot families and helper destinations.",
+    "Retain raw/candidate member indices and eligibility/rejection reasons.",
+    "Evaluate incremental utility, intentional negatives and denominator ablations."
+  ],
+  "schemaVersion": 1,
+  "status": "design-not-executed",
+  "common": "common.json",
+  "sources": "sources.json",
+  "holdouts": "common.json sample and sources.json split; all historical evidence development-only",
+  "repeatability": "common.json repeatability and jevRepeatability",
+  "primaryEndpoint": "equal-language/repository macro baseline logloss minus augmented logloss",
+  "passRefineStop": "common.json thresholds plus additionalPassGates; A1 decisionOverride replaces statistical gate",
+  "sampleSizeRationale": "roadmap primary statistical contract; A1 exact zero-FP bound and clustered sensitivity design",
+  "leakageProtections": [
+    "public labels selected before native predictors",
+    "no Jev validation labels",
+    "repository/fork/patch/clone-family grouped splits",
+    "all prior examples development-only",
+    "prediction hashes sealed before label join",
+    "no target metric selection or holdout tuning"
+  ],
+  "expectedArtifactSchema": "artifact.schema.json",
+  "nonInferiorityControls": "common.json correctnessNonInferiority; all hard invariance controls apply",
+  "rawPositiveDirectionMetric": "copies"
+}

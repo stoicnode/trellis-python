@@ -1,0 +1,121 @@
+{
+  "id": "A1",
+  "rank": 5,
+  "panel": "syntax-targets",
+  "hypothesis": "Selected syntax-only rules identify independent accepted cleanup targets with low false-positive rates on explicit retained/valid targets.",
+  "unitOfAnalysis": "construct anchor for localization; PR and repository for inference",
+  "publicLabelSource": "held-out public maintainer changes and explicit intentional/valid targets; Ruff/Bandit/typescript-eslint fixtures development only",
+  "deterministicPredictors": {
+    "match": "frozen syntax rule and configuration on complete target construct",
+    "applicability": "complete/unsupported/incomplete with enumerated syntax and binding reasons",
+    "recommendation": "match after declared source suppression; never reads validation labels"
+  },
+  "baseline": [],
+  "augmented": [
+    "syntaxMatch"
+  ],
+  "secondary": {
+    "descriptive": [
+      "syntax-only detection versus contextual recommendation",
+      "production/test/generator role",
+      "TS versus TSX",
+      "safe/unsafe fix",
+      "typed/default S110 modes"
+    ]
+  },
+  "lanes": [
+    {
+      "id": "python-except-pass",
+      "language": "python",
+      "concept": "except-pass-silence",
+      "typedExceptions": true,
+      "suppression": "explicit source noqa:S110 suppresses recommendation only",
+      "ruleSource": "native clean implementation or operator-prepared ast-grep; never copy scb-check into corpus"
+    },
+    {
+      "id": "python-dict-update",
+      "language": "python",
+      "concept": "refined verbose-dict-update",
+      "scope": "synchronous loop, one assignment to statically known preexisting local dict; no filter/else/extra statements/named expression effects; otherwise unsupported"
+    },
+    {
+      "id": "typescript-extra-assertion",
+      "language": "typescript",
+      "concept": "no-extra-non-null-assertion",
+      "scope": "nested non-null assertion redundancy; no type-aware nullability inference"
+    }
+  ],
+  "sampleOverride": {
+    "validationRepositoriesPerLane": 8,
+    "positiveTargetsPerRepository": 8,
+    "explicitNegativeTargetsPerRepository": 16,
+    "positiveTargetsPerLane": 64,
+    "negativeTargetsPerLane": 128,
+    "minimumNegativeNearMissFraction": 0.5,
+    "maximumTargetsPerPr": 1,
+    "development": "all pinned fixtures plus known public examples; never validation"
+  },
+  "primaryEndpointOverride": "sensitivity of contextual target detection subject to fixed FPR ceiling, separately per lane",
+  "decisionOverride": {
+    "alphaPerLane": 0.0033333333333333335,
+    "sensitivityMinimum": 0.8,
+    "specificityMinimum": 0.95,
+    "targetClearingMinimum": 0.8,
+    "applicabilityMinimum": 0.9,
+    "applicabilityMinimumPerSubtype": 0.8,
+    "sensitivityAdjustedLowerBoundExclusive": 0.65,
+    "fprAdjustedUpperBoundExclusive": 0.05,
+    "bounds": "more conservative of exact binomial and repository hierarchical bootstrap",
+    "refine": "point pass but interval failure, or sensitivity>=0.65 and FPR<=0.10 with development-correctable failures; maximum one fresh reserve confirmation",
+    "stop": "sensitivity<0.65 or FPR>0.10 or hard failure or second failed confirmation",
+    "incomplete": "missing label quotas, source/provenance or parser observation; no substitution of unlabeled negatives"
+  },
+  "additionalPassGates": {
+    "authoritativeScoreChangesMaximum": 0,
+    "duplicateLocalization": "one-to-one matching; extra candidate hits are FP"
+  },
+  "contextPacket": [
+    "complete try/loop/assertion and owner",
+    "bindings and source suppressions",
+    "parser/language mode",
+    "expected anchors stored label-side only"
+  ],
+  "negativeControls": [
+    "intentional suppression without auto-reading label",
+    "logging/rethrow",
+    "typed exceptions",
+    "async/filter/side-effect dictionary loops",
+    "single necessary TS non-null assertion",
+    "comment and line shifts"
+  ],
+  "jevQuestions": [
+    "Development only: is enough binding and surrounding context present?"
+  ],
+  "implementationSteps": [
+    "Statically extract pinned literal fixture cases and exact configuration.",
+    "Use known Ruff failures for refinement; test native or pinned rule identities.",
+    "Freeze three lanes before opening external validation.",
+    "Use one-to-one anchor matching with no many-to-many credit.",
+    "Evaluate lane-specific sensitivity/FPR/coverage and accepted-target clearing.",
+    "Emit optional evidence design only for passing lanes; never alter index."
+  ],
+  "schemaVersion": 1,
+  "status": "design-not-executed",
+  "common": "common.json",
+  "sources": "sources.json",
+  "holdouts": "common.json sample and sources.json split; all historical evidence development-only",
+  "repeatability": "common.json repeatability and jevRepeatability",
+  "primaryEndpoint": "sensitivity of contextual target detection subject to fixed FPR ceiling, separately per lane",
+  "passRefineStop": "common.json thresholds plus additionalPassGates; A1 decisionOverride replaces statistical gate",
+  "sampleSizeRationale": "roadmap primary statistical contract; A1 exact zero-FP bound and clustered sensitivity design",
+  "leakageProtections": [
+    "public labels selected before native predictors",
+    "no Jev validation labels",
+    "repository/fork/patch/clone-family grouped splits",
+    "all prior examples development-only",
+    "prediction hashes sealed before label join",
+    "no target metric selection or holdout tuning"
+  ],
+  "expectedArtifactSchema": "artifact.schema.json",
+  "nonInferiorityControls": "common.json correctnessNonInferiority; all hard invariance controls apply"
+}

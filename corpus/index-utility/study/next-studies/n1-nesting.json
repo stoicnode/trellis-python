@@ -1,0 +1,101 @@
+{
+  "id": "N1",
+  "rank": 3,
+  "panel": "control-flow",
+  "hypothesis": "Executable control nesting has incremental held-out value beyond CC severity, total decisions, size, clones and cycles.",
+  "unitOfAnalysis": "one PR affected owner union, disjoint positive PRs from C1",
+  "publicLabelSource": "sources.json nesting intent with accepted guard-clause/flattening change; extraction alone excluded",
+  "deterministicPredictors": {
+    "C": "sum indicator(CC>10)",
+    "S": "fixed linear complexity severity regardless of C1 outcome",
+    "Q": "sum(CC-1)",
+    "L": "affected-owner executable SLOC",
+    "F": "executable function count",
+    "copies": "native independent executable copies",
+    "B": "same-class SCC burden",
+    "N": "sum max(owner.maxControlDepth-2,0); native executable-scopes ownership"
+  },
+  "baseline": [
+    "deltaC",
+    "deltaS",
+    "deltaQ",
+    "deltaL",
+    "deltaF",
+    "deltaCopies",
+    "deltaB"
+  ],
+  "augmented": [
+    "deltaC",
+    "deltaS",
+    "deltaQ",
+    "deltaL",
+    "deltaF",
+    "deltaCopies",
+    "deltaB",
+    "deltaN"
+  ],
+  "secondary": {
+    "descriptive": [
+      "maximum depth",
+      "module/class versus function",
+      "residual correlations",
+      "severity-stable slice"
+    ]
+  },
+  "additionalPassGates": {
+    "belowOrEqualCcTenPositivesPerLanguage": 16,
+    "belowThresholdDirectionRateMinimum": 0.7,
+    "severityStablePositivesPerLanguage": 16,
+    "severityStableToleranceFraction": 0.05,
+    "severityStableDenominator": "max(1,beforeS)",
+    "intentionalRetentionControlsPerLanguage": 32,
+    "unchangedIntentionalControlDeltaN": 0,
+    "scoreChangeAllowed": false
+  },
+  "contextPacket": [
+    "complete executable ownership",
+    "defaults/decorators/module and class initializers",
+    "guard cleanup and exception context",
+    "lexical usages"
+  ],
+  "negativeControls": [
+    "necessary resource/transaction nesting",
+    "tree traversal",
+    "elif/else-if chain equivalence",
+    "comprehensions",
+    "nested-function depth reset",
+    "required nesting additions in accepted fixes"
+  ],
+  "jevQuestions": [
+    "Does nesting encode required lifetime or ordering?",
+    "Would early returns preserve cleanup and exception semantics?",
+    "What missing context could reverse the judgment?"
+  ],
+  "implementationSteps": [
+    "Reuse control-flow panel packets, with disjoint C1 targets.",
+    "Freeze native depth and owner definitions.",
+    "Compute N without modifying scoring.",
+    "Fit B and B+N on development only.",
+    "Evaluate held-out gain, below-threshold and severity-stable strata."
+  ],
+  "schemaVersion": 1,
+  "status": "design-not-executed",
+  "common": "common.json",
+  "sources": "sources.json",
+  "holdouts": "common.json sample and sources.json split; all historical evidence development-only",
+  "repeatability": "common.json repeatability and jevRepeatability",
+  "primaryEndpoint": "equal-language/repository macro baseline logloss minus augmented logloss",
+  "passRefineStop": "common.json thresholds plus additionalPassGates; A1 decisionOverride replaces statistical gate",
+  "sampleSizeRationale": "roadmap primary statistical contract; A1 exact zero-FP bound and clustered sensitivity design",
+  "leakageProtections": [
+    "public labels selected before native predictors",
+    "no Jev validation labels",
+    "repository/fork/patch/clone-family grouped splits",
+    "all prior examples development-only",
+    "prediction hashes sealed before label join",
+    "no target metric selection or holdout tuning"
+  ],
+  "expectedArtifactSchema": "artifact.schema.json",
+  "nonInferiorityControls": "common.json correctnessNonInferiority; all hard invariance controls apply",
+  "rawPositiveDirectionMetric": "N"
+}

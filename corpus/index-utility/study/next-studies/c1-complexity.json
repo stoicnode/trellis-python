@@ -1,0 +1,96 @@
+{
+  "id": "C1",
+  "rank": 1,
+  "panel": "control-flow",
+  "hypothesis": "Above-threshold severity adds held-out structural-change sensitivity beyond threshold count and size.",
+  "unitOfAnalysis": "PR event; complete affected executable-owner union; target/neutral matched block",
+  "publicLabelSource": "sources.json complexity intent plus accepted public maintainer authority; refactor/extraction alone is not positive",
+  "deterministicPredictors": {
+    "C": "sum indicator(CC>10)",
+    "S": "sum max(CC-10,0)*sqrt(executableSloc)",
+    "U": "sum max(CC-10,0)",
+    "Q": "sum(CC-1)",
+    "L": "affected-owner executable SLOC sum",
+    "F": "affected-owner executable function count",
+    "R": "current eroded mass share: sum CC*sqrt(L) for CC>10 divided by sum CC*sqrt(L); empty scope explicitly not-applicable"
+  },
+  "baseline": [
+    "deltaC",
+    "deltaL",
+    "deltaF",
+    "deltaR"
+  ],
+  "augmented": [
+    "deltaC",
+    "deltaL",
+    "deltaF",
+    "deltaR",
+    "deltaS"
+  ],
+  "secondary": {
+    "unweighted": [
+      "deltaC",
+      "deltaL",
+      "deltaF",
+      "deltaR",
+      "deltaU"
+    ],
+    "descriptive": [
+      "CCsum-only",
+      "SLOC-only",
+      "smooth severity",
+      "count-only formula replacement scale100, density unchanged",
+      "count-and-size baseline without eroded share"
+    ]
+  },
+  "additionalPassGates": {
+    "sameThresholdCountAboveTenPositivesPerLanguage": 16,
+    "sameThresholdCountDirectionRateMinimum": 0.7,
+    "weightedVsUnweightedOneSided95GainLowerBoundExclusive": -0.02
+  },
+  "contextPacket": [
+    "common full owners",
+    "all extracted/moved helper destinations",
+    "lexical usages",
+    "definition-time expressions"
+  ],
+  "negativeControls": [
+    "doc/comment/formatting",
+    "rename",
+    "exact move",
+    "decision relocation without simplification",
+    "accepted required branch additions"
+  ],
+  "jevQuestions": [
+    "What concrete behavior-preserving structural change reduces cost?",
+    "Does extraction merely relocate decisions?",
+    "Is caller and type context sufficient?"
+  ],
+  "implementationSteps": [
+    "Recover label target ranges and destinations.",
+    "Freeze owner-union mapping before metrics.",
+    "Reuse native CC and executable size plus research severity.",
+    "Run controls and nested baseline/augmented/unweighted comparisons.",
+    "Evaluate no-threshold-crossing language strata and store owner contributions."
+  ],
+  "schemaVersion": 1,
+  "status": "design-not-executed",
+  "common": "common.json",
+  "sources": "sources.json",
+  "holdouts": "common.json sample and sources.json split; all historical evidence development-only",
+  "repeatability": "common.json repeatability and jevRepeatability",
+  "primaryEndpoint": "equal-language/repository macro baseline logloss minus augmented logloss",
+  "passRefineStop": "common.json thresholds plus additionalPassGates; A1 decisionOverride replaces statistical gate",
+  "sampleSizeRationale": "roadmap primary statistical contract; A1 exact zero-FP bound and clustered sensitivity design",
+  "leakageProtections": [
+    "public labels selected before native predictors",
+    "no Jev validation labels",
+    "repository/fork/patch/clone-family grouped splits",
+    "all prior examples development-only",
+    "prediction hashes sealed before label join",
+    "no target metric selection or holdout tuning"
+  ],
+  "expectedArtifactSchema": "artifact.schema.json",
+  "nonInferiorityControls": "common.json correctnessNonInferiority; all hard invariance controls apply",
+  "rawPositiveDirectionMetric": "S"
+}

@@ -1,0 +1,99 @@
+{
+  "id": "G1",
+  "rank": 4,
+  "panel": "dependency-graphs",
+  "hypothesis": "SCC size burden follows maintainer-endorsed cycle repairs better than cycle group count when graph scope and edge classes are held fixed.",
+  "unitOfAnalysis": "one public dependency-change PR, complete production graph",
+  "publicLabelSource": "sources.json cycles intent with located accepted circular-import/dependency removal",
+  "deterministicPredictors": {
+    "runtimeGroups": "runtime cyclic SCC count",
+    "typeGroups": "type-only cyclic SCC count",
+    "affectedModules": "union of modules cyclic in either class",
+    "nodes": "production graph nodes",
+    "edges": "distinct production from/to/class edges",
+    "S": "complexity severity",
+    "L": "production executable SLOC",
+    "B": "sum over runtime and type-only graphs of [sum(cyclic SCC size-1)+distinct self-loops]"
+  },
+  "baseline": [
+    "sameClassGroupCount"
+  ],
+  "augmented": [
+    "sameClassSccBurden"
+  ],
+  "secondary": {
+    "descriptive": [
+      "distinct internal cyclic edges",
+      "union-graph SCC burden; separate semantic ablation",
+      "runtime/type-only/deferred strata",
+      "partial repairs with unchanged SCC membership"
+    ]
+  },
+  "additionalPassGates": {
+    "partialRepairEventsPerLanguage": 16,
+    "fixedNodeEdgeAdditionBurdenDecreaseMaximum": 0,
+    "classGraphsMustMatchBaseline": true,
+    "coverageLossMayEarnImprovement": false
+  },
+  "contextPacket": [
+    "complete before/after class-typed adjacency",
+    "SCC memberships",
+    "changed import statements",
+    "one-hop boundary imports",
+    "declarative resolution and unresolved observations"
+  ],
+  "negativeControls": [
+    "graph-isomorphic rename/move",
+    "duplicate import statements",
+    "acyclic production additions",
+    "test additions",
+    "literal dynamic conversion",
+    "type-only identity",
+    "SCC merges",
+    "edge removal inside still-connected SCC",
+    "unresolved local observation"
+  ],
+  "jevQuestions": [
+    "Development only if needed: does eager initialization versus type coupling change the stated repair rationale?"
+  ],
+  "implementationSteps": [
+    "Recover complete pinned graphs and target edge statements.",
+    "Implement same-class burden in research; retain existing union experiment separately.",
+    "Run exhaustive four-node graph and enumeration invariants.",
+    "Evaluate direct matched ordering gain, PR-clustered uncertainty, partial repairs and coverage."
+  ],
+  "schemaVersion": 1,
+  "status": "design-not-executed",
+  "common": "common.json",
+  "sources": "sources.json",
+  "holdouts": "common.json sample and sources.json split; all historical evidence development-only",
+  "repeatability": "common.json repeatability and jevRepeatability",
+  "primaryEndpoint": "macro matched ordering gain Q(B)-Q(G), target reduction versus neutral reduction; tie=0.5",
+  "passRefineStop": "G1 decisionOverride replaces common logistic estimator and gain thresholds; common coverage/repeatability/non-inferiority plus additionalPassGates remain required",
+  "sampleSizeRationale": "128 blocks; planning SD0.5, design effect1.7, SE0.058; screen for ordering gain around0.20, not weak incremental latent factors",
+  "leakageProtections": [
+    "public labels selected before native predictors",
+    "no Jev validation labels",
+    "repository/fork/patch/clone-family grouped splits",
+    "all prior examples development-only",
+    "prediction hashes sealed before label join",
+    "no target metric selection or holdout tuning"
+  ],
+  "expectedArtifactSchema": "artifact.schema.json",
+  "nonInferiorityControls": "common.json correctnessNonInferiority; all hard invariance controls apply",
+  "primaryEndpointOverride": "macro matched ordering gain Q(B)-Q(G), target reduction versus neutral reduction; tie=0.5",
+  "decisionOverride": {
+    "gainMinimum": 0.15,
+    "adjustedLowerGainBoundExclusive": 0,
+    "languagePointGainMinimum": 0,
+    "languageOneSided95LowerGainBoundExclusive": -0.1,
+    "leaveOneRepositoryOutGainExclusive": 0,
+    "directionRateMinimumPerLanguage": 0.7,
+    "stopIfAdjustedUpperGainBoundBelow": 0.15,
+    "stopIfLanguage95UpperGainBoundBelow": -0.1,
+    "refine": "complete, missed pass, upper gain bound >=0.15 and no hard failure",
+    "estimator": "direct block ordering; no fitted coefficients",
+    "alpha": 0.01
+  },
+  "rawPositiveDirectionMetric": "B"
+}

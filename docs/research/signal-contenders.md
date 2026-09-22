@@ -15,6 +15,13 @@ Status meanings:
 
 No contender below changes scoring version `0.9.0-provisional`.
 
+The [evidence audit](index-evidence-audit.md) qualifies the discovery results below,
+including detector-derived clone cues in Jev packets and the edge-class confound
+in the SCC experiment. The [ranked validation roadmap](index-validation-roadmap.md)
+and its machine-readable manifests now define the next study execution order,
+public-label holdouts, controls and decision gates. Earlier queue lists below
+remain the historical candidate rationale, not a replacement validation contract.
+
 ## Measurement and formula contenders
 
 | Contender | Evidence now | Status | Next independent gate |

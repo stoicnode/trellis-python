@@ -1,0 +1,1352 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Trellis public maintainer study artifact record v1",
+  "description": "One JSON/JSONL record. All paths are relative to a portable artifact root; validators also enforce hashes, cross-record joins, containment, quotas and split disjointness.",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/source-lock"
+    },
+    {
+      "$ref": "#/definitions/label"
+    },
+    {
+      "$ref": "#/definitions/event"
+    },
+    {
+      "$ref": "#/definitions/block"
+    },
+    {
+      "$ref": "#/definitions/packet"
+    },
+    {
+      "$ref": "#/definitions/measurement"
+    },
+    {
+      "$ref": "#/definitions/prediction"
+    },
+    {
+      "$ref": "#/definitions/decision"
+    }
+  ],
+  "definitions": {
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "bytes"
+      ]
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "startColumn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endColumn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blobSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "startLine",
+        "startColumn",
+        "endLine",
+        "endColumn",
+        "blobSha256"
+      ]
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "sourceSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "classificationSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "configurationSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "licenseRef": {
+          "$ref": "#/definitions/artifactRef"
+        }
+      },
+      "required": [
+        "repository",
+        "commit",
+        "tree",
+        "sourceSha256",
+        "classificationSha256",
+        "configurationSha256",
+        "licenseRef"
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unsupported",
+            "unavailable"
+          ]
+        },
+        "observed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eligible": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "state",
+        "observed",
+        "eligible",
+        "reasons"
+      ]
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unsupported",
+            "unavailable",
+            "not-applicable"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "population": {
+          "type": "string",
+          "minLength": 1
+        },
+        "numerator": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "denominator": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "value",
+        "unit",
+        "population",
+        "numerator",
+        "denominator",
+        "reason"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "complete"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "incomplete",
+                  "unsupported",
+                  "unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifactSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "configurationSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "artifactSha256",
+        "configurationSha256"
+      ]
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "incomplete",
+            "not-applicable"
+          ]
+        },
+        "estimate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lower": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "upper": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "threshold": {
+          "type": "string",
+          "minLength": 1
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "estimate",
+        "lower",
+        "upper",
+        "threshold",
+        "denominator",
+        "reason"
+      ]
+    },
+    "slice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "enum": [
+            "python",
+            "typescript",
+            "pooled"
+          ]
+        },
+        "repositoryGroup": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "subtype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "measured": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lower": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "upper": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "language",
+        "repositoryGroup",
+        "subtype",
+        "selected",
+        "measured",
+        "excluded",
+        "missing",
+        "estimate",
+        "lower",
+        "upper"
+      ]
+    },
+    "source-lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "source-lock"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "sealed",
+            "unsealed"
+          ]
+        },
+        "manifestSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "selectorsSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "normalizerSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cutoff": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/snapshot"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tool"
+          }
+        },
+        "labelLedger": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "selectionLedger": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "splitLedger": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "matchedBlocks": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "knownExposureInventory": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "quotaSatisfied": {
+          "type": "boolean"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "state",
+        "manifestSha256",
+        "selectorsSha256",
+        "normalizerSha256",
+        "cutoff",
+        "sources",
+        "tools",
+        "labelLedger",
+        "selectionLedger",
+        "splitLedger",
+        "matchedBlocks",
+        "knownExposureInventory",
+        "quotaSatisfied",
+        "limitations"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "sealed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "quotaSatisfied": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "label"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "enum": [
+            "C1",
+            "N1",
+            "D1",
+            "G1",
+            "A1"
+          ]
+        },
+        "class": {
+          "enum": [
+            "structural-positive",
+            "neutral",
+            "intentional-negative",
+            "rule-positive",
+            "rule-negative",
+            "correctness-control",
+            "ambiguous"
+          ]
+        },
+        "sourceKind": {
+          "enum": [
+            "accepted-review",
+            "maintainer-pr",
+            "fixture-snapshot",
+            "synthetic-control"
+          ]
+        },
+        "publicUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "authority": {
+          "enum": [
+            "OWNER",
+            "MEMBER",
+            "COLLABORATOR",
+            "fixture-maintainer",
+            "owned-control",
+            "unverified"
+          ]
+        },
+        "publicRecordId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intentTextRef": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "intentByteStart": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "intentByteEnd": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "acceptedRecordRef": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "targetRanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "ruleMode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "behaviorEquivalence": {
+          "enum": [
+            "not-established",
+            "public-test-evidence",
+            "synthetic-precondition-verified"
+          ]
+        },
+        "labelDerivationSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "eventId",
+        "study",
+        "class",
+        "sourceKind",
+        "publicUrl",
+        "authority",
+        "publicRecordId",
+        "intentTextRef",
+        "intentByteStart",
+        "intentByteEnd",
+        "acceptedRecordRef",
+        "targetRanges",
+        "ruleMode",
+        "behaviorEquivalence",
+        "labelDerivationSha256"
+      ]
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "event"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "enum": [
+            "C1",
+            "N1",
+            "D1",
+            "G1",
+            "A1"
+          ]
+        },
+        "lane": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "repositoryGroup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duplicateComponent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pullRequestGroup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "familyGroups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "language": {
+          "enum": [
+            "python",
+            "typescript"
+          ]
+        },
+        "syntaxSubtype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRole": {
+          "enum": [
+            "production",
+            "test",
+            "generated",
+            "vendor",
+            "mixed"
+          ]
+        },
+        "sizeStratum": {
+          "enum": [
+            "le5000",
+            "5001to10000",
+            "gt10000"
+          ]
+        },
+        "split": {
+          "enum": [
+            "development",
+            "validation",
+            "reserve"
+          ]
+        },
+        "before": {
+          "$ref": "#/definitions/snapshot"
+        },
+        "after": {
+          "$ref": "#/definitions/snapshot"
+        },
+        "labelRef": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "targetBefore": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "targetAfter": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "scopeMap": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "packetBefore": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "packetAfter": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "eligibility": {
+          "enum": [
+            "selected",
+            "excluded",
+            "incomplete"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "study",
+        "lane",
+        "repositoryGroup",
+        "duplicateComponent",
+        "pullRequestGroup",
+        "familyGroups",
+        "language",
+        "syntaxSubtype",
+        "sourceRole",
+        "sizeStratum",
+        "split",
+        "before",
+        "after",
+        "labelRef",
+        "targetBefore",
+        "targetAfter",
+        "scopeMap",
+        "packetBefore",
+        "packetAfter",
+        "eligibility",
+        "reason"
+      ]
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "block"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "enum": [
+            "C1",
+            "N1",
+            "D1",
+            "G1"
+          ]
+        },
+        "split": {
+          "enum": [
+            "development",
+            "validation",
+            "reserve"
+          ]
+        },
+        "repositoryGroup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "enum": [
+            "python",
+            "typescript"
+          ]
+        },
+        "targetEventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "neutralEventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "matchingDistance": {
+          "type": "number"
+        },
+        "orientationSwap": {
+          "type": "boolean"
+        },
+        "matchingFeaturesSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sharedClusterIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "study",
+        "split",
+        "repositoryGroup",
+        "language",
+        "targetEventId",
+        "neutralEventId",
+        "matchingDistance",
+        "orientationSwap",
+        "matchingFeaturesSha256",
+        "sharedClusterIds"
+      ]
+    },
+    "packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "packet"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "side": {
+          "enum": [
+            "a",
+            "b"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/artifactRef"
+          }
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "relatedSourceRanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "relationshipMap": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "coverage": {
+          "$ref": "#/definitions/coverage"
+        },
+        "includedUsages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "omittedUsages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "archiveSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "jevView": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "not-requested",
+                "complete",
+                "context-unavailable"
+              ]
+            },
+            "ref": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/artifactRef"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "state",
+            "ref",
+            "reason"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "eventId",
+        "side",
+        "sourceRefs",
+        "owners",
+        "relatedSourceRanges",
+        "relationshipMap",
+        "coverage",
+        "includedUsages",
+        "omittedUsages",
+        "archiveSha256",
+        "jevView"
+      ]
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "measurement"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshotSide": {
+          "enum": [
+            "before",
+            "after"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "affected-owner-union",
+            "full-production"
+          ]
+        },
+        "run": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "analyzerCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tool"
+          }
+        },
+        "parserIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "graphPolicyIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clonePolicyIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metrics": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/definitions/metric"
+          }
+        },
+        "coverage": {
+          "$ref": "#/definitions/coverage"
+        },
+        "rawReport": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "sourceUnchanged": {
+          "type": "boolean"
+        },
+        "semanticSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "elapsedMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rssBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "eventId",
+        "snapshotSide",
+        "scope",
+        "run",
+        "platform",
+        "sourceSha256",
+        "analyzerCommit",
+        "tools",
+        "parserIdentity",
+        "graphPolicyIdentity",
+        "clonePolicyIdentity",
+        "metrics",
+        "coverage",
+        "rawReport",
+        "sourceUnchanged",
+        "semanticSha256",
+        "elapsedMs",
+        "rssBytes"
+      ]
+    },
+    "prediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "prediction"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blockOrEventId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "enum": [
+            "C1",
+            "N1",
+            "D1",
+            "G1",
+            "A1"
+          ]
+        },
+        "fitSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "featureVectorSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "baselineProbability": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "augmentedProbability": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "baselineState": {
+          "enum": [
+            "complete",
+            "incomplete"
+          ]
+        },
+        "augmentedState": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unsupported"
+          ]
+        },
+        "candidateAnchors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/range"
+          }
+        },
+        "abstentionReasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sealedBeforeLabelJoin": {
+          "const": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "blockOrEventId",
+        "study",
+        "fitSha256",
+        "featureVectorSha256",
+        "baselineProbability",
+        "augmentedProbability",
+        "baselineState",
+        "augmentedState",
+        "candidateAnchors",
+        "abstentionReasons",
+        "sealedBeforeLabelJoin"
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "recordKind": {
+          "const": "decision"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "enum": [
+            "C1",
+            "N1",
+            "D1",
+            "G1",
+            "A1"
+          ]
+        },
+        "lane": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "refine",
+            "stop",
+            "incomplete"
+          ]
+        },
+        "claimScope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceLockSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "predictionSealSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "analysisSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "selectedEvents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "measuredEvents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missingEvents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repositoryGroups": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "primaryEndpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alpha": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "bootstrapSeed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bootstrapReplicatesRef": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "fitRef": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/gate"
+          }
+        },
+        "slices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/slice"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "productionPromotion": {
+          "const": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "recordKind",
+        "id",
+        "study",
+        "lane",
+        "status",
+        "claimScope",
+        "sourceLockSha256",
+        "predictionSealSha256",
+        "analysisSha256",
+        "selectedEvents",
+        "measuredEvents",
+        "missingEvents",
+        "repositoryGroups",
+        "primaryEndpoint",
+        "alpha",
+        "bootstrapSeed",
+        "bootstrapReplicatesRef",
+        "fitRef",
+        "gates",
+        "slices",
+        "limitations",
+        "productionPromotion"
+      ]
+    }
+  }
+}
