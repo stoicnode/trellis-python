@@ -24,15 +24,14 @@
  *   bun run scripts/check-debt-markers.ts --budget P.json --root src --root scripts
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { scanTsFiles } from "./scan-ts-files.ts";
 
 const SCRIPT_DIR = import.meta.dir;
 const DEFAULT_REPO_ROOT = resolve(SCRIPT_DIR, "..");
 const DEFAULT_BUDGET_PATH = resolve(SCRIPT_DIR, "debt-markers-budget.json");
 const DEFAULT_SCAN_ROOTS = ["src", "scripts"] as const;
-const EXTENSIONS = [".ts", ".tsx"] as const;
-const EXCLUDE_DIR_SEGMENTS = ["node_modules", "__golden__"] as const;
 const DEFAULT_EXCLUDE_PATH_PREFIXES = [] as const;
 const SELF_EXCLUDE: ReadonlySet<string> = new Set([
 	"scripts/check-debt-markers.ts",
@@ -114,24 +113,6 @@ export function loadBudget(path: string): {
 	return { trackerRegexes, allowlist: entries, rawAllowlist };
 }
 
-function* walk(dir: string): Generator<string> {
-	if (!existsSync(dir)) return;
-	for (const entry of readdirSync(dir)) {
-		if ((EXCLUDE_DIR_SEGMENTS as readonly string[]).includes(entry)) continue;
-		const full = join(dir, entry);
-		const st = statSync(full);
-		if (st.isDirectory()) {
-			yield* walk(full);
-		} else if (st.isFile()) {
-			yield full;
-		}
-	}
-}
-
-function isTsFile(name: string): boolean {
-	return EXTENSIONS.some((ext) => name.endsWith(ext));
-}
-
 function lineHasTracker(line: string, trackerRegexes: RegExp[]): boolean {
 	for (const re of trackerRegexes) {
 		if (re.test(line)) return true;
@@ -150,28 +131,16 @@ export function scan(options: ScanOptions = {}): ScanResult {
 	const allowSet = new Set(rawAllowlist);
 	const matchedAllow = new Set<string>();
 
-	const shouldExclude = (relPath: string): boolean => {
-		if (selfExclude.has(relPath)) return true;
-		for (const prefix of excludePathPrefixes) {
-			if (relPath.startsWith(prefix)) return true;
-		}
-		return false;
-	};
-
-	const allFiles: string[] = [];
-	for (const r of scanRoots) {
-		for (const f of walk(resolve(repoRoot, r))) allFiles.push(f);
-	}
-
 	const untracked: Marker[] = [];
 	const allowedSilenced: Marker[] = [];
 
-	for (const abs of allFiles) {
-		const rel = relative(repoRoot, abs).replaceAll("\\", "/");
-		if (!isTsFile(rel)) continue;
-		if (shouldExclude(rel)) continue;
-
-		const content = readFileSync(abs, "utf8");
+	for (const { absPath, relPath } of scanTsFiles({
+		repoRoot,
+		scanRoots,
+		excludePathPrefixes,
+		selfExclude,
+	})) {
+		const content = readFileSync(absPath, "utf8");
 		const lines = content.split("\n");
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i] ?? "";
@@ -179,9 +148,9 @@ export function scan(options: ScanOptions = {}): ScanResult {
 			if (!match) continue;
 			if (lineHasTracker(line, trackerRegexes)) continue;
 			const lineNo = i + 1;
-			const key = `${rel}:${lineNo}`;
+			const key = `${relPath}:${lineNo}`;
 			const marker: Marker = {
-				path: rel,
+				path: relPath,
 				line: lineNo,
 				marker: match[1] ?? match[0],
 				text: line.trim(),

@@ -22,15 +22,14 @@
  *   bun run scripts/check-file-sizes.ts --budget P.json --root src --root scripts
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { scanTsFiles } from "./scan-ts-files.ts";
 
 const SCRIPT_DIR = import.meta.dir;
 const DEFAULT_REPO_ROOT = resolve(SCRIPT_DIR, "..");
 const DEFAULT_BUDGETS_PATH = resolve(SCRIPT_DIR, "file-size-budgets.json");
 const DEFAULT_SCAN_ROOTS = ["src", "scripts"] as const;
-const EXTENSIONS = [".ts", ".tsx"] as const;
-const EXCLUDE_DIR_SEGMENTS = ["node_modules", "__golden__"] as const;
 const DEFAULT_EXCLUDE_PATH_PREFIXES = [] as const;
 
 export interface BudgetsFile {
@@ -77,20 +76,6 @@ export function loadBudgets(path: string): BudgetsFile {
 	return { threshold, budgets: normalized };
 }
 
-function* walk(dir: string): Generator<string> {
-	if (!existsSync(dir)) return;
-	for (const entry of readdirSync(dir)) {
-		if ((EXCLUDE_DIR_SEGMENTS as readonly string[]).includes(entry)) continue;
-		const full = join(dir, entry);
-		const st = statSync(full);
-		if (st.isDirectory()) {
-			yield* walk(full);
-		} else if (st.isFile()) {
-			yield full;
-		}
-	}
-}
-
 export function countLines(filePath: string): number {
 	const buf = readFileSync(filePath);
 	if (buf.length === 0) return 0;
@@ -100,10 +85,6 @@ export function countLines(filePath: string): number {
 	}
 	if (buf[buf.length - 1] !== 0x0a) count++;
 	return count;
-}
-
-function isTsFile(name: string): boolean {
-	return EXTENSIONS.some((ext) => name.endsWith(ext));
 }
 
 export function scan(options: ScanOptions = {}): ScanResult {
@@ -116,30 +97,19 @@ export function scan(options: ScanOptions = {}): ScanResult {
 	const failures: Failure[] = [];
 	const seenInWalk = new Set<string>();
 
-	const shouldExclude = (relPath: string): boolean => {
-		for (const prefix of excludePathPrefixes) {
-			if (relPath.startsWith(prefix)) return true;
-		}
-		return false;
-	};
+	for (const { absPath, relPath } of scanTsFiles({
+		repoRoot,
+		scanRoots,
+		excludePathPrefixes,
+	})) {
+		seenInWalk.add(relPath);
 
-	const allFiles: string[] = [];
-	for (const r of scanRoots) {
-		for (const f of walk(resolve(repoRoot, r))) allFiles.push(f);
-	}
-
-	for (const abs of allFiles) {
-		const rel = relative(repoRoot, abs).replaceAll("\\", "/");
-		if (!isTsFile(rel)) continue;
-		if (shouldExclude(rel)) continue;
-		seenInWalk.add(rel);
-
-		const lines = countLines(abs);
-		const explicit = budgets[rel];
+		const lines = countLines(absPath);
+		const explicit = budgets[relPath];
 		if (explicit !== undefined) {
 			if (lines > explicit) {
 				failures.push({
-					path: rel,
+					path: relPath,
 					lines,
 					budget: explicit,
 					reason: `exceeds frozen budget (${lines} > ${explicit}); refactor instead of raising the budget`,
@@ -147,7 +117,7 @@ export function scan(options: ScanOptions = {}): ScanResult {
 			}
 		} else if (lines > threshold) {
 			failures.push({
-				path: rel,
+				path: relPath,
 				lines,
 				budget: threshold,
 				reason: `exceeds default threshold (${lines} > ${threshold}); split the file or add a justified entry to the budget JSON`,
