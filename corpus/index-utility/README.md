@@ -85,6 +85,26 @@ production erosion mass rises while the eroded-function count stays at 41.
 The new comparison display shows that concentration effect explicitly. It
 must not be read as a cleanup of existing structural debt.
 
+Phase 4's isolated [formula experiments](formula-experiments/README.md) use
+the repaired P3.2 measurements plus production graph and executable-function
+signals from the same pinned checkouts. The research baseline reproduces all
+16 authoritative indexes. Candidate results include exact contributions,
+rank reversals, language/size slices, saturation and run cost; none changes
+the production score or selects a formula before independent review.
+
+The Phase 5 [study preregistration](study/preregistration.json) pins six new
+repositories, the blinded deterministic sample, primary endpoint and
+regression margins before labels. Its maintenance pairs and external-tool
+versions are pinned beside it. Two independent human reviews remain
+uncollected, so no formula is promoted.
+
+The final [Release A self-audit](self-audit/index-release-a/manifest.json)
+compares the P3.2 source to the completed research/study/release additions
+under analyzer 0.9.0. The index and eroded-function count remain 38 and 41;
+three final payload fingerprints match. Added clean source lowers density
+and exact points while absolute erosion mass rises, so the record does not
+claim a target-code cleanup.
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

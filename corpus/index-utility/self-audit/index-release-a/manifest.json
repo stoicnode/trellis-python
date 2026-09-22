@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "slice": "Phase 4 research, Phase 5 preregistration and Release A documentation",
+  "targetBeforeRevision": "9a5cec5",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "6d81361b024a3d754e1682f6134923029dfc11dc9352468860cc93bc37bde7ed",
+  "sourceAfterSha256": "5ca4c49cceb472db521fb4860954317a12c522e9f0059416fe1887e1083ac0fa",
+  "configuration": {
+    "mode": "default",
+    "configFile": "trellis.yaml"
+  },
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "reports": {
+    "before": {
+      "compressedPath": "before.json.gz",
+      "sha256": "fb41c8f78b4489efa54e0e2fe998515c8fa73d04aaa5a3595dcf8da540ddae1a",
+      "uncompressedSha256": "fbf1d2f06c2426fdf7bde52dde1b99d0193513e0a83cf9189de6738b3e89926b",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 38,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25918.668,
+      "productionErodedShare": 0.126628,
+      "productionCloneGroups": 18,
+      "productionCloneDensity": 0.031486,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17
+    },
+    "after": {
+      "compressedPath": "after.json.gz",
+      "sha256": "9da4936183679b2d3114fb340f750d8e72a2b5ad81339c641fbe026bd8aa65fe",
+      "uncompressedSha256": "17dbf732d92b2291f3af90db60a800928563224a65dd17c516980540fc702770",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 38,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 26456.529,
+      "productionErodedShare": 0.124054,
+      "productionCloneGroups": 18,
+      "productionCloneDensity": 0.030778,
+      "productionCycleGroups": 1,
+      "productionDocumentationWarnings": 17
+    }
+  },
+  "afterThreeRunPayloadFingerprints": [
+    "0ca2a46e1ae83ab090da0776794eab661a63e469486bebca23fabbca560f6dfa",
+    "0ca2a46e1ae83ab090da0776794eab661a63e469486bebca23fabbca560f6dfa",
+    "0ca2a46e1ae83ab090da0776794eab661a63e469486bebca23fabbca560f6dfa"
+  ],
+  "disposition": "Index and eroded production count unchanged. Research helpers were refactored after an initial same-analyzer run exposed two new CC-threshold hotspots and a one-point regression. Final research code has no complexity hotspot; exact points changed through clean-denominator growth, not target cleanup."
+}

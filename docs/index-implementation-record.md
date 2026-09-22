@@ -185,3 +185,24 @@ inspection context only.
 To migrate, audit the target with 0.7.0 and save a new baseline. Keep 0.6.0
 reports and history unchanged; use 0.6.0 with its matching baseline to roll
 back. No formula or historical report is silently recalculated.
+
+## Release A completion
+
+The remaining accepted measurement and evidence slices are complete:
+
+- analyzer/scoring 0.8.0 resolves binding-confirmed literal Python dynamic
+  imports and locates unknown targets without fabricating graph edges;
+- analyzer/scoring 0.9.0 removes actual Python docstrings from executable
+  mass and clone populations while retaining physical size;
+- analyzer 0.9.0 adds unscored excessive-documentation, independent
+  executable-copy, initialization and nesting evidence;
+- report and comparison surfaces expose burden, density, saturation, graph
+  limits, denominators and exact raw change from the same core facts.
+
+Each slice has a 16-scope three-run record and a Trellis 2-by-2 self-audit
+under `corpus/index-utility/`. The consolidated semantic inventory, fixed
+corpus contribution table, migration commands and rollback are in
+[`index-release-a.md`](index-release-a.md). The isolated Phase 4 experiments
+do not change scoring. Phase 5 has pinned repositories, maintenance pairs,
+sampling and promotion rules; it still requires two independent human
+reviewers, so Release B remains unimplemented.

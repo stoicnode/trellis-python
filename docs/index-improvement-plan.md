@@ -4,7 +4,10 @@ Status: in progress; Phase 0 evidence and Phase 1 graph/Python repairs are
 implemented. Phase 2's Python executable-size correction, advisory clone
 candidate population and advisory documentation detector are implemented.
 Phase 3.1's executable-scope and nesting evidence and Phase 3.2's reporting
-context are implemented; Phases 4–6 are pending.
+context are implemented. Phase 4's isolated experiments and Phase 5's
+preregistered sampling/decision protocol are implemented. Phase 6's Release A
+inventory, migration and rollback are implemented; independent human labels
+and any Release B scoring cutover remain pending.
 Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.
