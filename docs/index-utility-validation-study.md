@@ -4,6 +4,14 @@ Status: preregistered and awaiting two independent human reviewers. No labels
 have been collected or inferred. This dependency does not block the Release A
 measurement corrections; it does block any Release B scoring promotion.
 
+The census and reviewer packet are now generated. The
+[artifact record](../corpus/index-utility/study/generated-artifacts.json)
+locates them outside the repository and records their hashes. It contains
+5,920 production function units and a 120-sample blind packet: 20 per
+repository, split into 60 flagged and 60 matched-unflagged units. A repeated
+generation produced identical census, JSON packet, Markdown packet, answer
+key and source-record hashes. Keep the answer key away from reviewers.
+
 The machine-readable [preregistration](../corpus/index-utility/study/preregistration.json)
 pins six repositories that are absent from the development corpus: three
 Python and three TypeScript scopes, with one library, framework and developer
@@ -33,6 +41,7 @@ bun scripts/index-study-sample.ts \
   --units /absolute/study/unit-census.json \
   --preregistration corpus/index-utility/study/preregistration.json \
   --reviewer-out /absolute/study/reviewer-packet.json \
+  --reviewer-md-out /absolute/study/reviewer-packet.md \
   --key-out /absolute/study/answer-key.json
 ```
 

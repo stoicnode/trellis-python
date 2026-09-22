@@ -50,12 +50,15 @@ degradation. Per-scope metrics, payload hashes and resource records are under
 
 The final [Trellis self-audit](../corpus/index-utility/self-audit/index-release-a/manifest.json)
 holds analyzer 0.9.0 constant across the P3.2 and completed Release A source.
-Both score 38 with 41 eroded production functions and 18 clone groups. Raw
-erosion mass rises from 25,918.668 to 26,456.529; density denominators grow,
-so exact points fall without constituting a cleanup. Three final measurement
-payload fingerprints are identical. An intermediate run exposed two new
-research-helper hotspots and a one-point regression; those helpers were
-split, and the final source has no research-code complexity hotspot.
+Both score 38 with 41 eroded production functions. The completed source has
+19 raw clone groups, one more than the P3.2 source, after adding the generated
+study tooling. Raw erosion mass rises from 25,918.668 to 26,651.773. Larger
+density denominators lower the complexity and cycle contributions while the
+new clone raises duplication, leaving the rounded index unchanged; this is
+source movement, not a cleanup. Three final measurement payload fingerprints
+are identical. An intermediate run exposed two new research-helper hotspots
+and a one-point regression; those helpers were split, and the final source has
+no index-study complexity hotspot.
 
 ## Baseline migration
 

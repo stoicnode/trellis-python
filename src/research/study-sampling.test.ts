@@ -11,6 +11,12 @@ function units(): StudyUnit[] {
 			path: `src/${index}.ts`,
 			kind: index % 2 === 0 ? "function" : "module",
 			sizeBucket: index % 3 === 0 ? ("large" as const) : ("small" as const),
+			startLine: index + 1,
+			endLine: index + 2,
+			excerptStartLine: index + 1,
+			excerptEndLine: index + 2,
+			excerpt: `function unit${index}() {}`,
+			excerptTruncated: false,
 			flagKinds: index < 12 ? ["complexity.hotspot"] : [],
 		})),
 	);

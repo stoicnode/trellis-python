@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-22T00:00:00.000Z",
+  "analyzerVersion": "0.9.0",
+  "artifactDirectory": "/Users/bbr/.codex/visualizations/2026/09/22/01a0c970-f40d-7991-9cbf-d481c02012f9/index-study-v1/artifacts",
+  "census": {
+    "path": "unit-census.json",
+    "units": 5920,
+    "bytes": 7382763,
+    "sha256": "8dc2b3047ffbdefd21c8bee93843068c91a6acbf5c6dd36e659a491a46e824ab"
+  },
+  "reviewerPacket": {
+    "jsonPath": "reviewer-packet.json",
+    "jsonBytes": 223604,
+    "jsonSha256": "bf3d2a7b4295723575b1f73bd82439d8caf65a1e42e3884c3cf3b97ac6a9c423",
+    "markdownPath": "reviewer-packet.md",
+    "markdownBytes": 270629,
+    "markdownSha256": "01515268823515f4b1889620a624d5eb69dbe86cbb3f5a6553994820105e4905",
+    "samples": 120,
+    "perRepository": 20,
+    "flagged": 60,
+    "matchedUnflagged": 60
+  },
+  "privateAnswerKey": {
+    "path": "answer-key.json",
+    "bytes": 43089,
+    "sha256": "c945af3839af68b647fc8d89270d94c13a61da8f884979c939c905b94e0e2bac"
+  },
+  "sourceRecord": {
+    "path": "source-record.json",
+    "bytes": 2482,
+    "sha256": "92572ac991be3837c9d6fba6ed2ae46fba024a0892950fcb14ad9fdea58734b5"
+  },
+  "determinism": "A second census and sample run produced all five identical SHA-256 hashes.",
+  "storage": "Generated artifacts include third-party source excerpts and remain outside the Trellis repository. The source record retains repository, commit, scope and license-file hashes."
+}

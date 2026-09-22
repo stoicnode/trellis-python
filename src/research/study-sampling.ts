@@ -9,6 +9,12 @@ export interface StudyUnit {
 	path: string;
 	kind: string;
 	sizeBucket: "small" | "medium" | "large";
+	startLine: number;
+	endLine: number;
+	excerptStartLine: number;
+	excerptEndLine: number;
+	excerpt: string;
+	excerptTruncated: boolean;
 	flagKinds: string[];
 }
 
@@ -20,6 +26,12 @@ export interface ReviewerUnit {
 	path: string;
 	kind: string;
 	sizeBucket: StudyUnit["sizeBucket"];
+	startLine: number;
+	endLine: number;
+	excerptStartLine: number;
+	excerptEndLine: number;
+	excerpt: string;
+	excerptTruncated: boolean;
 }
 
 export interface StudySample {
@@ -113,6 +125,12 @@ export function buildStudySample(
 			path: unit.path,
 			kind: unit.kind,
 			sizeBucket: unit.sizeBucket,
+			startLine: unit.startLine,
+			endLine: unit.endLine,
+			excerptStartLine: unit.excerptStartLine,
+			excerptEndLine: unit.excerptEndLine,
+			excerpt: unit.excerpt,
+			excerptTruncated: unit.excerptTruncated,
 		})),
 		answerKey: keyed
 			.map(({ unit, stratum, blindId }) => ({

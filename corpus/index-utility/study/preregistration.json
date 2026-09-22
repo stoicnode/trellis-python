@@ -5,6 +5,7 @@
   "seed": "trellis-index-utility-pilot-v1-2026-09-22",
   "reviewers": 2,
   "unitsPerRepository": { "flagged": 10, "matchedUnflagged": 10 },
+  "sizeBucketsExecutableSloc": { "smallMax": 20, "mediumMax": 60 },
   "primaryCandidate": "combined-v1",
   "primaryEndpoint": "actionable-precision",
   "acceptableRegressionPercentagePoints": 5,

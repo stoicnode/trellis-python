@@ -97,6 +97,10 @@ repositories, the blinded deterministic sample, primary endpoint and
 regression margins before labels. Its maintenance pairs and external-tool
 versions are pinned beside it. Two independent human reviews remain
 uncollected, so no formula is promoted.
+The [generated-artifact record](study/generated-artifacts.json) points to the
+5,920-unit census and 120-sample reviewer packet, records source/license
+provenance and confirms an identical second generation. The packet remains
+outside this repository because it contains third-party source excerpts.
 
 The final [Release A self-audit](self-audit/index-release-a/manifest.json)
 compares the P3.2 source to the completed research/study/release additions
