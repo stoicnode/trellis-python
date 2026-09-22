@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "selectedBeforeScoring": true,
+  "pairs": [
+    {
+      "repository": "httpx", "language": "python",
+      "before": "7d3a5347a9717169c00c73b71ba7c560e9a04443",
+      "after": "a4161062501a32ce258e9f990737d494bfe419aa",
+      "record": "https://github.com/encode/httpx/commit/a4161062501a32ce258e9f990737d494bfe419aa",
+      "description": "Refactor httpx/_utils.py (#1943)"
+    },
+    {
+      "repository": "werkzeug", "language": "python",
+      "before": "56aa21d050c739944b623c087a50850dad40803c",
+      "after": "87bd23357d4ca41f14a6f5a239afecc49e50e53d",
+      "record": "https://github.com/pallets/werkzeug/commit/87bd23357d4ca41f14a6f5a239afecc49e50e53d",
+      "description": "property cleanup (#3278)"
+    },
+    {
+      "repository": "black", "language": "python",
+      "before": "f4b006f61d4009135b744941f02df384f7604bc8",
+      "after": "1d233bb977901a27c12bd883aa94eaa8f088f02c",
+      "record": "https://github.com/psf/black/commit/1d233bb977901a27c12bd883aa94eaa8f088f02c",
+      "description": "Simplify power operator hugging implementation (#4918)"
+    },
+    {
+      "repository": "zod", "language": "typescript",
+      "before": "6772a43e21349206830ae77ea35104712a31aafc",
+      "after": "060bc9f3ec69bff2849f3cc7c17807b863f503b6",
+      "record": "https://github.com/colinhacks/zod/commit/060bc9f3ec69bff2849f3cc7c17807b863f503b6",
+      "description": "share default size/length check branches (#6394)"
+    },
+    {
+      "repository": "hono", "language": "typescript",
+      "before": "ec648d683768ec5093315e5dc694c05594fec185",
+      "after": "dac5d5794c6134711e469c5e69d09cd6274e1fc1",
+      "record": "https://github.com/honojs/hono/commit/dac5d5794c6134711e469c5e69d09cd6274e1fc1",
+      "description": "refactor on-handler iteration (#5326)"
+    },
+    {
+      "repository": "tsx", "language": "typescript",
+      "before": "67d02b71916c8ce6444046ea1093a42aef52c274",
+      "after": "8d326a462c6a300b1056ea3e0d9f98a24252c088",
+      "record": "https://github.com/privatenumber/tsx/commit/8d326a462c6a300b1056ea3e0d9f98a24252c088",
+      "description": "separate extension resolution phases"
+    }
+  ]
+}

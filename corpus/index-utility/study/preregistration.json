@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "registeredAt": "2026-09-22T00:00:00.000Z",
+  "status": "registered-before-labels",
+  "seed": "trellis-index-utility-pilot-v1-2026-09-22",
+  "reviewers": 2,
+  "unitsPerRepository": { "flagged": 10, "matchedUnflagged": 10 },
+  "primaryCandidate": "combined-v1",
+  "primaryEndpoint": "actionable-precision",
+  "acceptableRegressionPercentagePoints": 5,
+  "sliceRegressionLimitPercentagePoints": 10,
+  "repositories": [
+    {
+      "id": "httpx", "language": "python", "role": "library",
+      "remote": "https://github.com/encode/httpx.git",
+      "commit": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254", "scope": "httpx"
+    },
+    {
+      "id": "werkzeug", "language": "python", "role": "framework",
+      "remote": "https://github.com/pallets/werkzeug.git",
+      "commit": "6048fa48753c7b61e35cc34537667809dee8fa35", "scope": "src/werkzeug"
+    },
+    {
+      "id": "black", "language": "python", "role": "developer-tool",
+      "remote": "https://github.com/psf/black.git",
+      "commit": "b5b1eb6f60ce9febc473c6cb49f935954d108678", "scope": "src/black"
+    },
+    {
+      "id": "zod", "language": "typescript", "role": "library",
+      "remote": "https://github.com/colinhacks/zod.git",
+      "commit": "10dda3a3a4bc76ed0bf83e994de194587e489ef8", "scope": "packages/zod/src"
+    },
+    {
+      "id": "hono", "language": "typescript", "role": "framework",
+      "remote": "https://github.com/honojs/hono.git",
+      "commit": "6cadf7537385c6e3df9cbd6d05c9b84c82ae0361", "scope": "src"
+    },
+    {
+      "id": "tsx", "language": "typescript", "role": "developer-tool",
+      "remote": "https://github.com/privatenumber/tsx.git",
+      "commit": "ca66105a17a2a4c6503fe3a12b5b9ec408286011", "scope": "src"
+    }
+  ]
+}

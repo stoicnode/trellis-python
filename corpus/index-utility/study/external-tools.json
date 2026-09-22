@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "status": "versions-pinned-not-an-oracle",
+  "python": [
+    { "name": "radon", "version": "6.0.1", "wheelSha256": "632cc032364a6f8bb1010a2f6a12d0f14bc7e5ede76585ef29dc0cecf4cd8859", "use": "Python CC/function-span triangulation" },
+    { "name": "xenon", "version": "0.9.3", "wheelSha256": "6e2c2c251cc5e9d01fe984e623499b13b2140fcbf74d6c03a613fa43a9347097", "use": "Radon threshold presentation only" },
+    { "name": "lizard", "version": "1.24.0", "wheelSha256": "a688bc607a891ff4a7836826f25742dc9c1bf648da3075dbd495e199e8848602", "use": "cross-language CC/function-span triangulation" },
+    { "name": "import-linter", "version": "2.15", "wheelSha256": "9aaf16a88ac1e99d5a464cd7f66b6a05f7060bfa761162e0ed441773a267ed3b", "use": "declared Python architecture contracts only" },
+    { "name": "wily", "version": "1.25.0", "wheelSha256": "c8f6333c77fad438f646d49225409b4fb5336474834a52beea18097205d09204", "use": "optional historical context only" }
+  ],
+  "node": [
+    { "name": "jscpd", "version": "5.2.1", "lock": "bun.lock", "use": "clone triangulation" },
+    { "name": "dependency-cruiser", "version": "18.3.1", "lock": "bun.lock", "use": "declared TypeScript architecture rules only" }
+  ]
+}
