@@ -1,9 +1,9 @@
 /** Conservative, filesystem-free resolution of Python imports against the discovered inventory. */
 import { dirname } from "node:path";
 import type { SourceInventory } from "../discovery/index.ts";
-import type { ImportSite } from "../metrics/graph-imports.ts";
 import type { GraphResolver } from "../metrics/graph-resolve.ts";
 import type { EdgeResolution, GraphConfig } from "../metrics/graph-types.ts";
+import type { ImportSite } from "../syntax/import-sites.ts";
 
 interface ModuleEntry {
 	path: string;

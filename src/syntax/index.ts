@@ -13,6 +13,7 @@
  * `sloc.ts`.
  */
 export { collectFunctions, type FileFunctions, walkOwnNodes } from "./functions.ts";
+export { collectImportSites, type ImportSite, type ImportSiteKind } from "./import-sites.ts";
 export { buildSyntaxInventory } from "./inventory.ts";
 export {
 	type ParsedSource,
@@ -21,7 +22,7 @@ export {
 	rangeAt,
 	scriptVariantForPath,
 } from "./parse.ts";
-export { classifyLines, countLines, type LineKind } from "./sloc.ts";
+export { classifyLines, countLines } from "./sloc.ts";
 export {
 	type FileSyntax,
 	FUNCTION_KINDS,
@@ -29,6 +30,7 @@ export {
 	type FunctionKind,
 	isTypeScriptFile,
 	type LineCounts,
+	type LineKind,
 	type ParseDiagnostic,
 	type ScriptVariant,
 	type SyntaxInventory,

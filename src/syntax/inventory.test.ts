@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import ts from "typescript";
@@ -30,6 +30,11 @@ async function build() {
 }
 
 describe("buildSyntaxInventory", () => {
+	test("owns TypeScript import-site extraction without importing graph metrics", async () => {
+		const source = await readFile(new URL("./inventory.ts", import.meta.url), "utf8");
+		expect(source).not.toContain('from "../metrics/graph-imports.ts"');
+	});
+
 	test("carries discovery ownership and parses every classified file once", async () => {
 		await put("package.json", JSON.stringify({ name: "app" }));
 		await put("src/math.ts", "export function add(a: number, b: number) {\n\treturn a + b;\n}\n");

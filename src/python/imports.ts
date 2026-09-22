@@ -1,7 +1,7 @@
 /** Python import-site extraction from the shared @lezer/python tree. */
 import type { Tree, TreeCursor } from "@lezer/common";
 import type { Range } from "../contract/index.ts";
-import type { ImportSite } from "../metrics/graph-imports.ts";
+import type { ImportSite } from "../syntax/import-sites.ts";
 
 interface Leaf {
 	name: string;

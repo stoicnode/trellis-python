@@ -46,8 +46,8 @@
 import { dirname, join, relative } from "node:path";
 import ts from "typescript";
 import type { SourceInventory } from "../discovery/index.ts";
+import type { ImportSite } from "../syntax/import-sites.ts";
 import { resolveAsset } from "./graph-assets.ts";
-import type { ImportSite } from "./graph-imports.ts";
 import type { EdgeResolution, GraphConfig } from "./graph-types.ts";
 import { exportsCandidates, manifestCandidates, wildcardMatch } from "./graph-workspace.ts";
 

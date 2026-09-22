@@ -30,8 +30,8 @@
 import type { Tree } from "@lezer/common";
 import type ts from "typescript";
 import type { Completeness, Range, SourceSet } from "../contract/index.ts";
-import type { ImportSite } from "../metrics/graph-imports.ts";
 import type { FunctionIdentity } from "./identity.ts";
+import type { ImportSite } from "./import-sites.ts";
 
 /** The function-like node kinds the inventory recognizes (SPEC §5.1). */
 export const FUNCTION_KINDS = [
@@ -90,6 +90,9 @@ export interface LineCounts {
 	commentOnly: number;
 	blank: number;
 }
+
+/** The classification of one physical line (see `sloc.ts`). */
+export type LineKind = "code" | "commentOnly" | "blank";
 
 /** A language-neutral normalized lexical token used by the shared clone engine. */
 export interface NormalizedToken {
@@ -161,7 +164,7 @@ export interface BaseFileSyntax {
 	functions: NormalizedFunctionFacts[];
 	lines: LineCounts;
 	/** One line classification per physical source line, shared by all metric consumers. */
-	lineKinds?: readonly import("./sloc.ts").LineKind[];
+	lineKinds?: readonly LineKind[];
 	/** Static import sites from the adapter's one parse. */
 	imports?: readonly ImportSite[];
 	/** Adapter-provided normalized token stream, when its parser has no TypeScript tree. */
@@ -176,7 +179,7 @@ export interface BaseFileSyntax {
 export interface TypeScriptFileSyntax extends BaseFileSyntax {
 	language?: "typescript";
 	text?: string;
-	lineKinds?: readonly import("./sloc.ts").LineKind[];
+	lineKinds?: readonly LineKind[];
 	imports?: readonly ImportSite[];
 	scriptKind: ScriptVariant;
 	sourceFile: ts.SourceFile;

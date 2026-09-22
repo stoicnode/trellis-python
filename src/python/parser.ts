@@ -6,9 +6,9 @@
 import type { Tree } from "@lezer/common";
 import { parser } from "@lezer/python";
 import { HOTSPOT_IDENTITY_VERSION, type Range, type SourceSet } from "../contract/index.ts";
-import type { LineKind } from "../syntax/sloc.ts";
 import type {
 	LineCounts,
+	LineKind,
 	NormalizedFunctionFacts,
 	NormalizedToken,
 	ParseDiagnostic,

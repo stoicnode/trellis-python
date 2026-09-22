@@ -38,6 +38,7 @@
  *   as `incomplete` coverage (SPEC §3.3).
  */
 import type { Completeness, Finding, MetricValue, Range, SourceSet } from "../contract/index.ts";
+import type { ImportSiteKind } from "../syntax/import-sites.ts";
 
 /** The versioned graph policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
 export const GRAPH_POLICY_VERSION = "1.0.0";
@@ -57,7 +58,7 @@ export const GRAPH_POLICY = {
 export type GraphPolicy = typeof GRAPH_POLICY;
 
 /** The syntactic kind of an import site. */
-export type EdgeKind = "import" | "re-export" | "dynamic";
+export type EdgeKind = ImportSiteKind;
 
 /**
  * Why a local-intent specifier did not resolve. Machine-checkable; the

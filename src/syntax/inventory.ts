@@ -20,7 +20,6 @@ import { join } from "node:path";
 import ts from "typescript";
 import type { Range } from "../contract/index.ts";
 import type { ClassifiedFile, SourceInventory } from "../discovery/index.ts";
-import { collectImportSites } from "../metrics/graph-imports.ts";
 import { collectPythonImportSites } from "../python/imports.ts";
 import {
 	PYTHON_PARSER_VERSION,
@@ -29,6 +28,7 @@ import {
 	pythonLineKinds,
 } from "../python/parser.ts";
 import { collectFunctions } from "./functions.ts";
+import { collectImportSites } from "./import-sites.ts";
 import { parseSource } from "./parse.ts";
 import { classifyLines, countLines } from "./sloc.ts";
 import type { FileSyntax, ParseDiagnostic, SyntaxInventory } from "./types.ts";

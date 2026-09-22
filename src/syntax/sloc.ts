@@ -15,7 +15,7 @@
  *   comment, and code-like text inside a comment never makes one code.
  */
 import ts from "typescript";
-import type { LineCounts } from "./types.ts";
+import type { LineCounts, LineKind } from "./types.ts";
 import type { SyntaxWork } from "./work.ts";
 
 const COMMENT_TRIVIA = new Set<ts.SyntaxKind>([
@@ -30,9 +30,6 @@ const PLAIN_TRIVIA = new Set<ts.SyntaxKind>([
 	ts.SyntaxKind.ShebangTrivia,
 	ts.SyntaxKind.ConflictMarkerTrivia,
 ]);
-
-/** The classification of one physical line (see the module docblock). */
-export type LineKind = "code" | "commentOnly" | "blank";
 
 /** Mutable per-line flags, folded into {@link LineCounts} at the end. */
 interface LineFlags {
