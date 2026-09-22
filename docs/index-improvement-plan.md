@@ -4,6 +4,9 @@ Status: proposed; implementation has not started. Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.
 
+Plan amendment: flag oversized documentation separately from structural debt,
+and measure Trellis's own changes before and after each implementation slice.
+
 ## Objective and evidence
 
 Make index changes reflect changes in production structural debt more reliably,
@@ -33,6 +36,11 @@ The observed regressions to preserve as reproductions are:
 | I9 | A module-level decision expression scores 0; the same expression inside a function scores 26 | Expose executable scopes beyond functions |
 | I10 | Nesting below CC 11 has no hotspot; 11 of 12 Python scopes saturate erosion density | Surface missing review leads and evaluate better response curves |
 
+Additional requested requirements: flag excessive docstrings/documentation
+blocks using explicit thresholds, and use Trellis itself to evaluate the
+implementation changes. These are product requirements, not additional defects
+established by the exploratory review.
+
 The review bundle currently lives at
 `/Users/bbr/.codex/visualizations/2026/09/22/01a0c957-4fa9-77d0-bfba-58d8d255e329/index-review/`.
 It contains the evaluation, input manifests, raw measurements, probe source,
@@ -46,7 +54,7 @@ understand the plan without that bundle.
 | --- | --- | --- | --- |
 | 0 | Durable reproductions and acceptance contract | None | None |
 | 1 | Production graph scope and Python semantic repairs | 0 | Versioned measurement correction |
-| 2 | Documentation and clone measurement populations | 0; integrate with 1 | Documentation correction; clone candidates initially experimental |
+| 2 | Documentation and clone populations; excessive-documentation findings | 0; integrate with 1 | Documentation correction; new documentation findings unscored |
 | 3 | Additional located evidence and clearer reporting | 1 and relevant parts of 2 | Unscored additions |
 | 4 | Candidate cycle, complexity, and clone scoring | 1–2; consume 3 where applicable | Research outputs only |
 | 5 | Independent utility validation and scoring decision | 4 | Promotion only if evidence supports it |
@@ -78,6 +86,10 @@ better. Select exact version numbers at each release cutover.
 5. Create tracker issues for the work items below when `sd` is available. These
    plan IDs are not tracker references and must not be used to satisfy source
    debt-marker rules. `ml` and `sd` were unavailable during the review.
+6. Capture a Trellis self-audit before implementation, retaining JSON, source
+   and configuration fingerprints, analyzer/scoring versions and the exact
+   target revision. Keep artifacts outside the audited source tree. Use the
+   before/after protocol below throughout implementation, not only at release.
 
 **Exit:** another checkout can reproduce all counterexamples and the 16 scope
 summaries without machine-specific imports or executing target code. Freeze
@@ -169,6 +181,7 @@ Primary seams: `src/python/imports.ts`, `resolve.ts`, `parser.ts`,
 preserve scored metrics and hotspot identity; diagnostic ranges may shift.
 Cover module/class/function docs, comment-only edits, CRLF/Unicode, adjacent
 strings, and real multiline data. Retain TypeScript comment invariance.
+Documentation-only edits may change the separate advisory findings in P2.3.
 
 ### P2.2: Independent executable clones (I5)
 
@@ -192,10 +205,60 @@ detected. Cover same-line independent occurrences, overlapping and disjoint
 copies, 2/10/40-copy cases, mixed contexts and resource exhaustion. Preserve
 the independent small-input oracle and bounded work accounting.
 
-Primary seams: `src/python/parser.ts`, normalized syntax facts,
+### P2.3: Excessive docstrings and documentation blocks
+
+Depends on P2.1's documentation identification. Add a located, unscored
+`documentation.excessive` finding to native analysis. Start with actual Python
+module/class/function/method docstrings and attached TypeScript/TSX JSDoc
+blocks so the detector can also inspect Trellis's own TypeScript source.
+Standalone Markdown documents and ordinary runtime strings are outside this
+initial detector's scope; report the supported scope explicitly.
+
+- **Provisional default:** flag a block exceeding **40 nonblank content lines
+  or 300 words**. Exactly 40 lines and exactly 300 words do not trip the rule.
+  These are review triggers to test on the corpus, not calibrated quality
+  boundaries. An OR rule catches both long lists and very long single lines.
+- Count content after removing opening/closing delimiters and JSDoc line-prefix
+  markers; ignore whitespace-only content lines. Define words as nonempty
+  whitespace-separated content tokens, using Unicode whitespace consistently.
+  Count physical source content without evaluating strings or expanding escape
+  sequences. Include examples, parameter sections and code blocks in the raw
+  counts; do not make undocumented exceptions for them.
+- Emit one finding per documentation block with its original range, owning
+  declaration identity when known, language/source set, measured line/word
+  counts, effective thresholds and which threshold was exceeded. Preserve
+  identity through line shifts; use an explicit ambiguity reason when needed.
+- Put detection settings in strict declarative configuration, separate from
+  scoring weights: positive-integer line/word thresholds and an explicit
+  enable/disable setting. Carry settings in analysis identity so changing a
+  threshold is not mistaken for a source-code improvement in comparisons.
+- Default to an advisory warning: no index contribution and no default policy
+  failure. Operators may explicitly gate the finding through the existing
+  declarative policy seam once the finding kind is supported. Report test
+  documentation separately; it must not offset production debt.
+- Say that the block exceeds a size threshold and merits review. Suggest
+  removing repetition or moving extended tutorials to maintained reference
+  docs when appropriate, while retaining essential API contracts and examples.
+  Do not assert that length alone proves unnecessary documentation or remove
+  documentation automatically.
+
+**Acceptance:** cover 39/40/41 content lines and 299/300/301 words, each threshold
+independently and both together, blank padding, one-line docs, JSDoc markers,
+CRLF/Unicode, nested declarations and source-set classification. Long ordinary
+strings must not trigger. A docstring expansion can add this warning while
+leaving structural score inputs unchanged after P2.1. Verify configuration
+validation, effective-threshold evidence, stable identity, policy opt-in and
+CLI/SDK/report parity. Review flagged API docs on the pinned corpus and
+Trellis itself before accepting defaults; record justified long examples as
+tradeoffs rather than automatically raising the threshold to clear them.
+
+Primary seams: `src/python/parser.ts`, normalized syntax facts, native analyzer
+registration, documentation analysis, configuration/finding contracts,
 `src/metrics/analyze.ts`, `erosion.ts`, `duplication-*.ts`, and their tests.
 Clone population promotion waits for Phase 5; docstring correction can ship
 with Release A after its documented semantics and acceptance are satisfied.
+P2.3's advisory detector can ship in that release without waiting for scored
+formula calibration.
 
 ## Phase 3 — Cover blind spots and make evidence usable
 
@@ -223,6 +286,8 @@ fixture coverage.
   score saturation, exact dimension changes and top located contributors.
 - Show production graph scope, type/deferred relationships, unresolved limits,
   unsupported files, and complete versus unknown dimensions prominently.
+- Present excessive-documentation findings with observed counts and effective
+  thresholds, clearly separate from scored structural hotspots.
 - Explain unchanged headlines with changed raw severity and distinguish
   analyzer/configuration changes from target-code changes. Recommend finding
   review and explicit metric budgets; do not introduce quality labels or a
@@ -308,13 +373,73 @@ rank stability, popularity, or synthetic controls alone.
   Newly required missing analysis withholds the headline. Optional evidence
   failures remain separate and cannot manufacture zero native debt.
 - Run lint, typecheck, tests and `check:all`; rerun the fixed corpus, three-run
-  16-scope measurements and self-audit at each release candidate. Review every
+  16-scope measurements and the self-audit protocol below at each release
+  candidate. Review every
   unexplained movement and enforce existing resource budgets. No budget
   relaxation without the repository's tracker and commit requirements.
 - Supply baseline migration commands, before/after contribution tables and a
   rollback path to the prior release and matching baseline artifacts. Do not
   overwrite history, silently rescore it, or claim a formula change improved
   the target code. Push or publish only on explicit user request.
+
+## Trellis before/after measurement of its own changes
+
+Use Trellis to evaluate each completed implementation slice and release
+candidate, including the new documentation detector once available. This
+supplements the tests and external corpus; self-measurement alone cannot
+validate the scoring model.
+
+1. Before a slice, save a complete baseline audit of the current Trellis source
+   using its checked-in `trellis.yaml`. Record target and analyzer revisions,
+   dirty-source snapshot hashes when applicable, configuration, versions and
+   completeness. Preserve existing exclusions; do not exclude new code merely
+   to improve the result.
+2. Afterwards, audit the changed source with the same configuration and retain
+   JSON plus a readable comparison. Inspect index, exact contributions, raw
+   complexity/erosion, clone groups and density, cycle burden, coverage and new
+   or worsened located findings. Include documentation-warning counts, block
+   sizes and threshold crossings once P2.3 is implemented. Report any unknown
+   dimension instead of substituting zero.
+3. When the analyzer changes, separate target-code change from measurement
+   change using immutable before/after source snapshots and prepared analyzer
+   checkouts. At minimum run the **new analyzer on both source snapshots**.
+   Also retain the old analyzer's baseline; where supported, run both analyzers
+   on both snapshots for a 2-by-2 comparison. Same-analyzer pairs measure source
+   changes; same-source pairs explain analyzer changes. A newly added detector
+   is previously unavailable evidence, not proof that all its findings are new.
+4. Use the normal comparison service only on compatible report pairs. Do not
+   override compatibility checks to manufacture cross-version score deltas.
+   Store manifests alongside reports and supply configuration context through
+   the core comparison seam where needed; disclose any configuration caveat.
+5. Rerun final release measurements three times with the existing fixed-clock
+   harness to verify identical measurement fingerprints. Keep timing and RSS
+   outside deterministic identity and within the established budget checks.
+
+Example commands for an unchanged analyzer and compatible configuration, from
+the repository root; create the chosen external artifact directory first:
+
+```sh
+trellis audit . --json --out /absolute/artifacts/trellis-before.json
+# Complete the implementation slice, preserving the baseline artifact.
+trellis audit . --json --out /absolute/artifacts/trellis-after.json
+trellis compare /absolute/artifacts/trellis-before.json /absolute/artifacts/trellis-after.json --json
+```
+
+Use explicit analyzer entrypoints/checkouts for analyzer-changing slices;
+running the checkout's newly changed CLI against an old report does not hold
+the analyzer constant. In development, `bun src/cli/main.ts` is the corresponding
+CLI entrypoint. Artifact writes above are explicitly requested; no history
+database, target execution or network is needed.
+
+**Acceptance:** every slice's completion record links before/after artifacts
+and identifies the analyzer held constant, source changes, score/raw-metric
+deltas and disposition of new findings. A same-analyzer self-score regression
+is a release blocker: fix it or resolve a demonstrated measurement defect and
+rerun the pair before proceeding. Review worsened raw hotspots even when
+rounding hides the headline change. Advisory documentation findings require a
+recorded action or justified tradeoff, not deletion of useful documentation
+to reach a lower count. Documentation-only plan edits should leave current
+source measurements unchanged; this does not demonstrate that P2.3 works.
 
 ## Subsequent advisory backlog
 
@@ -334,7 +459,8 @@ coverage limits and a review-utility pilot before any scored promotion.
 ## Suggested commit boundaries and completion
 
 Start with Phase 0, then one focused commit per P1.1, P1.2 typing, P1.2 overloads,
-P1.3, P2.1, clone classification, independent clone occurrences, P3.1 and P3.2.
+P1.3, P2.1, clone classification, independent clone occurrences, P2.3, P3.1 and
+P3.2. Record the Trellis before/after results with each completed slice.
 Keep experimental formula tooling, study records, and eventual formula
 promotion separate. All runtime behavior belongs in the core; avoid CLI-only
 patches. Follow the repository's validation and local commit protocol.
