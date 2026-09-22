@@ -7,6 +7,7 @@ import {
 	runDependencyGraphAnalysis,
 	runDocumentationAnalysis,
 	runDuplicationAnalysis,
+	runExecutableScopeAnalysis,
 	runImportCycleAnalysis,
 	runSafeguardInspection,
 } from "../analysis/index.ts";
@@ -132,6 +133,7 @@ describe("audit orchestration through the registry", () => {
 		const complexity = runComplexityAnalysis(syntax);
 		const documentation = runDocumentationAnalysis(syntax, effectiveDocumentationConfig(undefined));
 		const duplication = runDuplicationAnalysis(syntax);
+		const executableScopes = runExecutableScopeAnalysis(syntax);
 		const graph = runDependencyGraphAnalysis(source, syntax);
 		const cycles = runImportCycleAnalysis(graph);
 		const safeguards = (await runSafeguardInspection(source.root)).product;
@@ -139,6 +141,7 @@ describe("audit orchestration through the registry", () => {
 			complexity,
 			documentation,
 			duplication,
+			executableScopes,
 			graph,
 			cycles,
 		]);
@@ -178,6 +181,7 @@ describe("audit orchestration through the registry", () => {
 			"trellis.dependency-graph",
 			"trellis.documentation",
 			"trellis.duplication",
+			"trellis.executable-scopes",
 			"trellis.import-cycles",
 		]);
 		expect(runs.map((run) => run.result.provider.id)).toEqual([
@@ -185,6 +189,7 @@ describe("audit orchestration through the registry", () => {
 			"trellis.dependency-graph",
 			"trellis.documentation",
 			"trellis.duplication",
+			"trellis.executable-scopes",
 			"trellis.import-cycles",
 		]);
 		// Every selected run analyzed the same shared parse (the passes are the
@@ -216,7 +221,7 @@ describe("audit orchestration through the registry", () => {
 		expect(analyzers.map((event) => event.id)).toEqual(
 			selectedMeasuredAnalyzers().map((analyzer) => analyzerProgressId(analyzer.identity.id)),
 		);
-		expect(analyzers.map((event) => event.index)).toEqual([0, 1, 2, 3, 4]);
+		expect(analyzers.map((event) => event.index)).toEqual([0, 1, 2, 3, 4, 5]);
 		expect(analyzers.every((event) => event.total === selectedMeasuredAnalyzers().length)).toBe(
 			true,
 		);
@@ -273,7 +278,9 @@ describe("audit orchestration through the registry", () => {
 		for (const analysis of report.evidence.analyses) {
 			expect(analysis.provider.kind).toBe("native");
 			expect(analysis.scoring).toBe(
-				analysis.provider.id === "trellis.documentation" ? "advisory" : "scored",
+				["trellis.documentation", "trellis.executable-scopes"].includes(analysis.provider.id)
+					? "advisory"
+					: "scored",
 			);
 		}
 	});
@@ -320,7 +327,11 @@ describe("measuredAnalysisEvidence", () => {
 			const analyzer = registry.find((a) => a.identity.id === contribution.result.provider.id);
 			if (analyzer === undefined) throw new Error("measured run without a registry entry");
 			expect(contribution.scoring).toBe(
-				contribution.result.provider.id === "trellis.documentation" ? "advisory" : "scored",
+				["trellis.documentation", "trellis.executable-scopes"].includes(
+					contribution.result.provider.id,
+				)
+					? "advisory"
+					: "scored",
 			);
 			expect(contribution.metricIds).toEqual(analyzer.metrics);
 			// The contract result is the report-shaped minimum: internal

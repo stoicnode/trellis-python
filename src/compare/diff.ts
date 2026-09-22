@@ -79,8 +79,14 @@ function byLocation(a: Finding, b: Finding): number {
 }
 
 /** A structured scoped key, historical fallback key, or explicit non-matchability. */
+const OWNER_KEY_FINDING_KINDS = new Set([
+	"documentation.excessive",
+	"executable.initialization",
+	"executable.nesting",
+]);
+
 function findingKey(finding: Finding): string | null {
-	if (finding.kind === "documentation.excessive") {
+	if (OWNER_KEY_FINDING_KINDS.has(finding.kind)) {
 		const key = finding.facts?.ownerKey;
 		return finding.facts?.identityState === "identified" && typeof key === "string"
 			? JSON.stringify([finding.kind, finding.path, key])

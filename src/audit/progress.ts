@@ -44,6 +44,7 @@ export const ANALYZER_IDS = [
 	"dependency-graph",
 	"documentation",
 	"duplication",
+	"executable-scopes",
 	"import-cycles",
 ] as const;
 

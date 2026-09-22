@@ -62,6 +62,7 @@ import {
 	runDependencyGraphAnalysis,
 	runDocumentationAnalysis,
 	runDuplicationAnalysis,
+	runExecutableScopeAnalysis,
 	runImportCycleAnalysis,
 	runSafeguardInspection,
 	toContractResult,
@@ -141,6 +142,24 @@ export function selectedMeasuredAnalyzers(): readonly NativeAnalyzer[] {
 	return NATIVE_REGISTRY.ordered().filter((analyzer) => analyzer.metrics.length > 0);
 }
 
+function runIndependentAdvisory(
+	id: string,
+	syntax: SyntaxInventory,
+	options: MeasureAnalysesOptions,
+): NativeAnalysisRun<MeasuredAnalysis> | undefined {
+	switch (id) {
+		case "trellis.documentation":
+			return runDocumentationAnalysis(
+				syntax,
+				options.documentation ?? effectiveDocumentationConfig(undefined),
+			);
+		case "trellis.executable-scopes":
+			return runExecutableScopeAnalysis(syntax);
+		default:
+			return undefined;
+	}
+}
+
 /**
  * Run every selected measured native analyzer over the shared passes (one
  * discovery, one shared parse — {@link measureAnalyses} takes them as inputs
@@ -167,17 +186,14 @@ export function measureAnalyses(
 			index,
 			total: execution.length,
 		});
+		const advisory = runIndependentAdvisory(analyzer.identity.id, syntax, options);
+		if (advisory !== undefined) {
+			runs.push(advisory);
+			continue;
+		}
 		switch (analyzer.identity.id) {
 			case "trellis.complexity":
 				runs.push(runComplexityAnalysis(syntax));
-				break;
-			case "trellis.documentation":
-				runs.push(
-					runDocumentationAnalysis(
-						syntax,
-						options.documentation ?? effectiveDocumentationConfig(undefined),
-					),
-				);
 				break;
 			case "trellis.duplication":
 				runs.push(

@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "slice": "P3.1 advisory executable scopes and located nesting",
+  "targetBeforeRevision": "a93cf04",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "c45bb9357e7b4dbc77a32d93a08be92bc70055aa3b90c816f53d67ce55375298",
+  "sourceAfterSha256": "4a32b3fd5e90c50d9a3b7175fd2d3668e8b56a32909c6ab2ede8636ca2ab3fd2",
+  "configuration": {
+    "mode": "default",
+    "configFile": "trellis.yaml"
+  },
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "d5c397b3f50568d3f7f941b76032659c607d38bed545b7a085cba667a6fe4504",
+      "uncompressedSha256": "b3f3af09df2a9c2a31841f3b50cf752efd02c99295359ba983dd13a830f48cc1",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 24770.262,
+      "productionCloneDensity": 0.03266,
+      "productionCycleGroups": 1,
+      "productionInitializationDecisions": null,
+      "productionMaxNesting": null,
+      "executableFindings": 0
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "1b3b595cf68eaa4a9991e79fcff8f6ab7c1dcbee74f773ad5b32a520449f92b0",
+      "uncompressedSha256": "65d1bf41a6bca16efb04317d78c224bccf3beb10f55e105a2cd9f5143d528c0e",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25303.293,
+      "productionCloneDensity": 0.032053,
+      "productionCycleGroups": 1,
+      "productionInitializationDecisions": null,
+      "productionMaxNesting": null,
+      "executableFindings": 0
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "4898604799e9da0a821c85698ba2cabc9cd2a79373d0ac2a9698b0fa2c34b5ac",
+      "uncompressedSha256": "c7fcdfc73155fdbb92f48b7695e07af78d6d92ce85e95bbaf3ff66955bb1b4e8",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 24770.262,
+      "productionCloneDensity": 0.03266,
+      "productionCycleGroups": 1,
+      "productionInitializationDecisions": 66,
+      "productionMaxNesting": 4,
+      "executableFindings": 108
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "08ada669c2fcb332bcd8934e3088849a13bdabbd9b6bcfd3d2f1c83a80377e8a",
+      "uncompressedSha256": "28fe8e259285c32909056e16d505e6afd4d522c4bd18093a0c29c3fc4ef69328",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 41,
+      "productionErosionMass": 25303.293,
+      "productionCloneDensity": 0.032053,
+      "productionCycleGroups": 1,
+      "productionInitializationDecisions": 66,
+      "productionMaxNesting": 4,
+      "executableFindings": 108
+    }
+  },
+  "afterThreeRunPayloadFingerprints": [
+    "c940b13993296adff7e89ada5216b10ef99bd90c2ee8ef143e505f5dc65bb0d7",
+    "c940b13993296adff7e89ada5216b10ef99bd90c2ee8ef143e505f5dc65bb0d7",
+    "c940b13993296adff7e89ada5216b10ef99bd90c2ee8ef143e505f5dc65bb0d7"
+  ],
+  "review": {
+    "interpretation": "All four cells score 39. The new analyzer adds unscored initialization and nesting facts. The old and new analyzers agree on the unchanged score for each source snapshot. New code adds raw production erosion mass but no new eroded functions or unexplained index movement."
+  }
+}

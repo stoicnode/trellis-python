@@ -101,6 +101,7 @@ describe("native registry", () => {
 			"trellis.dependency-graph",
 			"trellis.documentation",
 			"trellis.duplication",
+			"trellis.executable-scopes",
 			"trellis.import-cycles",
 			"trellis.safeguards",
 		]);

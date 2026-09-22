@@ -2,8 +2,9 @@
 
 Status: in progress; Phase 0 evidence and Phase 1 graph/Python repairs are
 implemented. Phase 2's Python executable-size correction, advisory clone
-candidate population and advisory documentation detector are implemented;
-Phases 3–6 are pending.
+candidate population and advisory documentation detector are implemented.
+Phase 3.1's executable-scope and nesting evidence is implemented; Phase 3.2
+and Phases 4–6 are pending.
 Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.

@@ -33,7 +33,7 @@ const BRANCH_NODES = new Set([
 	"ConditionalExpression",
 ]);
 
-function decisionsAt(node: Node, text: string): number {
+export function decisionsAt(node: Node, text: string): number {
 	if (BRANCH_NODES.has(node.name)) return 1;
 	if (node.name === "MatchClause") return isDefaultCase(node, text) ? 0 : 1;
 	if (

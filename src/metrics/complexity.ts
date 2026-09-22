@@ -76,7 +76,7 @@ const NESTING_KINDS: ReadonlySet<ts.SyntaxKind> = new Set([
 ]);
 
 /** CC decisions contributed by one node (0 for non-decisions). */
-function decisionsOf(node: ts.Node): number {
+export function decisionsOf(node: ts.Node): number {
 	if (BRANCH_KINDS.has(node.kind)) return 1;
 	if (ts.isBinaryExpression(node) && LOGICAL_OPERATORS.has(node.operatorToken.kind)) return 1;
 	if (

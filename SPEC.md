@@ -266,6 +266,17 @@ Size and nesting are explanatory signals unless the scoring formula
 explicitly includes them (§7). Empty or function-free scopes produce
 documented finite values or `not-applicable`, never crashes or silent zeros.
 
+An unscored `trellis.executable-scopes` pass separately inventories module,
+class-initialization and function bodies. It assigns decisions in defaults,
+decorators and class headers to the enclosing unit and resets ownership and
+control depth inside each nested function body. Located
+`executable.initialization` findings show module/class decisions;
+`executable.nesting` findings begin at control depth 3 independently of the
+scored CC 11 hotspot threshold. The pass retains stable named owner keys,
+marks ambiguous owners explicitly and never feeds the scoring formula. Its
+depth conventions and metric definitions are in
+[`docs/executable-scopes.md`](docs/executable-scopes.md).
+
 Analyzer 0.9.0 identifies only first-statement Python string expressions in
 module, class and function suites as docstrings. Physical code-line counts
 remain in source coverage and `complexity.functions.*.detail.sloc`;

@@ -212,6 +212,12 @@ Warnings include measured counts and do not affect the index. Configure
 `documentation.maxWords` in `trellis.yaml`; use `policy.failOnNew` to gate new
 `documentation.excessive` findings against a baseline.
 
+Advisory executable-scope evidence locates module and class initialization
+decisions and nesting at depth 3 in any unit, including functions below the
+scored hotspot threshold. It preserves separate production and test metrics
+without changing the index. See the
+[executable scope guide](docs/executable-scopes.md) for ownership and depth rules.
+
 Clone reports also carry advisory `duplication.candidate.*` metrics for
 independent executable copies. They classify syntax context and count
 non-overlapping token occurrences, including copies that share a physical

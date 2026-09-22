@@ -66,6 +66,15 @@ candidate group. The four-cell Trellis self-audit is under
 [`self-audit/p22-clones/`](self-audit/p22-clones/manifest.json); all cells
 score 39.
 
+P3.1's advisory executable-scope and nesting measurements are retained in
+[`p31-scopes/`](p31-scopes/summary.json). All 16 pinned scopes passed three
+deterministic runs, and every index matches P2.2. The new pass records 957
+production initialization decisions and 1,372 production nesting findings
+at depth 3 or greater across the corpus. These are located review leads, not
+validated debt labels. The four-cell Trellis self-audit is under
+[`self-audit/p31-scopes/`](self-audit/p31-scopes/manifest.json); all cells
+score 39, with old and new analyzers run against both source snapshots.
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

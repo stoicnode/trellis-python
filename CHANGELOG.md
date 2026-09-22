@@ -11,6 +11,12 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Added
 
+- Native advisory executable-scope analysis now locates decisions in module
+  and class initialization and control nesting from depth 3, including
+  functions below the scored hotspot threshold. Definition-time expressions
+  belong to the enclosing unit; nested function bodies remain separate.
+  Stable named owners support line-shift comparison. No new metric affects
+  the current score.
 - Native duplication now emits a separate, unscored candidate view of
   independent executable copies. Per-token syntax roles distinguish executable
   logic, import/export lists, type declarations, literal data and mixed spans.
