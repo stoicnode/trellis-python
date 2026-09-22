@@ -332,10 +332,10 @@ describe("client SDK provider-capable parity (SPEC §16.4, §13.1)", () => {
 		writeFileSync(currentPath, renderAuditJson(current.report));
 		const sdk = await client.compare(oldPath, currentPath);
 		expect(sdk.policy).toBeNull();
-		// Provider absence remains honest and does not fragment an otherwise compatible native basis.
-		expect(sdk.comparison.compatibility.comparable).toBe(true);
-		expect(sdk.comparison.compatibility.caveats.map((issue) => issue.code)).toContain(
-			"schema-span",
+		// Provider absence remains honest even though the old schema lacks hotspot identity.
+		expect(sdk.comparison.compatibility.comparable).toBe(false);
+		expect(sdk.comparison.compatibility.issues.map((issue) => issue.code)).toContain(
+			"schema-version",
 		);
 		// The pre-provider side reads as unrequested — never a regression.
 		const sonarjs = sdk.comparison.evidence.providers.find((p) => p.providerId === "sonarjs");
@@ -345,7 +345,7 @@ describe("client SDK provider-capable parity (SPEC §16.4, §13.1)", () => {
 			"never as a regression",
 		);
 		const cli = await runCli(["compare", oldPath, currentPath, "--json"]);
-		expect(cli.code).toBe(0);
+		expect(cli.code).toBe(2);
 		expect(sdk.comparison).toEqual(JSON.parse(cli.stdout));
 	}, 20_000);
 

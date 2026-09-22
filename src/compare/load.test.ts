@@ -74,6 +74,8 @@ describe("loadReportArtifact", () => {
 		const legacy: Record<string, unknown> = { ...report("clean") };
 		delete legacy.evidence;
 		legacy.schemaVersion = "1.0.0";
+		const { unknownDimensions: _unknownDimensions, ...legacyScore } = report("clean").score;
+		legacy.score = legacyScore;
 		const path = await save("legacy.json", JSON.stringify(legacy));
 		const loaded = await loadReportArtifact(path);
 		expect(loaded.schemaVersion).toBe("1.0.0");

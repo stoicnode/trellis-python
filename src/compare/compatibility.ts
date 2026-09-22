@@ -47,6 +47,7 @@ import {
 	type AuditReport,
 	carriedAnalyses,
 	isSupportedSchemaVersion,
+	PRE_IDENTITY_SCHEMA_VERSION,
 	PRE_PROVIDER_SCHEMA_VERSION,
 	type SourceCoverage,
 } from "../contract/index.ts";
@@ -172,7 +173,8 @@ function versionFacts(
 		return;
 	}
 	if (baseline.schemaVersion !== current.schemaVersion) {
-		const hasIdentity = (version: string): boolean => version === "1.2.0" || version === "1.3.0";
+		const hasIdentity = (version: string): boolean =>
+			version !== PRE_PROVIDER_SCHEMA_VERSION && version !== PRE_IDENTITY_SCHEMA_VERSION;
 		if (hasIdentity(baseline.schemaVersion) !== hasIdentity(current.schemaVersion)) {
 			issues.push({
 				code: "schema-version",

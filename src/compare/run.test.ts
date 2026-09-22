@@ -93,6 +93,10 @@ describe("runComparison", () => {
 		const legacy = JSON.parse(await readFile(baseline, "utf8")) as Record<string, unknown>;
 		delete legacy.evidence;
 		legacy.schemaVersion = "1.0.0";
+		const { unknownDimensions: _unknownDimensions, ...legacyScore } = legacy.score as {
+			unknownDimensions?: string[];
+		};
+		legacy.score = legacyScore;
 		await writeFile(baseline, JSON.stringify(legacy, null, 2));
 		const current = await saveArtifact("sloppy", "b.json");
 		const result = await runComparison(baseline, current);
