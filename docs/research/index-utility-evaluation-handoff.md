@@ -6,6 +6,11 @@ This is a task brief for another agent, not an evaluation result. Start from
 [Python calibration record](../python-score-calibration.md), and the
 [pinned Python manifest](../../corpus/python-calibration/manifest.json).
 
+The exploratory review's proposed response is the
+[index improvement plan](../index-improvement-plan.md). It records reproduced
+counterexamples, implementation phases and validation gates; it does not claim
+that the independent study below has been completed.
+
 ## Assignment
 
 Determine **when the 0–100 Trellis sloppiness index helps a maintainer make a
