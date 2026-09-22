@@ -77,8 +77,8 @@ describe("native duplication cutover", () => {
 		const report = auditReportSchema.parse(JSON.parse(ran.stdout));
 		expect(measurementPayload(report)).toEqual(measurementPayload(sdk.report));
 		expect(report.analyzerVersion).toBe("0.4.0");
-		expect(report.schemaVersion).toBe("1.3.0");
-		expect(report.scoringVersion).toBe("0.2.0-provisional");
+		expect(report.schemaVersion).toBe("1.4.0");
+		expect(report.scoringVersion).toBe("0.3.0-provisional");
 		expect(report.metrics["duplication.groups.production"]).toMatchObject({
 			state: "complete",
 			value: 1,
@@ -153,6 +153,8 @@ describe("native duplication cutover", () => {
 		expect(compared.comparison.findings?.resolved).toEqual([]);
 		for (const schemaVersion of ["1.0.0", "1.1.0", "1.2.0"] as const) {
 			const artifact: Record<string, unknown> = { ...historical, schemaVersion };
+			const { unknownDimensions: _unknownDimensions, ...legacyScore } = historical.score;
+			artifact.score = legacyScore;
 			if (schemaVersion === "1.0.0") delete artifact.evidence;
 			await writeFile(before, JSON.stringify(artifact));
 			const loaded = await loadReportArtifact(before);

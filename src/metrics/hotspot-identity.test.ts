@@ -68,7 +68,7 @@ describe("hotspot identity emission", () => {
 	test("round-trips modern findings and rejects missing, malformed or unknown identity", async () => {
 		fixture = await auditFixture("sloppy");
 		const { report } = fixture;
-		expect(report.schemaVersion).toBe("1.3.0");
+		expect(report.schemaVersion).toBe("1.4.0");
 		if (report.schemaVersion === "1.0.0") throw new Error("expected modern report");
 		expect(auditReportSchema.parse(JSON.parse(JSON.stringify(report)))).toEqual(report);
 		const hotspot = report.findings.find((finding) => finding.kind === "complexity.hotspot");

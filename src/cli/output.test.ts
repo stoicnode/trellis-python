@@ -1,8 +1,18 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CliError, formatForPath, type Rendered, writeReportFile } from "./output.ts";
+import {
+	CliError,
+	EXIT,
+	emit,
+	FailOnExit,
+	formatForPath,
+	type Rendered,
+	renderError,
+	resolveFormat,
+	writeReportFile,
+} from "./output.ts";
 
 /**
  * `--out` file export (SPEC §12): the file format is inferred from the path
@@ -12,6 +22,40 @@ import { CliError, formatForPath, type Rendered, writeReportFile } from "./outpu
  */
 
 const RENDERED: Rendered = { human: "HUMAN", json: { value: 1 }, md: "# MD" };
+
+describe("CLI output and exit contract", () => {
+	test("rejects conflicting format flags as an operational error", () => {
+		expect(resolveFormat({})).toBe("human");
+		expect(resolveFormat({ json: true })).toBe("json");
+		expect(resolveFormat({ md: true })).toBe("md");
+		expect(() => resolveFormat({ json: true, md: true })).toThrow(CliError);
+	});
+
+	test("emits a withheld JSON headline with an explicit null", () => {
+		const write = spyOn(process.stdout, "write").mockImplementation(() => true);
+		try {
+			emit("json", { ...RENDERED, json: { score: { index: null } } });
+			expect(write).toHaveBeenCalledWith('{\n  "score": {\n    "index": null\n  }\n}\n');
+		} finally {
+			write.mockRestore();
+		}
+	});
+
+	test("keeps a policy trip distinct from an operational error", () => {
+		const failure = new FailOnExit(["sloppiness index withheld"]);
+		expect(failure.code).toBe(EXIT.FAIL);
+		expect(failure.reasons).toEqual(["sloppiness index withheld"]);
+		const write = spyOn(process.stderr, "write").mockImplementation(() => true);
+		try {
+			expect(renderError(new CliError("invalid report"), "json")).toBe(EXIT.ERROR);
+			expect(write).toHaveBeenCalledWith(
+				'{\n  "error": {\n    "message": "invalid report"\n  }\n}\n',
+			);
+		} finally {
+			write.mockRestore();
+		}
+	});
+});
 
 describe("formatForPath", () => {
 	test("infers json/markdown from the extension when no flag is set", () => {

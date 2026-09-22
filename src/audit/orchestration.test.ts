@@ -268,7 +268,11 @@ describe("audit orchestration through the registry", () => {
 		const before = await auditWorkspace(repo, { now: PINNED });
 		await put("src/tangled-2.ts", tangledFunction("tangled2"));
 		const core = await auditWorkspace(repo, { now: PINNED });
-		expect(core.score.index ?? 0).toBeGreaterThan(before.score.index ?? 0);
+		expect(core.score.index).toBeNull();
+		expect(before.score.index).toBeNull();
+		expect(core.metrics["erosion.eroded-count.production"]?.value ?? 0).toBeGreaterThan(
+			before.metrics["erosion.eroded-count.production"]?.value ?? 0,
+		);
 		expect(core.findings.some((finding) => finding.path === "src/tangled-2.ts")).toBe(true);
 		// The run service both surfaces fold reports the same measurement.
 		const service = await runWorkspaceAudit(repo, { now: PINNED });

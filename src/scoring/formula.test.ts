@@ -11,7 +11,7 @@ import {
 describe("SCORING_FORMULA", () => {
 	test("is pinned to the contract scoring version and labelled provisional", () => {
 		expect(SCORING_FORMULA.version).toBe(SCORING_VERSION);
-		expect(SCORING_FORMULA.version).toBe("0.2.0-provisional");
+		expect(SCORING_FORMULA.version).toBe("0.3.0-provisional");
 		expect(SCORING_FORMULA.provisional).toBe(true);
 	});
 

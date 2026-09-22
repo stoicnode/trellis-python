@@ -50,6 +50,7 @@ function makeAuditReport(
 			index: overrides.index ?? 12,
 			direction: "lower-is-better",
 			partial: false,
+			unknownDimensions: [],
 			contributions: [
 				{ dimension: "complexity", points: 12, metricIds: ["complexity.average-cc"] },
 			],
