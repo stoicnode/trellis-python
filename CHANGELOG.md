@@ -11,6 +11,13 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Added
 
+- Added an isolated, read-only formula research harness for SCC cycle burden,
+  complexity severity, smoother density response, independent executable
+  clones and runtime/type-only edge treatment. Its pinned 16-scope artifact
+  reports exact contributions, rank reversals, language/size slices,
+  saturation and resource cost. Production scoring remains unchanged pending
+  independent utility validation.
+
 - Audit summaries now place absolute burden beside density, name saturated
   score terms and graph observation limits, and separate excessive
   documentation warnings from structural hotspots. Comparable JSON,
