@@ -45,6 +45,12 @@ export type StagedRunOutcome<T> =
 	| { kind: "timeout"; cleanup: CleanupStatus }
 	| { kind: "cancelled"; cleanup: CleanupStatus };
 
+/** A lifecycle exit that needs provider-local located unavailable evidence. */
+export type StagedAnalysisFailure =
+	| { kind: "adapter-failed"; error: unknown }
+	| { kind: "timeout" }
+	| { kind: "cancelled" };
+
 /** Count the files in a staged selection by their already-classified source set. */
 export function stagedSourceSetCounts(
 	view: StagedWorkspaceView,
@@ -84,6 +90,25 @@ export function degradeForCleanup(result: AnalysisResult, cleanup: CleanupStatus
 		...result,
 		reason: result.reason === undefined ? note : `${result.reason}; ${note}`,
 	};
+}
+
+/**
+ * Fold a staged provider-analysis lifecycle into evidence while preserving the
+ * provider's own identity and failure wording. Cleanup degradation belongs to
+ * the lifecycle boundary, so it is applied exactly once on every exit path.
+ */
+export function foldStagedAnalysisOutcome(
+	lifecycle: StagedRunOutcome<AnalysisResult>,
+	failureResult: (failure: StagedAnalysisFailure) => AnalysisResult,
+): AnalysisResult {
+	if (lifecycle.kind === "completed") {
+		return degradeForCleanup(lifecycle.value, lifecycle.cleanup);
+	}
+	const failure: StagedAnalysisFailure =
+		lifecycle.kind === "adapter-failed"
+			? { kind: "adapter-failed", error: lifecycle.error }
+			: { kind: lifecycle.kind };
+	return degradeForCleanup(failureResult(failure), lifecycle.cleanup);
 }
 
 /** Settled adapter result — errors are carried, never rethrown here. */

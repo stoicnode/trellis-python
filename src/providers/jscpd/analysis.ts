@@ -33,7 +33,8 @@ import { readFile } from "node:fs/promises";
 import type { AnalysisResult, CloneMatchMode, ObservedCoverage } from "../../contract/index.ts";
 import type { PinnedToolResolveOptions } from "../resolve.ts";
 import {
-	degradeForCleanup,
+	foldStagedAnalysisOutcome,
+	type StagedAnalysisFailure,
 	type StagedRunOutcome,
 	stagedSourceSetCounts,
 	stagingDiagnostics,
@@ -72,6 +73,21 @@ function neverRan(
 	reason: string,
 ): AnalysisResult {
 	return { provider: requestedIdentity(mode), state, reason };
+}
+
+/** Translate lifecycle exits into jscpd's stable, located unavailable evidence. */
+function lifecycleFailure(mode: CloneMatchMode, failure: StagedAnalysisFailure): AnalysisResult {
+	if (failure.kind === "adapter-failed") {
+		return neverRan(mode, "unavailable", `the jscpd adapter failed: ${messageOf(failure.error)}`);
+	}
+	if (failure.kind === "cancelled") {
+		return neverRan(
+			mode,
+			"unavailable",
+			"the audit was cancelled before the jscpd analysis completed; the provider process group was terminated and no evidence was produced",
+		);
+	}
+	return neverRan(mode, "unavailable", "the jscpd analysis exceeded its wall-time limit");
 }
 
 /**
@@ -253,27 +269,5 @@ export async function runJscpdAnalysis(
 				: `staging failed unexpectedly: ${messageOf(error)}`;
 		return neverRan(mode, "unavailable", reason);
 	}
-	switch (lifecycle.kind) {
-		case "completed":
-			return degradeForCleanup(lifecycle.value, lifecycle.cleanup);
-		case "adapter-failed":
-			return degradeForCleanup(
-				neverRan(mode, "unavailable", `the jscpd adapter failed: ${messageOf(lifecycle.error)}`),
-				lifecycle.cleanup,
-			);
-		case "cancelled":
-			return degradeForCleanup(
-				neverRan(
-					mode,
-					"unavailable",
-					"the audit was cancelled before the jscpd analysis completed; the provider process group was terminated and no evidence was produced",
-				),
-				lifecycle.cleanup,
-			);
-		case "timeout":
-			return degradeForCleanup(
-				neverRan(mode, "unavailable", "the jscpd analysis exceeded its wall-time limit"),
-				lifecycle.cleanup,
-			);
-	}
+	return foldStagedAnalysisOutcome(lifecycle, (failure) => lifecycleFailure(mode, failure));
 }

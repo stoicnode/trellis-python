@@ -42,7 +42,8 @@ import type {
 } from "../../contract/index.ts";
 import type { PinnedToolResolveOptions } from "../resolve.ts";
 import {
-	degradeForCleanup,
+	foldStagedAnalysisOutcome,
+	type StagedAnalysisFailure,
 	type StagedRunOutcome,
 	stagedSourceSetCounts,
 	stagingDiagnostics,
@@ -72,6 +73,28 @@ export interface DependencyCruiserAnalysisOptions {
 	resolve?: PinnedToolResolveOptions;
 	/** Wall-time limit for waiting on the staged analysis (the lifecycle's own bound). */
 	timeoutMs?: number;
+}
+
+/** Translate lifecycle exits into dependency-cruiser's stable, located unavailable evidence. */
+function lifecycleFailure(
+	policy: ReturnType<typeof compileArchitecturePolicy>,
+	failure: StagedAnalysisFailure,
+): AnalysisResult {
+	if (failure.kind === "adapter-failed") {
+		return neverRan(
+			policy,
+			"unavailable",
+			`the dependency-cruiser adapter failed: ${messageOf(failure.error)}`,
+		);
+	}
+	if (failure.kind === "cancelled") {
+		return neverRan(
+			policy,
+			"unavailable",
+			"the audit was cancelled before the architecture analysis completed; the provider process group was terminated and no evidence was produced",
+		);
+	}
+	return neverRan(policy, "unavailable", "the architecture analysis exceeded its wall-time limit");
 }
 
 /** Normalize one validated cruise outcome; throws only on invalid evidence. */
@@ -232,31 +255,5 @@ export async function runDependencyCruiserAnalysis(
 				: `staging failed unexpectedly: ${messageOf(error)}`;
 		return neverRan(policy, "unavailable", reason);
 	}
-	switch (lifecycle.kind) {
-		case "completed":
-			return degradeForCleanup(lifecycle.value, lifecycle.cleanup);
-		case "adapter-failed":
-			return degradeForCleanup(
-				neverRan(
-					policy,
-					"unavailable",
-					`the dependency-cruiser adapter failed: ${messageOf(lifecycle.error)}`,
-				),
-				lifecycle.cleanup,
-			);
-		case "cancelled":
-			return degradeForCleanup(
-				neverRan(
-					policy,
-					"unavailable",
-					"the audit was cancelled before the architecture analysis completed; the provider process group was terminated and no evidence was produced",
-				),
-				lifecycle.cleanup,
-			);
-		case "timeout":
-			return degradeForCleanup(
-				neverRan(policy, "unavailable", "the architecture analysis exceeded its wall-time limit"),
-				lifecycle.cleanup,
-			);
-	}
+	return foldStagedAnalysisOutcome(lifecycle, (failure) => lifecycleFailure(policy, failure));
 }
