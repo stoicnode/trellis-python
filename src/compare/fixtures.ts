@@ -202,7 +202,7 @@ export function jscpdAnalysis(overrides: AnalysisOverrides = {}): ReportAnalysis
 
 /** Optional report-level knobs for the report builders. */
 export interface ReportSpec {
-	schemaVersion?: "1.1.0" | "1.2.0" | "1.3.0" | "1.4.0";
+	schemaVersion?: "1.1.0" | "1.2.0" | "1.3.0" | "1.4.0" | "1.5.0";
 	/** Merged over the default metrics (one complete metric per native-owned id). */
 	metrics?: Record<string, MetricValue>;
 	/** The headline index (default 10). */

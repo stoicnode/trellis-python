@@ -130,8 +130,9 @@ Every measurement and every report carries an explicit state:
 - `incomplete` — part of the scored scope could not be analyzed (parse errors,
   unresolved imports that could join scored source nodes, resource exhaustion).
   Python imports with runtime-selected or absent targets remain located
-  observations outside the declared-source cycle score. The report says what
-  and where;
+  observations outside the declared-source cycle score. A test-only parse
+  failure may make overall evidence incomplete while leaving a complete
+  production score. The report says what and where;
   an incomplete required dimension prevents publishing an apparently
   complete headline score (§7).
 - `unsupported` — the source is outside the TypeScript/TSX/Python analyzed
@@ -505,6 +506,19 @@ versioned calibration (§16.5).
   intent remains blocking. This scope change is graph policy 1.2.0 and scoring
   version 0.4.0-provisional; older baselines require a fresh comparison.
 
+  Starting with analyzer 0.5.0, graph policy 1.3.0 and cycle policy 1.2.0,
+  `import-cycle.{groups,modules,density}.production` measure the graph induced
+  by production files and only imports between those files. The scoring
+  formula consumes `groups.production` and `density.production`; the original
+  unsuffixed metrics retain their workspace-wide meaning as unscored evidence.
+  Production-cycle completeness derives from production parse diagnostics and
+  unresolved production imports, independently of test-only failures. A
+  production import of a test module is a located
+  `graph.production-imports-test` finding. Workspace cycle findings carry
+  their source sets and whether all members are in the scored graph. This
+  measurement correction is scoring 0.5.0-provisional and requires a fresh
+  baseline; formula weights are unchanged.
+
 ### 5.5 Safeguards (hook/check inspection — separate from the score)
 
 Safeguards inspect **configuration**, never execution, over a small
@@ -594,7 +608,7 @@ their original interpretation.
 
 ```jsonc
 {
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "analyzerVersion": "0.2.0",
   "scoringVersion": "0.1.0-provisional",
   "repo": { "root": "/abs/path", "identity": "…" },
@@ -737,7 +751,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.4.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.5.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.
@@ -785,7 +799,7 @@ repo-level by construction.
 |---|---|---|
 | `complexity-erosion` | 0.50 | `erosion.eroded-share.production` @ 0.25; `erosion.eroded-count.production` log scale 20 |
 | `duplication` | 0.30 | `duplication.density.production` @ 0.15; `duplication.groups.production` log scale 15 |
-| `import-cycle` | 0.20 | `import-cycle.density` @ 0.10; `import-cycle.groups` log scale 5 |
+| `import-cycle` | 0.20 | `import-cycle.density.production` @ 0.10; `import-cycle.groups.production` log scale 5 |
 
 - Density terms normalize linearly: `100 × min(1, value / saturation)`.
   Absolute counts use `b = ln(1 + count / scale)`, then `100 × b / (1 + b)`.

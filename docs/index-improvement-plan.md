@@ -1,6 +1,7 @@
 # Index measurement and calibration improvement plan
 
-Status: proposed; implementation has not started. Recorded 2026-09-22 against
+Status: in progress; Phase 0 evidence and P1.1 production cycle scope are implemented.
+Remaining phases are pending. Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.
 
@@ -41,12 +42,10 @@ blocks using explicit thresholds, and use Trellis itself to evaluate the
 implementation changes. These are product requirements, not additional defects
 established by the exploratory review.
 
-The review bundle currently lives at
-`/Users/bbr/.codex/visualizations/2026/09/22/01a0c957-4fa9-77d0-bfba-58d8d255e329/index-review/`.
-It contains the evaluation, input manifests, raw measurements, probe source,
-probe results, hashes, and a passing nine-gate log. Phase 0 removes reliance on
-that machine-specific location. The observations above are sufficient to
-understand the plan without that bundle.
+The portable manifest, compact summaries and compressed raw measurements live
+under [`corpus/index-utility/`](../corpus/index-utility/README.md). The
+observations above are sufficient to understand the plan without the raw
+bundle.
 
 ## Delivery sequence
 

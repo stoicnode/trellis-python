@@ -39,8 +39,8 @@ function goldenMetrics(): MetricValue[] {
 		"erosion.eroded-count.production": 5, //     → 18.243447
 		"duplication.density.production": 0.075, //  → 50
 		"duplication.groups.production": 0, //       → 0
-		"import-cycle.density": 0.05, //             → 50
-		"import-cycle.groups": 5, //                 → 40.938389
+		"import-cycle.density.production": 0.05, //             → 50
+		"import-cycle.groups.production": 5, //                 → 40.938389
 	});
 }
 
@@ -65,8 +65,8 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 				"erosion.eroded-count.production": 50,
 				"duplication.density.production": 0.5,
 				"duplication.groups.production": 40,
-				"import-cycle.density": 0.4,
-				"import-cycle.groups": 9,
+				"import-cycle.density.production": 0.4,
+				"import-cycle.groups.production": 9,
 			}),
 		);
 		expect(result.index).toBe(77);
@@ -94,7 +94,7 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 			productionMetrics({ "duplication.groups.production": 1 }),
 			productionMetrics({
 				"erosion.eroded-share.production": 0.013,
-				"import-cycle.groups": 2,
+				"import-cycle.groups.production": 2,
 			}),
 		];
 		for (const fixture of fixtures) {
@@ -128,7 +128,7 @@ describe("scoreSloppiness — bounds, rounding, and contribution totals", () => 
 	});
 
 	test("duplicate metric ids are a caller error, never silently merged", () => {
-		const metrics = [...goldenMetrics(), metric("import-cycle.groups", 5)];
+		const metrics = [...goldenMetrics(), metric("import-cycle.groups.production", 5)];
 		expect(() => scoreSloppiness(metrics)).toThrow(/duplicate metric id/);
 	});
 });
@@ -174,7 +174,10 @@ describe("scoreSloppiness — missing-analysis policy", () => {
 		const result = scoreSloppiness(
 			productionMetrics({}).filter((m) => !m.id.startsWith("import-cycle.")),
 		);
-		expect(result.missing).toEqual(["import-cycle.density", "import-cycle.groups"]);
+		expect(result.missing).toEqual([
+			"import-cycle.density.production",
+			"import-cycle.groups.production",
+		]);
 		expect(result.index).toBeNull();
 		expect(result.partial).toBe(true);
 		const cycles = result.dimensions.find((d) => d.dimension === "import-cycle");
@@ -182,13 +185,13 @@ describe("scoreSloppiness — missing-analysis policy", () => {
 		expect(scoreSchema.safeParse(result.score).success).toBe(true);
 	});
 
-	test("an incomplete test-set metric flags partial without distorting the production index", () => {
+	test("an incomplete test-set metric leaves the production index complete", () => {
 		const result = scoreSloppiness([
 			...productionMetrics({}),
 			incomplete("complexity.cc.p90.test"),
 		]);
-		expect(result.index).toBeNull();
-		expect(result.partial).toBe(true);
+		expect(result.index).toBe(0);
+		expect(result.partial).toBe(false);
 	});
 
 	test("a not-applicable ratio with complete zero counts is an empty scope, not missing", () => {

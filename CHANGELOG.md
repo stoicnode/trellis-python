@@ -11,6 +11,14 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Scored import cycles now use a production-induced graph. Test-only cycles,
+  imports and parse failures remain visible in workspace evidence without
+  diluting or withholding a complete production cycle score. The original
+  `import-cycle.*` metrics retain their workspace meaning; new
+  `import-cycle.*.production` metrics feed the unchanged formula weights.
+  Production imports of test modules are located findings. Analyzer 0.5.0,
+  schema 1.5.0 and scoring 0.5.0-provisional require fresh baselines for
+  comparison; historical reports remain readable.
 - Python audits now score cycles over declared source targets while retaining
   runtime-selected and absent-target imports as located unresolved evidence.
   Parser and resolver repairs plus a 250-million-unit bounded duplicate-work

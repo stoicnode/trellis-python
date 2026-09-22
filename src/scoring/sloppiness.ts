@@ -8,7 +8,7 @@
  * Rules implemented here (all documented in SPEC §7.1):
  *
  * - Only the **production** source set is scored; test-set metrics never
- *   offset production debt. Import cycles are repo-level by construction.
+ *   offset production debt. Import cycles use the production-induced graph.
  * - Every contribution is traceable: each dimension lists the raw metric
  *   ids, values, saturation thresholds, and blend shares that produced its
  *   points, and the contract `score` view references only metrics present
@@ -20,10 +20,9 @@
  *   (§3.4). A `not-applicable` ratio with complete zero counts is a
  *   genuinely empty scope and scores 0; the companion count term (always
  *   finite when measured) independently confirms zero debt.
- * - `partial` is true when any input metric is `incomplete` or any required
- *   metric is absent. Callers pass the full analyzer metric set; the report
- *   assembler (trellis-ef85) must emit every metric so the §6.4 invariant
- *   (`partial` equals the report's completeness rollup) holds.
+ * - `partial` is true when a required scored metric is incomplete or absent.
+ *   Other incomplete evidence remains visible in report completeness without
+ *   withholding an otherwise complete production score.
  * - The formula consumes only summed-mass repo metrics (§5.2 numerator/
  *   denominator sums). Per-package ratios in metric `detail` are
  *   explanatory and are never averaged into the index.
@@ -205,9 +204,6 @@ export function scoreSloppiness(metrics: readonly MetricValue[]): SloppinessScor
 	const unknownDimensions = scored
 		.filter((dimension) => dimension.state === "unknown")
 		.map((dimension) => dimension.dimension);
-	if (unknownDimensions.length === 0 && metrics.some((metric) => metric.state === "incomplete")) {
-		unknownDimensions.push("native-analysis");
-	}
 	const partial = unknownDimensions.length > 0;
 	const total = partial
 		? null

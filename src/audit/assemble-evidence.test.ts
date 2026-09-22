@@ -35,8 +35,8 @@ function requiredMetrics(): MetricValue[] {
 		metric("duplication.groups.production", 0),
 		metric("erosion.eroded-count.production", 0),
 		metric("erosion.eroded-share.production", 0, { unit: "ratio" }),
-		metric("import-cycle.density", 0, { unit: "ratio" }),
-		metric("import-cycle.groups", 0),
+		metric("import-cycle.density.production", 0, { unit: "ratio" }),
+		metric("import-cycle.groups.production", 0),
 	];
 }
 
@@ -217,19 +217,19 @@ describe("assembleReport evidence area", () => {
 		expect(report.evidence.completeness).toBe("incomplete");
 	});
 
-	test("refuses a score that disagrees with the declared scored inputs", () => {
-		// A scored analysis that shows a gap demands a partial headline; a
-		// scorer that saw only complete metrics says otherwise — assembly
-		// must reject the mismatch rather than publish either lie.
+	test("keeps a complete score when the scored metrics remain complete", () => {
 		const scored = contribution(requiredMetrics(), {
 			providerId: "trellis.duplication",
 			state: "incomplete",
 		});
-		expect(() =>
-			assembleReport(
-				{ ...fakeMeasurements(), analyses: [scored] },
-				scoreSloppiness(scored.metrics),
-			),
-		).toThrow(/partial/);
+		const report = assembleReport(
+			{ ...fakeMeasurements(), analyses: [scored] },
+			scoreSloppiness(scored.metrics),
+		);
+		if (report.schemaVersion !== SCHEMA_VERSION) {
+			throw new Error("expected an evidence-carrying report");
+		}
+		expect(report.score.partial).toBe(false);
+		expect(report.evidence.completeness).toBe("incomplete");
 	});
 });

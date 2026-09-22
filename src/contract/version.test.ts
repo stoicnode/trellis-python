@@ -15,11 +15,11 @@ describe("contract version constants", () => {
 	test("pins the evidence-carrying schema version for the §6 contract family", () => {
 		// 1.4.0 withholds incomplete native-score headlines rather than
 		// presenting a maximum numeric index.
-		expect(SCHEMA_VERSION).toBe("1.4.0");
+		expect(SCHEMA_VERSION).toBe("1.5.0");
 	});
 
 	test("pins the provisional scoring version from SPEC §7", () => {
-		expect(SCORING_VERSION).toBe("0.4.0-provisional");
+		expect(SCORING_VERSION).toBe("0.5.0-provisional");
 	});
 
 	test("aliases the analyzer version from the package version", () => {
@@ -29,15 +29,22 @@ describe("contract version constants", () => {
 
 describe("version-aware schema reading (§16.6)", () => {
 	test("reads the pre-provider version and the current version, oldest first", () => {
-		expect(SUPPORTED_SCHEMA_VERSIONS).toEqual(["1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0"]);
+		expect(SUPPORTED_SCHEMA_VERSIONS).toEqual([
+			"1.0.0",
+			"1.1.0",
+			"1.2.0",
+			"1.3.0",
+			"1.4.0",
+			"1.5.0",
+		]);
 		expect(PRE_PROVIDER_SCHEMA_VERSION).toBe("1.0.0");
 	});
 
 	test("accepts exactly the supported versions", () => {
-		for (const version of ["1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0"]) {
+		for (const version of ["1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0"]) {
 			expect(isSupportedSchemaVersion(version)).toBe(true);
 		}
-		for (const version of ["0.9.0", "1.0.1", "1.5.0", "2.0.0", "", "1.1"]) {
+		for (const version of ["0.9.0", "1.0.1", "1.6.0", "2.0.0", "", "1.1"]) {
 			expect(isSupportedSchemaVersion(version)).toBe(false);
 		}
 	});

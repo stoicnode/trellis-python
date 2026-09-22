@@ -303,8 +303,11 @@ const GRAPH_METRICS = [
 /** The import-cycle analyzer's metric ids (mirrors its output, sorted). */
 const CYCLE_METRICS = [
 	"import-cycle.density",
+	"import-cycle.density.production",
 	"import-cycle.groups",
+	"import-cycle.groups.production",
 	"import-cycle.modules",
+	"import-cycle.modules.production",
 ] as const;
 
 const complexityAnalyzer: NativeAnalyzerRegistration = {

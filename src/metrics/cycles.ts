@@ -34,7 +34,7 @@
 import type { DependencyGraph } from "./graph-types.ts";
 
 /** The versioned cycle policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const CYCLE_POLICY_VERSION = "1.1.0";
+export const CYCLE_POLICY_VERSION = "1.2.0";
 
 export const CYCLE_POLICY = {
 	version: CYCLE_POLICY_VERSION,
@@ -55,6 +55,8 @@ export const CYCLE_POLICY = {
 	 * per-package so repo totals never double-count a cross-package group.
 	 */
 	packageView: "shared-ids-per-package-modules",
+	/** Scoring uses the production-induced subgraph; workspace groups remain evidence. */
+	scoredScope: "production-induced",
 } as const;
 
 export type CyclePolicy = typeof CYCLE_POLICY;

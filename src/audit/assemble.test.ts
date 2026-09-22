@@ -95,8 +95,8 @@ function requiredMetrics(): MetricValue[] {
 		metric("duplication.groups.production", 0),
 		metric("erosion.eroded-count.production", 0),
 		metric("erosion.eroded-share.production", 0, { unit: "ratio" }),
-		metric("import-cycle.density", 0, { unit: "ratio" }),
-		metric("import-cycle.groups", 0),
+		metric("import-cycle.density.production", 0, { unit: "ratio" }),
+		metric("import-cycle.groups.production", 0),
 	];
 }
 
@@ -248,14 +248,14 @@ describe("assembleReport", () => {
 		expect(report.run).toEqual({ auditedAt: "2026-01-02T03:04:05.000Z", durationMs: 12 });
 	});
 
-	test("rolls an incomplete metric up to an incomplete, partial report", () => {
+	test("keeps a complete score when only an unscored metric is incomplete", () => {
 		const metrics = [
 			...requiredMetrics(),
 			metric("graph.edges.unresolved", 1, { state: "incomplete", reason: "1 unresolved" }),
 		];
 		const report = assembleReport(fakeMeasurements(metrics), scoreSloppiness(metrics));
 		expect(report.completeness).toBe("incomplete");
-		expect(report.score.partial).toBe(true);
+		expect(report.score.partial).toBe(false);
 	});
 
 	test("refuses to publish a report whose score disagrees with its metrics", () => {

@@ -156,6 +156,28 @@ function unresolvedFindings(edges: readonly GraphEdge[]): Finding[] {
 	return findings;
 }
 
+/** A production dependency on test code stays visible outside the scored graph. */
+function productionTestFindings(graph: DependencyGraph): Finding[] {
+	const sourceSets = new Map(graph.nodes.map((node) => [node.path, node.sourceSet]));
+	return graph.edges.flatMap((edge) => {
+		if (
+			sourceSets.get(edge.from) !== "production" ||
+			edge.resolution.status !== "local" ||
+			sourceSets.get(edge.resolution.target) !== "test"
+		)
+			return [];
+		return [
+			{
+				kind: "graph.production-imports-test",
+				path: edge.from,
+				range: edge.range,
+				summary: `production import depends on test module '${edge.resolution.target}'`,
+				facts: { target: edge.resolution.target, edgeKind: edge.kind, typeOnly: edge.typeOnly },
+			},
+		];
+	});
+}
+
 /**
  * Resolve the workspace's dependency graph (see the module docblock for the
  * outputs and state rules). Resolution touches local files/configuration
@@ -178,6 +200,9 @@ export function analyzeDependencyGraph(
 		})),
 	);
 	const diagnosticFiles = syntax.files.filter((file) => file.diagnostics.length > 0).length;
+	const diagnosticPaths = syntax.files
+		.filter((file) => file.diagnostics.length > 0)
+		.map((file) => file.path);
 	const graph: DependencyGraph = {
 		policyVersion: GRAPH_POLICY_VERSION,
 		root: syntax.root,
@@ -190,10 +215,15 @@ export function analyzeDependencyGraph(
 		externals: externalPackages(edges),
 		configs: resolver.configs(),
 		completeness: "complete",
+		diagnosticPaths,
 	};
 	const metrics = graphMetrics(graph, diagnosticFiles);
 	graph.completeness = metrics.some((metric) => metric.state === "incomplete")
 		? "incomplete"
 		: "complete";
-	return { graph, metrics, findings: unresolvedFindings(edges) };
+	return {
+		graph,
+		metrics,
+		findings: [...unresolvedFindings(edges), ...productionTestFindings(graph)],
+	};
 }

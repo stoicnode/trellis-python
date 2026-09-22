@@ -134,8 +134,8 @@ describe("scoringCatalogMetricIds", () => {
 			"duplication.groups.production",
 			"erosion.eroded-count.production",
 			"erosion.eroded-share.production",
-			"import-cycle.density",
-			"import-cycle.groups",
+			"import-cycle.density.production",
+			"import-cycle.groups.production",
 		]);
 	});
 });
@@ -147,7 +147,7 @@ describe("requiredForScoring", () => {
 			entry("trellis.duplication", { metrics: ["duplication.groups.production"] }),
 			entry("trellis.dependency-graph", { metrics: ["graph.files"] }),
 			entry("trellis.import-cycles", {
-				metrics: ["import-cycle.groups"],
+				metrics: ["import-cycle.groups.production"],
 				requires: ["trellis.dependency-graph"],
 			}),
 			entry("trellis.safeguards"),

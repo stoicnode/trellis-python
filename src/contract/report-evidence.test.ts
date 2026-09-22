@@ -12,7 +12,7 @@ import {
 	type EvidenceAuditReport,
 	type PreProviderAuditReport,
 } from "./report.ts";
-import { SCHEMA_VERSION } from "./version.ts";
+import { PRE_PRODUCTION_CYCLE_SCHEMA_VERSION } from "./version.ts";
 
 /**
  * Evidence vs score completeness on the versioned report (SPEC §16.2,
@@ -26,8 +26,10 @@ import { SCHEMA_VERSION } from "./version.ts";
 /** Parse a report and narrow it to the evidence-carrying member (any other version throws). */
 function parseEvidenceReport(report: unknown): EvidenceAuditReport {
 	const parsed = auditReportSchema.parse(report);
-	if (parsed.schemaVersion !== SCHEMA_VERSION) {
-		throw new Error(`expected schema version ${SCHEMA_VERSION}, got ${parsed.schemaVersion}`);
+	if (parsed.schemaVersion !== PRE_PRODUCTION_CYCLE_SCHEMA_VERSION) {
+		throw new Error(
+			`expected schema version ${PRE_PRODUCTION_CYCLE_SCHEMA_VERSION}, got ${parsed.schemaVersion}`,
+		);
 	}
 	return parsed;
 }
@@ -150,7 +152,7 @@ function advisoryExternal(
 function evidenceReport(): EvidenceAuditReport {
 	return {
 		...baseReport(),
-		schemaVersion: SCHEMA_VERSION,
+		schemaVersion: PRE_PRODUCTION_CYCLE_SCHEMA_VERSION,
 		findings: baseReport().findings.map((finding) => ({
 			...finding,
 			identity: { version: "1.0.0", state: "ambiguous", reason: "anonymous" },

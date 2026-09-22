@@ -14,24 +14,19 @@
  *   cross-package cycles appear in every affected package's view while
  *   module counts stay per-package, so the repo-level affected-module total
  *   (the union over all groups) never double-counts;
- * - contract metrics `import-cycle.groups` (count, split by class in
- *   `detail`), `import-cycle.modules` (affected-module union), and
- *   `import-cycle.density` (affected modules / graph nodes, a ratio of
- *   compatible quantities), plus one located `import-cycle` finding per
- *   group.
+ * - workspace metrics `import-cycle.{groups,modules,density}` retain their
+ *   historical meaning. The `.production` counterparts measure the induced
+ *   production graph and feed scoring. Located workspace findings carry
+ *   their source sets and scored status.
  *
  * State rules (SPEC §3.3):
  *
  * - Counts are always finite (`0` when acyclic) → `complete` on a complete
  *   graph. The density is `not-applicable` only for a node-free graph
  *   (a 0/0 ratio is meaningless).
- * - Unresolved graph coverage accompanies the results: when the dependency
- *   graph is `incomplete` (unknown scored edges or parse diagnostics), every
- *   cycle metric is `incomplete` with the partial values measured over the
- *   resolved edges and a reason carrying the graph's own incompleteness
- *   reasons; `detail.unresolvedEdges` keeps the unresolved-edge count
- *   machine-readable. An incomplete graph never yields an apparently clean
- *   cycle result.
+ * - Each scope derives completeness from its own parse diagnostics and
+ *   relevant unresolved edges. An unrelated test failure can degrade the
+ *   workspace metrics while the production metrics remain complete.
  *
  * Determinism (SPEC §3.5): group ids and representative paths derive from
  * sorted members and sorted adjacency only, so the analysis is byte-stable
@@ -46,7 +41,11 @@ import {
 	type EdgeClass,
 } from "./cycles.ts";
 import { roundTo } from "./erosion.ts";
-import type { DependencyGraph, DependencyGraphAnalysis } from "./graph-types.ts";
+import {
+	blocksCycleScore,
+	type DependencyGraph,
+	type DependencyGraphAnalysis,
+} from "./graph-types.ts";
 
 /** One complete cyclic module group (SPEC §5.4). */
 export interface CycleGroup {
@@ -79,6 +78,8 @@ export interface CycleAnalysis {
 	policyVersion: string;
 	/** Every cyclic module group, in id order (both edge classes). */
 	groups: CycleGroup[];
+	/** Cycles wholly inside the scored production graph. */
+	productionGroups: CycleGroup[];
 	/** One view per package touched by at least one group, sorted by path. */
 	packages: PackageCycleView[];
 	/** Repo-level affected modules: the union over all groups (no double-counting). */
@@ -204,17 +205,20 @@ function cycleMetrics(
 	groups: readonly CycleGroup[],
 	affected: AffectedModules,
 	reason: string | undefined,
+	suffix = "",
+	unresolvedCount?: number,
 ): MetricValue[] {
 	const runtime = groups.filter((group) => group.edgeClass === "runtime").length;
-	const unresolvedEdges = graph.edges.filter(
-		(edge) => edge.resolution.status === "unresolved",
-	).length;
+	const unresolvedEdges =
+		unresolvedCount ?? graph.edges.filter((edge) => edge.resolution.status === "unresolved").length;
+	const scope = suffix === ".production" ? "production" : "workspace";
 	const metrics: MetricValue[] = [
 		{
-			id: "import-cycle.groups",
+			id: `import-cycle.groups${suffix}`,
 			unit: "count",
 			...stateAndValue(groups.length, reason),
 			detail: {
+				scope,
 				runtime,
 				typeOnly: groups.length - runtime,
 				policyVersion: CYCLE_POLICY_VERSION,
@@ -222,14 +226,51 @@ function cycleMetrics(
 			},
 		},
 		{
-			id: "import-cycle.modules",
+			id: `import-cycle.modules${suffix}`,
 			unit: "count",
 			...stateAndValue(affected.all, reason),
-			detail: { runtime: affected.runtime, typeOnly: affected.typeOnly },
+			detail: { scope, runtime: affected.runtime, typeOnly: affected.typeOnly },
 		},
-		densityMetric(graph.nodes.length, affected.all, reason),
+		{
+			...densityMetric(graph.nodes.length, affected.all, reason),
+			id: `import-cycle.density${suffix}`,
+			detail: { scope },
+		},
 	];
 	return metrics.sort((a, b) => compareStrings(a.id, b.id));
+}
+
+/** The scored graph has production nodes and only edges whose endpoints are production. */
+function productionGraph(graph: DependencyGraph): DependencyGraph {
+	const nodes = graph.nodes.filter((node) => node.sourceSet === "production");
+	const paths = new Set(nodes.map((node) => node.path));
+	return {
+		...graph,
+		nodes,
+		edges: graph.edges.filter(
+			(edge) =>
+				paths.has(edge.from) &&
+				edge.resolution.status === "local" &&
+				paths.has(edge.resolution.target),
+		),
+		diagnosticPaths: (graph.diagnosticPaths ?? []).filter((path) => paths.has(path)),
+		completeness: productionIncompleteness(graph) === undefined ? "complete" : "incomplete",
+	};
+}
+
+/** Unknown production edges and parse failures alone can withhold scored cycle metrics. */
+function productionIncompleteness(graph: DependencyGraph): string | undefined {
+	const production = new Set(
+		graph.nodes.filter((node) => node.sourceSet === "production").map((node) => node.path),
+	);
+	const unresolved = graph.edges.filter(
+		(edge) => production.has(edge.from) && blocksCycleScore(edge),
+	).length;
+	const diagnostics = (graph.diagnosticPaths ?? []).filter((path) => production.has(path)).length;
+	const reasons: string[] = [];
+	if (unresolved > 0) reasons.push(`${unresolved} production import edge(s) could not be resolved`);
+	if (diagnostics > 0) reasons.push(`${diagnostics} production file(s) produced parse diagnostics`);
+	return reasons.length === 0 ? undefined : reasons.join("; ");
 }
 
 /** The range locating a group: the first edge of its representative path. */
@@ -248,6 +289,8 @@ function findingRange(graph: DependencyGraph, group: CycleGroup): Range {
 
 /** One `import-cycle` finding per group (SPEC §6.2). */
 function cycleFinding(graph: DependencyGraph, group: CycleGroup): Finding {
+	const sourceSetOf = new Map(graph.nodes.map((node) => [node.path, node.sourceSet]));
+	const sourceSets = [...new Set(group.members.map((member) => sourceSetOf.get(member)))].sort();
 	return {
 		kind: "import-cycle",
 		path: group.representativePath[0] ?? "",
@@ -256,6 +299,8 @@ function cycleFinding(graph: DependencyGraph, group: CycleGroup): Finding {
 		facts: {
 			group: group.id,
 			edgeClass: group.edgeClass,
+			sourceSets,
+			scored: sourceSets.length === 1 && sourceSets[0] === "production",
 			members: group.members.length,
 			packages: group.packages,
 			representativePath: group.representativePath,
@@ -273,12 +318,31 @@ export function analyzeCycles(analysis: DependencyGraphAnalysis): CycleAnalysis 
 	const groups = buildGroups(graph);
 	const affected = countAffected(groups);
 	const reason = graphIncompleteness(analysis);
+	const scoredGraph = productionGraph(graph);
+	const productionGroups = buildGroups(scoredGraph);
+	const productionAffected = countAffected(productionGroups);
+	const productionReason = productionIncompleteness(graph);
+	const productionPaths = new Set(scoredGraph.nodes.map((node) => node.path));
+	const productionUnresolved = graph.edges.filter(
+		(edge) => productionPaths.has(edge.from) && edge.resolution.status === "unresolved",
+	).length;
 	return {
 		policyVersion: CYCLE_POLICY_VERSION,
 		groups,
+		productionGroups,
 		packages: packageViews(graph, groups),
 		affectedModules: affected.all,
-		metrics: cycleMetrics(graph, groups, affected, reason),
+		metrics: [
+			...cycleMetrics(graph, groups, affected, reason),
+			...cycleMetrics(
+				scoredGraph,
+				productionGroups,
+				productionAffected,
+				productionReason,
+				".production",
+				productionUnresolved,
+			),
+		].sort((a, b) => compareStrings(a.id, b.id)),
 		findings: groups.map((group) => cycleFinding(graph, group)),
 	};
 }

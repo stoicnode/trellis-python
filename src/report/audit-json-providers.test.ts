@@ -163,7 +163,7 @@ describe("renderAuditJson round-trips provider evidence through the artifact bou
 		const report = await audit({ sonarjs: {} });
 		const loaded = await roundTrip("undelivered.json", report);
 		expect(loaded).toEqual(report);
-		expect(loaded.schemaVersion).toBe("1.4.0");
+		expect(loaded.schemaVersion).toBe("1.5.0");
 		expect(externalAnalyses(loaded).map((entry) => entry.provider.id)).toEqual(["sonarjs"]);
 		for (const entry of externalAnalyses(loaded)) {
 			expect(entry.state).toBe("unsupported");
@@ -262,7 +262,7 @@ describe("renderAuditJson determinism and stable fields", () => {
 	test("keeps a default native-only audit native-only on the wire", async () => {
 		const report = await audit({});
 		const parsed = JSON.parse(renderAuditJson(report)) as AuditReport;
-		expect(parsed.schemaVersion).toBe("1.4.0");
+		expect(parsed.schemaVersion).toBe("1.5.0");
 		// Schema 1.1.0 mandates the evidence area — with native entries only.
 		expect(carriedAnalyses(parsed).every((entry) => entry.provider.kind === "native")).toBe(true);
 		expect(externalAnalyses(parsed)).toEqual([]);

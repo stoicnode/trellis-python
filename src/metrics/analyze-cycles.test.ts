@@ -277,7 +277,11 @@ describe("analyzeCycles with unresolved graph coverage", () => {
 		// …but every metric carries the unresolved coverage alongside (SPEC §3.3).
 		for (const metric of analysis.metrics) {
 			expect(metric.state).toBe("incomplete");
-			expect(metric.reason).toContain("1 local import edge(s) could not be resolved");
+			expect(metric.reason).toContain(
+				metric.id.endsWith(".production")
+					? "1 production import edge(s) could not be resolved"
+					: "1 local import edge(s) could not be resolved",
+			);
 		}
 		expect(byId(analysis.metrics).get("import-cycle.groups")).toMatchObject({
 			value: 1,

@@ -11,7 +11,7 @@ import {
 describe("SCORING_FORMULA", () => {
 	test("is pinned to the contract scoring version and labelled provisional", () => {
 		expect(SCORING_FORMULA.version).toBe(SCORING_VERSION);
-		expect(SCORING_FORMULA.version).toBe("0.4.0-provisional");
+		expect(SCORING_FORMULA.version).toBe("0.5.0-provisional");
 		expect(SCORING_FORMULA.provisional).toBe(true);
 	});
 
@@ -37,8 +37,8 @@ describe("SCORING_FORMULA", () => {
 				dimension: "import-cycle",
 				weight: 0.2,
 				terms: [
-					{ metricId: "import-cycle.density", saturatesAt: 0.1, share: 0.5 },
-					{ metricId: "import-cycle.groups", countScale: 5, share: 0.5 },
+					{ metricId: "import-cycle.density.production", saturatesAt: 0.1, share: 0.5 },
+					{ metricId: "import-cycle.groups.production", countScale: 5, share: 0.5 },
 				],
 			},
 		]);

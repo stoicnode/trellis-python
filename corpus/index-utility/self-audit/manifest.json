@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "targetBeforeRevision": "1143172ef17a7e8731fc7847c4535f954876ab1e",
+  "sourceBeforeSha256": "0f67fb0be3d4d19b0da564f8cce6ec4f299cd1311f421ad0b9eecf3212f5b7bc",
+  "sourceAfterSha256": "6b98000694a07d496d631b31ed3eb83e06254b1632a291aab5e8a34ef39888cb",
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "afterThreeRunPayloadFingerprints": [
+    "06fabea4933423a377eaf078e5c301b0d7c9d966476b943484a9b45d08ea3656",
+    "06fabea4933423a377eaf078e5c301b0d7c9d966476b943484a9b45d08ea3656",
+    "06fabea4933423a377eaf078e5c301b0d7c9d966476b943484a9b45d08ea3656"
+  ],
+  "reports": {
+    "trellis-before.json": {
+      "sha256": "df60ee5accf8897d373f5837d8779b52083619529e8e709c6dcc6f513739c219",
+      "compressedPath": "trellis-before.json.gz"
+    },
+    "trellis-after-old-analyzer.json": {
+      "sha256": "21cfd3e4558eedfa88c6ff362c0c1dd8a85c7a432bc092c5a874134df1b395ea",
+      "compressedPath": "trellis-after-old-analyzer.json.gz"
+    },
+    "trellis-before-new-analyzer.json": {
+      "sha256": "dbb8f0e2025017e07b8549f867c3bbe2c1b393c4b5223fce38dd24b672513755",
+      "compressedPath": "trellis-before-new-analyzer.json.gz"
+    },
+    "trellis-after-new-analyzer.json": {
+      "sha256": "3cfd8c6361270ee4abcd0d5ab9430be64a497b8c3fffb5c8264a4bda7f0b42b4",
+      "compressedPath": "trellis-after-new-analyzer.json.gz"
+    }
+  }
+}

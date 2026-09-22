@@ -1,6 +1,6 @@
 # Python analysis in Trellis
 
-Trellis 0.4.0 audits `.py` files alongside TypeScript and TSX with the same
+Trellis 0.5.0 audits `.py` files alongside TypeScript and TSX with the same
 scoring, reporting, comparison, policy, history and fleet pipeline. Python is
 parsed in process with pinned `@lezer/python` 1.1.18; no Python interpreter,
 project import, install or subprocess is needed for the native audit. The
@@ -46,8 +46,10 @@ failures, source lines, unresolved imports and dynamic imports. An unresolved
 import remains visible even when its absent or runtime-selected target cannot
 join the declared-source graph. Parser recovery and ambiguous local targets
 still make required dimensions incomplete.
-Schema 1.4.0 records withheld headlines, analyzer 0.4.0 records the broader
-source population, and scoring is 0.4.0-provisional. Recreate baselines
+Schema 1.5.0 carries production-only cycle metrics beside workspace cycle
+evidence. Analyzer 0.5.0 and scoring 0.5.0-provisional score cycles only over
+production modules and their imports; unrelated test files cannot dilute the
+cycle density or withhold its score. Recreate baselines
 made by older analyzer versions before using regression policy. Historical
 reports remain readable.
 

@@ -158,7 +158,13 @@ export function rollUpEvidenceCompleteness(
 export function rollUpScoreCompleteness(
 	analyses: readonly ReportAnalysis[],
 	metrics: Readonly<Record<string, MetricValue>>,
+	requiredMetricIds?: ReadonlySet<string>,
 ): Completeness {
+	if (requiredMetricIds !== undefined) {
+		return [...requiredMetricIds].some((id) => metrics[id]?.state === "incomplete")
+			? "incomplete"
+			: "complete";
+	}
 	for (const analysis of analyses) {
 		if (analysis.scoring !== "scored") continue;
 		if (GAP_STATES.has(analysis.state)) return "incomplete";

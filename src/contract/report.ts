@@ -62,6 +62,7 @@ import { safeguardResultSchema } from "./safeguard.ts";
 import { validateCurrentScore, validateMeasurementHonesty } from "./score-validation.ts";
 import {
 	PRE_IDENTITY_SCHEMA_VERSION,
+	PRE_PRODUCTION_CYCLE_SCHEMA_VERSION,
 	PRE_PROVIDER_SCHEMA_VERSION,
 	PRE_WITHHELD_SCHEMA_VERSION,
 	SCHEMA_VERSION,
@@ -237,13 +238,22 @@ function validateScoreContributors(
  */
 function validateCompletenessIndependence(
 	report: {
+		schemaVersion: string;
 		metrics: Record<string, MetricValue>;
 		score: Score;
 		evidence: EvidenceArea;
 	},
 	ctx: z.RefinementCtx,
 ): void {
-	const scoreCompleteness = rollUpScoreCompleteness(report.evidence.analyses, report.metrics);
+	const requiredMetricIds =
+		report.schemaVersion === SCHEMA_VERSION
+			? new Set(report.score.contributions.flatMap((entry) => entry.metricIds))
+			: undefined;
+	const scoreCompleteness = rollUpScoreCompleteness(
+		report.evidence.analyses,
+		report.metrics,
+		requiredMetricIds,
+	);
 	if (report.score.partial !== (scoreCompleteness === "incomplete")) {
 		ctx.addIssue({
 			code: "custom",
@@ -286,6 +296,7 @@ export const evidenceAuditReportSchema = z
 			PRE_IDENTITY_SCHEMA_VERSION,
 			SCOPED_IDENTITY_SCHEMA_VERSION,
 			PRE_WITHHELD_SCHEMA_VERSION,
+			PRE_PRODUCTION_CYCLE_SCHEMA_VERSION,
 			SCHEMA_VERSION,
 		]),
 		...reportBody,
@@ -294,7 +305,10 @@ export const evidenceAuditReportSchema = z
 	})
 	.superRefine((report, ctx) => {
 		validateMeasurementHonesty(report, ctx);
-		if (report.schemaVersion === SCHEMA_VERSION) {
+		if (
+			report.schemaVersion === SCHEMA_VERSION ||
+			report.schemaVersion === PRE_PRODUCTION_CYCLE_SCHEMA_VERSION
+		) {
 			validateCurrentScore(report, ctx);
 		} else if (
 			report.score.index === null ||

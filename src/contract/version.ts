@@ -26,7 +26,7 @@ import { VERSION } from "../index.ts";
 export const ANALYZER_VERSION = VERSION;
 
 /** Scoring version: the provisional formula (SPEC §7); trellis-00d5 owns the formula itself. */
-export const SCORING_VERSION = "0.4.0-provisional";
+export const SCORING_VERSION = "0.5.0-provisional";
 
 /**
  * Schema version for the §6 report/configuration contract family.
@@ -38,7 +38,10 @@ export const SCORING_VERSION = "0.4.0-provisional";
  * from the report's declared scored inputs. Native metric values and the
  * scoring formula are unchanged.
  */
-export const SCHEMA_VERSION = "1.4.0";
+export const SCHEMA_VERSION = "1.5.0";
+
+/** Reports before production-induced cycle scoring. */
+export const PRE_PRODUCTION_CYCLE_SCHEMA_VERSION = "1.4.0";
 
 /** Evidence-carrying schema immediately before withheld headlines. */
 export const PRE_WITHHELD_SCHEMA_VERSION = "1.3.0";
@@ -63,6 +66,7 @@ export const SUPPORTED_SCHEMA_VERSIONS = [
 	PRE_IDENTITY_SCHEMA_VERSION,
 	SCOPED_IDENTITY_SCHEMA_VERSION,
 	PRE_WITHHELD_SCHEMA_VERSION,
+	PRE_PRODUCTION_CYCLE_SCHEMA_VERSION,
 	SCHEMA_VERSION,
 ] as const;
 

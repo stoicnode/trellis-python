@@ -43,7 +43,7 @@ import type { Completeness, Finding, MetricValue, Range, SourceSet } from "../co
 import type { ImportSiteKind } from "../syntax/import-sites.ts";
 
 /** The versioned graph policy (SPEC §5.4 "fixed by the (versioned) graph policy"). */
-export const GRAPH_POLICY_VERSION = "1.2.0";
+export const GRAPH_POLICY_VERSION = "1.3.0";
 
 export const GRAPH_POLICY = {
 	version: GRAPH_POLICY_VERSION,
@@ -53,6 +53,8 @@ export const GRAPH_POLICY = {
 	dynamicImports: "literal-only",
 	/** Python cycle scoring covers declared source targets, not runtime-selected or absent modules. */
 	pythonCycleScope: "declared-source-targets",
+	/** Scored cycles use only production nodes and edges between them. */
+	scoredCycleScope: "production-induced",
 	/** A file importing itself records a self-edge; cycle policy downstream decides its meaning. */
 	selfEdges: "retained",
 	/** External packages are recorded by name and never resolved into (local files/config only). */
@@ -163,6 +165,8 @@ export interface DependencyGraph {
 	configs: GraphConfig[];
 	/** `"incomplete"` when scored edges remain unknown or files carried parse diagnostics. */
 	completeness: Completeness;
+	/** Parse failures by path, retained so induced graph views derive their own completeness. */
+	diagnosticPaths?: string[];
 }
 
 /** The graph plus its contract metrics and findings. */
