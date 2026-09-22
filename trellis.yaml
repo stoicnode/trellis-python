@@ -5,3 +5,6 @@ source:
     # Fixed validation fixtures (trellis-e924, corpus/): intentional clones,
     # erosion, cycles, and parse failures — audit inputs, not product source.
     - "corpus/**"
+    # Generated parser tables and their upstream tokenizer are audit runtime
+    # assets, not handwritten product behavior (trellis-0000).
+    - "src/python/grammar/**"

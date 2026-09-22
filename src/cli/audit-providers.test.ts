@@ -58,7 +58,7 @@ async function runCli(
 
 /** The runtime packages a trellis CLI install needs to boot (never the pinned tools). */
 const RUNTIME_PACKAGES = [
-	"@lezer/python",
+	"@lezer/lr",
 	"commander",
 	"js-yaml",
 	"typescript",

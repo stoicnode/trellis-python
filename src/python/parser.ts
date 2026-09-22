@@ -4,7 +4,6 @@
  */
 
 import type { Tree } from "@lezer/common";
-import { parser } from "@lezer/python";
 import { HOTSPOT_IDENTITY_VERSION, type Range, type SourceSet } from "../contract/index.ts";
 import type {
 	LineCounts,
@@ -13,10 +12,11 @@ import type {
 	NormalizedToken,
 	ParseDiagnostic,
 } from "../syntax/types.ts";
+import { parser } from "./grammar/trellis-parser.ts";
 import { pythonIndentationDiagnostics } from "./layout.ts";
 
 /** The pinned parser identity carried by the normalized inventory. */
-export const PYTHON_PARSER_VERSION = "1.1.18";
+export const PYTHON_PARSER_VERSION = "1.1.18-trellis.1";
 
 interface Node {
 	name: string;

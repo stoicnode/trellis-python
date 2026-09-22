@@ -71,6 +71,18 @@
 			"formatter": {
 				"enabled": false
 			}
+		},
+		{
+			"includes": ["src/python/grammar/**"],
+			"formatter": {
+				"enabled": false
+			},
+			"linter": {
+				"enabled": false
+			},
+			"assist": {
+				"enabled": false
+			}
 		}
 	]
 }

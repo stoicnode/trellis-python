@@ -33,6 +33,71 @@ function functions(source: string) {
 }
 
 describe("Python structural adapter", () => {
+	test("keeps a parenthesized relative import analyzable across comments", () => {
+		const source = [
+			"from .cookies import (",
+			"    # Requests keeps imports readable.",
+			"    CookieJar,",
+			"    extract_cookies_to_jar,",
+			")",
+		].join("\n");
+		const parsed = parsePython("src/requests/sessions.py", source);
+		expect(parsed.diagnostics).toEqual([]);
+		expect(collectPythonImportSites(parsed.tree, source, "src/requests/sessions.py")).toEqual([
+			expect.objectContaining({
+				python: { form: "from", level: 1, module: "cookies", imported: ["CookieJar"] },
+			}),
+			expect.objectContaining({
+				python: {
+					form: "from",
+					level: 1,
+					module: "cookies",
+					imported: ["extract_cookies_to_jar"],
+				},
+			}),
+		]);
+	});
+
+	test("accepts syntax recovered incorrectly by the upstream grammar", () => {
+		const validSources = [
+			"",
+			"# a comment-only module\n# remains a module\n",
+			[
+				"from .cookies import (",
+				"    # Requests keeps imports readable.",
+				"    CookieJar,",
+				"    extract_cookies_to_jar,",
+				")",
+			].join("\n"),
+			"__all__ = (\n    'CookieJar',\n    'extract_cookies_to_jar',\n)\n",
+			"def generator():\n    yield\n",
+			"with connect() as (host, port):\n    use(host, port)\n",
+			"values = [code for code, *parameters in controls]\n",
+			[
+				"match command:",
+				"    case {'kind': 'copy', 'items': [first, *rest]}:",
+				"        return first, rest",
+			].join("\n"),
+		];
+
+		for (const source of validSources)
+			expect(parsePython("src/valid.py", source).diagnostics).toEqual([]);
+	});
+
+	test("keeps malformed counterparts diagnosed", () => {
+		const invalidSources = [
+			"def broken():\nreturn 1\n",
+			"if first:\n    value = 1\n  return value\n",
+			"def generator():\n    yield from\n",
+			"with connect() as (1, port):\n    use(port)\n",
+			"values = [code for code, * in controls]\n",
+			"from module import (\n    value\n",
+		];
+
+		for (const source of invalidSources)
+			expect(parsePython("src/invalid.py", source).diagnostics.length).toBeGreaterThan(0);
+	});
+
 	test.each([
 		["if and elif", "if x:\n        pass\n    elif x > 2:\n        pass", 3, 1],
 		["nested if", "if x:\n        if x > 2:\n            pass", 3, 2],

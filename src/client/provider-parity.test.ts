@@ -72,7 +72,7 @@ function externalProviderIds(report: client.AuditReport): string[] {
 
 /** The runtime packages a trellis install needs to boot (never the pinned tools). */
 const RUNTIME_PACKAGES = [
-	"@lezer/python",
+	"@lezer/lr",
 	"commander",
 	"js-yaml",
 	"typescript",
