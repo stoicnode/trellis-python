@@ -1,6 +1,6 @@
-/** Maximal LCP intervals, with linear context counting instead of occurrence pairs.
+/** Maximal LCP intervals with reusable left-context range queries.
  * A member participates exactly when another occurrence differs on BOTH sides.
- * Inclusion/exclusion of left/right context counts tests that without a Cartesian product.
+ * Right contexts form contiguous suffix-array partitions at each interval depth.
  */
 import { DUPLICATION_MIN_TOKENS } from "./duplication.ts";
 import type { RawGroup, RawMember } from "./duplication-groups.ts";
@@ -32,6 +32,7 @@ function buildLeftContextIndex(
 	const minimum = new Uint32Array(size * 2);
 	work.reserve(size * 2);
 	const maximum = new Uint32Array(size * 2);
+	work.charge(size * 2);
 	minimum.fill(0xffffffff);
 	const offset = data.fileStart.length + 1;
 	for (let rank = 0; rank < sa.length; rank += 1) {
