@@ -1,6 +1,6 @@
 # Python analysis in Trellis
 
-Trellis 0.7.0 audits `.py` files alongside TypeScript and TSX with the same
+Trellis audits `.py` files alongside TypeScript and TSX with the same
 scoring, reporting, comparison, policy, history and fleet pipeline. Python is
 parsed in process with pinned `@lezer/python` 1.1.18; no Python interpreter,
 project import, install or subprocess is needed for the native audit. The
@@ -44,10 +44,11 @@ and relative `from` imports. `from pkg import child` targets the child module
 when present, otherwise the package containing the imported symbol. A top
 level name absent locally is external; a missing descendant of a known local
 package or failed relative import is unresolved. Ambiguous module owners are
-unresolved. Dynamic `__import__` and `importlib.import_module` calls, including
-simple aliases, are located limitations outside the declared-source cycle
-score. They remain visible as unresolved findings and counts. Ambiguous local
-module owners still make cycle coverage incomplete.
+unresolved. Binding-confirmed literal `importlib.import_module` calls,
+including a literal relative package, and supported one-argument absolute
+`__import__` calls can resolve to discovered local modules. Runtime-selected
+calls remain located unresolved evidence; ambiguous local module owners still
+make cycle coverage incomplete.
 Arbitrary dataflow, `sys.path` mutation, installed packages and imports
 between Python and TypeScript are not resolved.
 Confirmed `typing.TYPE_CHECKING` guards, including imported aliases,
@@ -60,6 +61,15 @@ classification, not Python execution. Deferred function bodies reconfirm
 typing aliases imported locally; a module alias used from a deferred body is
 treated as unknown because it could be rebound before the body runs. `.pyi`
 files remain unsupported.
+
+First-statement module, class and function docstrings retain physical SLOC but
+are excluded from executable function mass and clone tokens, covered lines and
+density denominators. Other multiline strings remain executable source.
+Native advisory documentation review flags a docstring only when its physical
+content exceeds 40 nonblank lines or 300 Unicode-whitespace-separated words.
+The finding carries the original range, owner when known and effective
+thresholds; it never changes the index. `trellis.yaml` can disable the review
+or set positive integer thresholds under `documentation`.
 
 Reports include `languageCoverage` rows with discovered/analyzed files, parse
 failures, source lines, unresolved imports and dynamic imports. An unresolved

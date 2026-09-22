@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "slice": "P2.3 advisory documentation detector",
+  "targetBeforeRevision": "0b72621",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "2396de26a188561780f4daa92e8621f2226de8a94a0a238292f4fe4bb4c91248",
+  "sourceAfterSha256": "64c1abf11d5df3f7367ce8eeb42faf482aa612497324b87c044b327c90e39414",
+  "configurationSha256": "7ac8d909bfb84cdf940f7f3e5470913a843249e516decec3c2e10f14955e7333",
+  "bunVersion": "1.2.22",
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "ae650782c7f3a6f2a63f27280a6b60e6c051296fa618d167fc10a8c9fba3222e",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "documentationExcessiveProduction": null,
+      "documentationExcessiveTest": null,
+      "productionErodedCount": 38,
+      "productionErosionMass": 23501.993,
+      "productionCloneDensity": 0.03356,
+      "productionCycleGroups": 1
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "7b3e22ded85a969531e714ed4371cd7482690a02cdf2edd7bb25f8a9ae34daf1",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "documentationExcessiveProduction": null,
+      "documentationExcessiveTest": null,
+      "productionErodedCount": 39,
+      "productionErosionMass": 23965.66,
+      "productionCloneDensity": 0.033078,
+      "productionCycleGroups": 1
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "f0eaef589181b8ed10f3be167fe8339169835b30b225f4ad7ababc4cc943c9d0",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "documentationExcessiveProduction": 17,
+      "documentationExcessiveTest": 0,
+      "productionErodedCount": 38,
+      "productionErosionMass": 23501.993,
+      "productionCloneDensity": 0.03356,
+      "productionCycleGroups": 1
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "6d002d1a9a4ec2f74dd7f34adc79a80e79e9012af7c7829495e6b792be1a8e37",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "documentationExcessiveProduction": 17,
+      "documentationExcessiveTest": 0,
+      "productionErodedCount": 39,
+      "productionErosionMass": 23965.66,
+      "productionCloneDensity": 0.033078,
+      "productionCycleGroups": 1
+    }
+  },
+  "afterThreeRunPayloadFingerprints": [
+    "85ae62dc63a55ccce5181ba93e48597f7ab8332454aa4e4ca8c4cb6928ac1fee",
+    "85ae62dc63a55ccce5181ba93e48597f7ab8332454aa4e4ca8c4cb6928ac1fee",
+    "85ae62dc63a55ccce5181ba93e48597f7ab8332454aa4e4ca8c4cb6928ac1fee"
+  ],
+  "review": {
+    "trellisProductionWarnings": 17,
+    "interpretation": "Most Trellis warnings are long module JSDoc headers. Review for repeated prose or movable tutorials; retain useful contracts and examples. The detector is advisory."
+  },
+  "configuration": {
+    "mode": "default",
+    "configFile": null
+  }
+}

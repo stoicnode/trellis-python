@@ -5,11 +5,17 @@ import { join, resolve } from "node:path";
 import {
 	runComplexityAnalysis,
 	runDependencyGraphAnalysis,
+	runDocumentationAnalysis,
 	runDuplicationAnalysis,
 	runImportCycleAnalysis,
 	runSafeguardInspection,
 } from "../analysis/index.ts";
-import { auditReportSchema, measurementPayload, SCHEMA_VERSION } from "../contract/index.ts";
+import {
+	auditReportSchema,
+	effectiveDocumentationConfig,
+	measurementPayload,
+	SCHEMA_VERSION,
+} from "../contract/index.ts";
 import { discoverSourceInventory } from "../discovery/index.ts";
 import { scoreSloppiness } from "../scoring/index.ts";
 import { buildSyntaxInventory } from "../syntax/index.ts";
@@ -124,11 +130,18 @@ describe("audit orchestration through the registry", () => {
 		const source = await discoverSourceInventory(repo);
 		const syntax = await buildSyntaxInventory(source);
 		const complexity = runComplexityAnalysis(syntax);
+		const documentation = runDocumentationAnalysis(syntax, effectiveDocumentationConfig(undefined));
 		const duplication = runDuplicationAnalysis(syntax);
 		const graph = runDependencyGraphAnalysis(source, syntax);
 		const cycles = runImportCycleAnalysis(graph);
 		const safeguards = (await runSafeguardInspection(source.root)).product;
-		const analyses = measuredAnalysisEvidence([complexity, duplication, graph, cycles]);
+		const analyses = measuredAnalysisEvidence([
+			complexity,
+			documentation,
+			duplication,
+			graph,
+			cycles,
+		]);
 		const metrics = collectMetrics(analyses);
 		const baseline = assembleReport(
 			{ source, syntax, analyses, safeguards },
@@ -163,12 +176,14 @@ describe("audit orchestration through the registry", () => {
 		expect(selectedMeasuredAnalyzers().map((analyzer) => analyzer.identity.id)).toEqual([
 			"trellis.complexity",
 			"trellis.dependency-graph",
+			"trellis.documentation",
 			"trellis.duplication",
 			"trellis.import-cycles",
 		]);
 		expect(runs.map((run) => run.result.provider.id)).toEqual([
 			"trellis.complexity",
 			"trellis.dependency-graph",
+			"trellis.documentation",
 			"trellis.duplication",
 			"trellis.import-cycles",
 		]);
@@ -201,7 +216,7 @@ describe("audit orchestration through the registry", () => {
 		expect(analyzers.map((event) => event.id)).toEqual(
 			selectedMeasuredAnalyzers().map((analyzer) => analyzerProgressId(analyzer.identity.id)),
 		);
-		expect(analyzers.map((event) => event.index)).toEqual([0, 1, 2, 3]);
+		expect(analyzers.map((event) => event.index)).toEqual([0, 1, 2, 3, 4]);
 		expect(analyzers.every((event) => event.total === selectedMeasuredAnalyzers().length)).toBe(
 			true,
 		);
@@ -257,7 +272,9 @@ describe("audit orchestration through the registry", () => {
 		expect(report.evidence.completeness).toBe("incomplete");
 		for (const analysis of report.evidence.analyses) {
 			expect(analysis.provider.kind).toBe("native");
-			expect(analysis.scoring).toBe("scored");
+			expect(analysis.scoring).toBe(
+				analysis.provider.id === "trellis.documentation" ? "advisory" : "scored",
+			);
 		}
 	});
 
@@ -302,7 +319,9 @@ describe("measuredAnalysisEvidence", () => {
 		for (const contribution of contributions) {
 			const analyzer = registry.find((a) => a.identity.id === contribution.result.provider.id);
 			if (analyzer === undefined) throw new Error("measured run without a registry entry");
-			expect(contribution.scoring).toBe("scored");
+			expect(contribution.scoring).toBe(
+				contribution.result.provider.id === "trellis.documentation" ? "advisory" : "scored",
+			);
 			expect(contribution.metricIds).toEqual(analyzer.metrics);
 			// The contract result is the report-shaped minimum: internal
 			// products never serialize.
@@ -331,6 +350,7 @@ describe("analyzerProgressId", () => {
 	test("maps registry analyzer ids onto the progress surface and rejects unknown ids", () => {
 		expect(analyzerProgressId("trellis.complexity")).toBe("complexity");
 		expect(analyzerProgressId("trellis.dependency-graph")).toBe("dependency-graph");
+		expect(analyzerProgressId("trellis.documentation")).toBe("documentation");
 		expect(analyzerProgressId("trellis.duplication")).toBe("duplication");
 		expect(analyzerProgressId("trellis.import-cycles")).toBe("import-cycles");
 		expect(() => analyzerProgressId("trellis.brand-new")).toThrow(/no progress id/);

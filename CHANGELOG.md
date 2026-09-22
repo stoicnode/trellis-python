@@ -9,6 +9,18 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ## [Unreleased]
 
+### Added
+
+- Native advisory analysis now flags Python module/class/function docstrings and
+  attached TypeScript/TSX JSDoc blocks exceeding 40 nonblank content lines or
+  300 whitespace-separated words. Reports retain original ranges, counts,
+  effective thresholds, source set and stable named owners. Strict
+  `documentation` configuration can disable the detector or set positive
+  integer thresholds; `policy.failOnNew` can opt into a baseline gate.
+  Documentation findings never affect the index. Comparisons with changed
+  detector settings omit documentation deltas while retaining comparable
+  scored results.
+
 ### Changed
 
 - Python first-statement module/class/function docstrings are now excluded

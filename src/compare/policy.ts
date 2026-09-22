@@ -255,6 +255,18 @@ function assessNewFindings(kind: string, comparison: ReportComparison): PolicyRe
 		status: "pass",
 		reasons: [],
 	};
+	if (
+		kind === "documentation.excessive" &&
+		comparison.compatibility.caveats.some((caveat) => caveat.code === "advisory-measurement")
+	) {
+		result.status = "fail";
+		result.reasons.push({
+			code: "baseline-incompatible",
+			message:
+				"documentation settings differ from the baseline; new documentation findings cannot be compared",
+		});
+		return result;
+	}
 	const found = (comparison.findings?.new ?? []).filter((finding) => finding.kind === kind);
 	if (found.length > 0) {
 		const locations = found

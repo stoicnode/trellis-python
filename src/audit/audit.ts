@@ -60,13 +60,19 @@ import {
 	nativeScoringRequiredIds,
 	runComplexityAnalysis,
 	runDependencyGraphAnalysis,
+	runDocumentationAnalysis,
 	runDuplicationAnalysis,
 	runImportCycleAnalysis,
 	runSafeguardInspection,
 	toContractResult,
 } from "../analysis/index.ts";
 import { loadAuditConfig } from "../config/index.ts";
-import type { AuditConfig, AuditReport } from "../contract/index.ts";
+import {
+	type AuditConfig,
+	type AuditReport,
+	type EffectiveDocumentationConfig,
+	effectiveDocumentationConfig,
+} from "../contract/index.ts";
 import { discoverSourceInventory, type SourceInventory } from "../discovery/index.ts";
 import type { DependencyGraphAnalysis, DuplicationBudget } from "../metrics/index.ts";
 import { scoreSloppiness } from "../scoring/index.ts";
@@ -116,6 +122,8 @@ export interface AuditCoreOptions {
 export interface MeasureAnalysesOptions {
 	/** Duplication resource budget (SPEC §5.3); defaults to the analyzer's documented budget. */
 	duplicationBudget?: DuplicationBudget;
+	/** Effective advisory documentation settings, carried in analysis identity. */
+	documentation?: EffectiveDocumentationConfig;
 	/** Optional progress sink receiving the per-analyzer events of the measure phase. */
 	onProgress?: AuditProgress;
 }
@@ -162,6 +170,14 @@ export function measureAnalyses(
 		switch (analyzer.identity.id) {
 			case "trellis.complexity":
 				runs.push(runComplexityAnalysis(syntax));
+				break;
+			case "trellis.documentation":
+				runs.push(
+					runDocumentationAnalysis(
+						syntax,
+						options.documentation ?? effectiveDocumentationConfig(undefined),
+					),
+				);
 				break;
 			case "trellis.duplication":
 				runs.push(
@@ -258,6 +274,7 @@ export async function auditWorkspace(
 
 	emit({ type: "phase", phase: "measure" });
 	const runs = measureAnalyses(source, syntax, {
+		documentation: effectiveDocumentationConfig(config.documentation),
 		...(options.duplicationBudget === undefined
 			? {}
 			: { duplicationBudget: options.duplicationBudget }),

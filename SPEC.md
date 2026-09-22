@@ -695,6 +695,10 @@ source:
   exclude: ["src/generated/**"]        # additions to documented defaults
   classify:
     "scripts/tools/**": "test"          # explicit source-set overrides
+documentation:                        # native advisory block-size review; never scoring weights
+  enabled: true                       # default true
+  maxContentLines: 40                 # positive integer; exceed to warn
+  maxWords: 300                       # positive integer; exceed to warn
 providers:                             # optional provider selection (§16.4) — additive, unscored
   jscpd:                               #   evidence: no provider requested by default
     mode: normalized                   #   one match mode per request (exact | normalized | near)
@@ -724,6 +728,19 @@ policy:                                 # failure policy only — never mutates 
   requireEvidence: [jscpd]              # demanded provider evidence (§16.3): absent or
                                          #   failed evidence fails the run, never the score
 ```
+
+The native `documentation.excessive` finding reviews first-statement Python
+module/class/function docstrings and attached TypeScript/TSX JSDoc only. It
+counts nonblank physical content lines and Unicode-whitespace-separated words
+after removing literal/comment delimiters and JSDoc line stars; examples and
+code blocks count. A block is flagged when either count exceeds its threshold
+(equality passes). Findings include source range, owner identity when known,
+source set, counts and effective thresholds. The default is advisory and
+unscored; operators can add `documentation.excessive` to `policy.failOnNew`.
+Changing detector settings makes documentation deltas noncomparable without
+invalidating the scored index comparison. A warning calls for review of
+repetition or a maintained reference document while retaining essential API
+contracts and examples; size alone does not prove a block unnecessary.
 
 Provider selection (§16.4, `providers`) is declarative data with the same
 rules: the block names exactly the known optional providers (an unknown id

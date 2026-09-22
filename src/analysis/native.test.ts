@@ -99,6 +99,7 @@ describe("native registry", () => {
 		expect(NATIVE_REGISTRY.ordered().map((analyzer) => analyzer.identity.id)).toEqual([
 			"trellis.complexity",
 			"trellis.dependency-graph",
+			"trellis.documentation",
 			"trellis.duplication",
 			"trellis.import-cycles",
 			"trellis.safeguards",

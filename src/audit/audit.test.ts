@@ -340,6 +340,7 @@ describe("auditWorkspace progress events", () => {
 			"analyzer",
 			"analyzer",
 			"analyzer",
+			"analyzer",
 			"measured",
 			"phase",
 			"safeguards-inspected",

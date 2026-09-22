@@ -199,10 +199,18 @@ files are reported as coverage boundaries.
 Python analysis uses a pinned in-process Lezer parser. It handles Python 3
 functions, methods, comprehensions, `match` cases, and ordinary imports without
 executing target code. Absolute and relative imports resolve against discovered
-root and `src/` modules. Dynamic imports and missing local targets are reported
-as graph limitations; cross-language imports are not resolved. Optional external
+root and `src/` modules. Binding-confirmed literal dynamic imports can resolve
+to discovered targets; runtime-selected imports and missing local targets
+remain graph limitations. Cross-language imports are not resolved. Optional external
 evidence providers currently inspect TypeScript files only. See
 [Python support and limits](docs/python-support.md).
+
+Native advisory documentation review flags Python docstrings and attached
+TypeScript/TSX JSDoc blocks exceeding 40 nonblank content lines or 300 words.
+Warnings include measured counts and do not affect the index. Configure
+`documentation.enabled`, `documentation.maxContentLines`, and
+`documentation.maxWords` in `trellis.yaml`; use `policy.failOnNew` to gate new
+`documentation.excessive` findings against a baseline.
 
 Audits never execute the project's tests, builds, linters, or hooks.
 Safeguard findings describe configuration and wiring; they do not establish

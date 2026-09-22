@@ -80,6 +80,12 @@ function byLocation(a: Finding, b: Finding): number {
 
 /** A structured scoped key, historical fallback key, or explicit non-matchability. */
 function findingKey(finding: Finding): string | null {
+	if (finding.kind === "documentation.excessive") {
+		const key = finding.facts?.ownerKey;
+		return finding.facts?.identityState === "identified" && typeof key === "string"
+			? JSON.stringify([finding.kind, finding.path, key])
+			: null;
+	}
 	const identity = finding.identity;
 	if (finding.kind !== "complexity.hotspot" || identity === undefined) {
 		return `${finding.kind}${finding.path}`;

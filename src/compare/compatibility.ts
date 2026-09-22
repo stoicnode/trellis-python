@@ -64,6 +64,7 @@ export interface CompatibilityIssue {
 		| "configuration"
 		| "configuration-unverifiable"
 		| "source-scope-changed"
+		| "advisory-measurement"
 		| "scored-measurement"
 		| "scoring-basis"
 		| "withheld-headline";

@@ -85,6 +85,7 @@ describe("default configuration selects only native analyses", () => {
 		expect(carriedProviderIds(absent)).toEqual([
 			"trellis.complexity",
 			"trellis.dependency-graph",
+			"trellis.documentation",
 			"trellis.duplication",
 			"trellis.import-cycles",
 		]);
@@ -95,7 +96,7 @@ describe("default configuration selects only native analyses", () => {
 		await seedClonePair(repo);
 		const before = await stagedScratchCount();
 		const report = await auditWorkspace(repo, { now: PINNED });
-		expect(carriedProviderIds(report)).toHaveLength(4);
+		expect(carriedProviderIds(report)).toHaveLength(5);
 		expect(await stagedScratchCount()).toBe(before);
 	});
 });

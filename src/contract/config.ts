@@ -43,6 +43,32 @@ export const sourceConfigSchema = z.strictObject({
 
 export type SourceConfig = z.infer<typeof sourceConfigSchema>;
 
+/** Advisory documentation review thresholds; never scoring weights. */
+export const documentationConfigSchema = z.strictObject({
+	enabled: z.boolean().optional(),
+	maxContentLines: z.number().int().positive().optional(),
+	maxWords: z.number().int().positive().optional(),
+});
+
+export type DocumentationConfig = z.infer<typeof documentationConfigSchema>;
+
+export interface EffectiveDocumentationConfig {
+	enabled: boolean;
+	maxContentLines: number;
+	maxWords: number;
+}
+
+/** Effective defaults are emitted in analysis identity and finding facts. */
+export function effectiveDocumentationConfig(
+	config: DocumentationConfig | undefined,
+): EffectiveDocumentationConfig {
+	return {
+		enabled: config?.enabled ?? true,
+		maxContentLines: config?.maxContentLines ?? 40,
+		maxWords: config?.maxWords ?? 300,
+	};
+}
+
 /** A metric budget: the run fails when the measured value exceeds `max`. */
 export const metricBudgetSchema = z.strictObject({
 	max: finiteNumberSchema.nonnegative(),
@@ -194,6 +220,7 @@ export type PolicyConfig = z.infer<typeof policyConfigSchema>;
 
 export const auditConfigSchema = z.strictObject({
 	source: sourceConfigSchema.prefault({}),
+	documentation: documentationConfigSchema.optional(),
 	providers: providerSelectionSchema.prefault({}),
 	policy: policyConfigSchema.prefault({}),
 });

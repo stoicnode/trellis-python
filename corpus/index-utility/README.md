@@ -46,6 +46,16 @@ corrections, not proof of source improvement; clone density can increase when
 documentation leaves the denominator. The self-audit for this slice is under
 [`self-audit/p21-docstrings/`](self-audit/p21-docstrings/manifest.json).
 
+P2.3's advisory documentation measurements are retained in
+[`p23-documentation/`](p23-documentation/summary.json). All 16 scopes completed
+three deterministic runs with unchanged indexes from P2.1. The provisional
+40-line/300-word trigger produced 551 warnings across the corpus, including
+long NumPy API docs and SQLAlchemy dialect references; these are review leads,
+not automatic debt or reasons to remove useful documentation. Trellis's own
+source has 17 production JSDoc warnings in this slice. The two-source by
+two-analyzer self-audit is under
+[`self-audit/p23-documentation/`](self-audit/p23-documentation/manifest.json).
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

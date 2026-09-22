@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "manifest": "../manifest.json",
+  "purpose": "P2.3 advisory documentation detector. Indexes should remain unchanged; warning counts are review triggers, not quality grades.",
+  "priorArtifact": "../p21-docstrings/current-measurements.json.gz",
+  "currentArtifact": {
+    "compressedPath": "current-measurements.json.gz",
+    "sha256": "429b3293a0919665c199d1e73ef95887c28e8b3deb69ed38ade3cd823c15b3e0",
+    "analyzerVersion": "0.9.0",
+    "scoringVersion": "0.9.0-provisional",
+    "scopeCount": 16,
+    "runsPerScope": 3,
+    "ok": true
+  },
+  "scopes": [
+    {
+      "repository": "click",
+      "scope": "click-package",
+      "priorIndex": 60,
+      "currentIndex": 60,
+      "documentationBlocksProduction": 267,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 9,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "requests",
+      "scope": "requests-package",
+      "priorIndex": 46,
+      "currentIndex": 46,
+      "documentationBlocksProduction": 225,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 3,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "flask",
+      "scope": "flask-package",
+      "priorIndex": 60,
+      "currentIndex": 60,
+      "documentationBlocksProduction": 257,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 8,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "rich",
+      "scope": "rich-package",
+      "priorIndex": 77,
+      "currentIndex": 77,
+      "documentationBlocksProduction": 678,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 4,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "numpy",
+      "scope": "numpy-python-package",
+      "priorIndex": 83,
+      "currentIndex": 83,
+      "documentationBlocksProduction": 1589,
+      "documentationBlocksTest": 691,
+      "excessiveProduction": 314,
+      "excessiveTest": 2,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "sqlalchemy",
+      "scope": "sqlalchemy-package",
+      "priorIndex": 81,
+      "currentIndex": 81,
+      "documentationBlocksProduction": 3973,
+      "documentationBlocksTest": 55,
+      "excessiveProduction": 173,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "pydantic",
+      "scope": "pydantic-package",
+      "priorIndex": 80,
+      "currentIndex": 80,
+      "documentationBlocksProduction": 989,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 20,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "attrs",
+      "scope": "attrs-source",
+      "priorIndex": 46,
+      "currentIndex": 46,
+      "documentationBlocksProduction": 162,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 4,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "jinja",
+      "scope": "jinja-package",
+      "priorIndex": 59,
+      "currentIndex": 59,
+      "documentationBlocksProduction": 485,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 2,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "packaging",
+      "scope": "packaging-package",
+      "priorIndex": 72,
+      "currentIndex": 72,
+      "documentationBlocksProduction": 309,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 1,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "dateutil",
+      "scope": "dateutil-package",
+      "priorIndex": 43,
+      "currentIndex": 43,
+      "documentationBlocksProduction": 112,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 7,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "sniffio",
+      "scope": "sniffio-package",
+      "priorIndex": 0,
+      "currentIndex": 0,
+      "documentationBlocksProduction": 2,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 0,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "tanstack-query",
+      "scope": "tanstack-query-focused",
+      "priorIndex": 47,
+      "currentIndex": 47,
+      "documentationBlocksProduction": 389,
+      "documentationBlocksTest": 6,
+      "excessiveProduction": 0,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "zustand",
+      "scope": "zustand-focused",
+      "priorIndex": 27,
+      "currentIndex": 27,
+      "documentationBlocksProduction": 8,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 0,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "ts-pattern",
+      "scope": "ts-pattern-focused",
+      "priorIndex": 39,
+      "currentIndex": 39,
+      "documentationBlocksProduction": 109,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 0,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    },
+    {
+      "repository": "ky",
+      "scope": "ky-focused",
+      "priorIndex": 45,
+      "currentIndex": 45,
+      "documentationBlocksProduction": 90,
+      "documentationBlocksTest": 0,
+      "excessiveProduction": 4,
+      "excessiveTest": 0,
+      "deterministic": true,
+      "complete": true
+    }
+  ],
+  "review": {
+    "defaultThresholds": {
+      "maxContentLines": 40,
+      "maxWords": 300
+    },
+    "notes": [
+      "NumPy API functions such as arrayprint.set_printoptions include parameter contracts, examples and behavior notes. Their long docstrings are justified review tradeoffs; retain useful API detail.",
+      "SQLAlchemy dialect module docstrings (for example mssql/base.py and mysql/base.py) contain extensive dialect reference material. A warning can prompt checking for repetition or a maintained reference page, but length alone does not justify removal.",
+      "Trellis has 17 production JSDoc warnings in this slice, predominantly module headers. The default does not fail policy or affect scoring."
+    ]
+  }
+}

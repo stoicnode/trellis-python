@@ -70,12 +70,15 @@ import {
 } from "./registry.ts";
 import type { InternalAnalysisResult } from "./result.ts";
 
+export { runDocumentationAnalysis } from "./documentation.ts";
+
 const DUPLICATION_NATIVE_OPTIONS = { engine: "suffix-array-lcp", "work-accounting": "v2" } as const;
 
 /** Supported native analyzer ids, sorted (the registry's addressable surface). */
 export const NATIVE_ANALYZER_IDS = [
 	"trellis.complexity",
 	"trellis.dependency-graph",
+	"trellis.documentation",
 	"trellis.duplication",
 	"trellis.import-cycles",
 	"trellis.safeguards",
@@ -284,6 +287,13 @@ const COMPLEXITY_METRICS = [
 	"erosion.mass.test",
 ] as const;
 
+const DOCUMENTATION_METRICS = [
+	"documentation.blocks.production",
+	"documentation.blocks.test",
+	"documentation.excessive.production",
+	"documentation.excessive.test",
+] as const;
+
 /** The duplication analyzer's metric ids (mirrors `analyzeDuplication` output, sorted). */
 const DUPLICATION_METRICS = [
 	"duplication.density.production",
@@ -320,6 +330,13 @@ const complexityAnalyzer: NativeAnalyzerRegistration = {
 	identity: nativeAnalyzerIdentity("trellis.complexity", "shared-parse"),
 	capabilities: ["complexity"],
 	metrics: COMPLEXITY_METRICS,
+	requires: [],
+};
+
+const documentationAnalyzer: NativeAnalyzerRegistration = {
+	identity: nativeAnalyzerIdentity("trellis.documentation", "shared-parse"),
+	capabilities: ["documentation"],
+	metrics: DOCUMENTATION_METRICS,
 	requires: [],
 };
 
@@ -362,6 +379,7 @@ const safeguardsAnalyzer: NativeAnalyzerRegistration = {
 /** The audited native registry: every supported analyzer, validated at load. */
 export const NATIVE_REGISTRY: NativeRegistry = buildNativeRegistry([
 	complexityAnalyzer,
+	documentationAnalyzer,
 	duplicationAnalyzer,
 	dependencyGraphAnalyzer,
 	importCyclesAnalyzer,

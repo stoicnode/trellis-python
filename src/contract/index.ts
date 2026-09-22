@@ -42,6 +42,10 @@ export * from "./clone-evidence.ts";
 export {
 	type AuditConfig,
 	auditConfigSchema,
+	type DocumentationConfig,
+	documentationConfigSchema,
+	type EffectiveDocumentationConfig,
+	effectiveDocumentationConfig,
 	type MetricBudget,
 	metricBudgetSchema,
 	type PolicyConfig,

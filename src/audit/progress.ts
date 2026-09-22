@@ -42,6 +42,7 @@ export type AuditPhase =
 export const ANALYZER_IDS = [
 	"complexity",
 	"dependency-graph",
+	"documentation",
 	"duplication",
 	"import-cycles",
 ] as const;

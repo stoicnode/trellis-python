@@ -28,7 +28,7 @@
  * side's provider evidence reads as unrequested — never a regression.
  */
 import type { AuditReport } from "../contract/index.ts";
-import { isSupportedSchemaVersion } from "../contract/index.ts";
+import { carriedAnalyses, isSupportedSchemaVersion } from "../contract/index.ts";
 import {
 	assessScoredBasis,
 	type CompareOptions,
@@ -59,6 +59,23 @@ export interface ReportComparison {
 	evidence: EvidenceComparison;
 }
 
+function documentationIdentity(report: AuditReport): string | null {
+	const analysis = carriedAnalyses(report).find(
+		(entry) => entry.provider.id === "trellis.documentation",
+	);
+	return analysis === undefined
+		? null
+		: JSON.stringify([
+				analysis.provider.mode,
+				analysis.provider.options,
+				analysis.analysis?.options,
+			]);
+}
+
+function isDocumentationFinding(finding: AuditReport["findings"][number]): boolean {
+	return finding.kind === "documentation.excessive";
+}
+
 /**
  * Compare two validated §6.4 reports (see the module docblock for the
  * per-basis compatibility and matching rules). Pure: no I/O of any kind.
@@ -69,23 +86,47 @@ export function compareReports(
 	options: CompareOptions = {},
 ): ReportComparison {
 	const compatibility = assessScoredBasis(baseline, current, options);
-	// Evidence verdicts are only decidable over readable schema versions; an
-	// uninterpretable pair carries its hard refusal and no evidence at all.
 	const readable =
 		isSupportedSchemaVersion(baseline.schemaVersion) &&
 		isSupportedSchemaVersion(current.schemaVersion);
+	const documentationChanged =
+		readable && documentationIdentity(baseline) !== documentationIdentity(current);
+	const adjustedCompatibility = documentationChanged
+		? {
+				...compatibility,
+				caveats: [
+					...compatibility.caveats,
+					{
+						code: "advisory-measurement" as const,
+						message:
+							"documentation detector settings differ; its metric and finding deltas are omitted while the scored index remains comparable",
+					},
+				],
+			}
+		: compatibility;
+	// Evidence verdicts are only decidable over readable schema versions; an
+	// uninterpretable pair carries its hard refusal and no evidence at all.
 	const evidence = readable ? compareEvidence(baseline, current) : { providers: [] };
 	if (!compatibility.comparable || baseline.score.index === null || current.score.index === null)
-		return { compatibility, evidence };
+		return { compatibility: adjustedCompatibility, evidence };
 	return {
-		compatibility,
+		compatibility: adjustedCompatibility,
 		evidence,
 		score: {
 			baseline: baseline.score.index,
 			current: current.score.index,
 			delta: current.score.index - baseline.score.index,
 		},
-		metrics: compareMetrics(baseline, current),
-		findings: compareFindings(baseline.findings, current.findings),
+		metrics: compareMetrics(baseline, current).filter(
+			(metric) => !documentationChanged || !metric.id.startsWith("documentation."),
+		),
+		findings: compareFindings(
+			documentationChanged
+				? baseline.findings.filter((finding) => !isDocumentationFinding(finding))
+				: baseline.findings,
+			documentationChanged
+				? current.findings.filter((finding) => !isDocumentationFinding(finding))
+				: current.findings,
+		),
 	};
 }
