@@ -726,7 +726,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.2.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.3.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.
