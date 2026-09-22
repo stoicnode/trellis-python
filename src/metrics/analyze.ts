@@ -67,6 +67,7 @@ function measureFile(file: FileSyntax): FunctionMeasurement[] {
 			file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : undefined);
 		if (lines === undefined) throw new Error(`missing line classification for ${file.path}`);
 		const sloc = fn.sloc ?? functionSloc(lines, fn.range);
+		const physicalSloc = functionSloc(file.lineKinds ?? lines, fn.range);
 		const mass = functionMass(cc, sloc);
 		return {
 			identity:
@@ -82,6 +83,7 @@ function measureFile(file: FileSyntax): FunctionMeasurement[] {
 			cc,
 			maxNesting,
 			sloc,
+			physicalSloc,
 			mass,
 			eroded: isEroded(cc),
 		};
@@ -122,6 +124,11 @@ function scopeAggregate(
 	return {
 		sourceSet,
 		...aggregate,
+		executableSloc: files.reduce(
+			(sum, file) =>
+				sum + (file.language === "python" ? file.executableLines.code : file.lines.code),
+			0,
+		),
 		diagnosticFiles: files
 			.filter((file) => file.diagnostics.length > 0)
 			.map((file) => file.path)
@@ -160,6 +167,7 @@ function scopeMetrics(scope: ScopeAggregate): MetricValue[] {
 		metric(`complexity.functions.${set}`, "count", scope.functionCount, reason, {
 			detail: { files: scope.files, sloc: scope.sloc },
 		}),
+		metric(`complexity.executable-sloc.${set}`, "lines", scope.executableSloc, reason),
 		metric(`complexity.cc.p50.${set}`, "cc", scope.cc?.p50 ?? null, reason),
 		metric(`complexity.cc.p90.${set}`, "cc", scope.cc?.p90 ?? null, reason),
 		metric(`complexity.cc.max.${set}`, "cc", scope.cc?.max ?? null, reason),
@@ -206,6 +214,7 @@ function hotspotFindings(functions: readonly FunctionMeasurement[]): Finding[] {
 				cc: fn.cc,
 				maxNesting: fn.maxNesting,
 				sloc: fn.sloc,
+				physicalSloc: fn.physicalSloc,
 				mass: roundTo(fn.mass, 3),
 			},
 		}));

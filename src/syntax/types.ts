@@ -30,6 +30,7 @@
 import type { Tree } from "@lezer/common";
 import type ts from "typescript";
 import type { Completeness, Range, SourceSet } from "../contract/index.ts";
+import type { PythonDocstring } from "../python/docstrings.ts";
 import type { FunctionIdentity } from "./identity.ts";
 import type { ImportSite } from "./import-sites.ts";
 
@@ -198,6 +199,11 @@ export interface PythonFileSyntax extends BaseFileSyntax {
 	language: "python";
 	parserTree: Tree;
 	functions: PythonFunctionFacts[];
+	/** Actual first-statement documentation blocks, located in original source offsets. */
+	docstrings: readonly PythonDocstring[];
+	/** Source lines with first-statement docstrings omitted; physical `lines` stay intact. */
+	executableLines: LineCounts;
+	executableLineKinds: readonly LineKind[];
 	/** Confirmed overload declarations lacking a same-container implementation. */
 	orphanOverloads: OrphanOverload[];
 }

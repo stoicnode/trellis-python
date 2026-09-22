@@ -1,4 +1,4 @@
-/** Bounded code-line union using the shared, unchanged line classification. */
+/** Bounded code-line union over the same executable population as the denominator. */
 import { classifyLines, type FileSyntax } from "../syntax/index.ts";
 import type { CloneGroup } from "./duplication.ts";
 import type { DuplicationWork } from "./duplication-work.ts";
@@ -27,7 +27,10 @@ function coveredLines(file: FileSyntax, intervals: LineInterval[], work: Duplica
 		work.charge();
 		return a.start - b.start || b.end - a.end;
 	});
-	const kinds = file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : []);
+	const kinds =
+		file.language === "python"
+			? file.executableLineKinds
+			: (file.lineKinds ?? ("sourceFile" in file ? classifyLines(file.sourceFile) : []));
 	work.reserve(kinds.length);
 	let last = 0;
 	let count = 0;
@@ -55,7 +58,7 @@ export function accountCandidateLines(
 	let duplicatedLines = 0;
 	for (const file of files) {
 		work.charge();
-		codeLines += file.lines.code;
+		codeLines += file.language === "python" ? file.executableLines.code : file.lines.code;
 		const intervals = paths.get(file.path);
 		if (intervals !== undefined) duplicatedLines += coveredLines(file, intervals, work);
 	}

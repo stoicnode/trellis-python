@@ -35,6 +35,17 @@ compatible within-analyzer comparisons and three-run current payload hashes.
 All four self-audit cells score 39; the added source raises raw production
 erosion mass, with no new complexity hotspot in the dynamic-import code.
 
+P2.1's analyzer 0.9.0 measurement is retained in
+[`p21-docstrings/`](p21-docstrings/summary.json), again over all 16 pins with
+three identical payload fingerprints per scope and complete scores. It records
+physical and executable production SLOC, erosion mass, clone density and
+side-by-side indexes. The raw result is a deterministic compressed artifact
+with its uncompressed SHA-256 in the summary. The same-source TypeScript
+scopes retain their scored measurements. Python changes are measurement
+corrections, not proof of source improvement; clone density can increase when
+documentation leaves the denominator. The self-audit for this slice is under
+[`self-audit/p21-docstrings/`](self-audit/p21-docstrings/manifest.json).
+
 To rerun against operator-prepared, clean checkouts under a directory with
 repository ids as folder names:
 

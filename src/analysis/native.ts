@@ -270,6 +270,8 @@ const COMPLEXITY_METRICS = [
 	"complexity.cc.p50.test",
 	"complexity.cc.p90.production",
 	"complexity.cc.p90.test",
+	"complexity.executable-sloc.production",
+	"complexity.executable-sloc.test",
 	"complexity.functions.production",
 	"complexity.functions.test",
 	"complexity.nesting.max.production",

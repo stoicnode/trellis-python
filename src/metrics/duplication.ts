@@ -15,6 +15,8 @@
  *   document order (comments and trivia never appear; the end-of-file
  *   token is dropped). A raw scanner loop is deliberately not used — it
  *   mis-tokenizes template literals without manual re-scan state.
+ *   Python uses the same shared-parse principle; actual first-statement
+ *   docstrings are omitted while suite markers retain structural boundaries.
  * - **Normalization**: every identifier maps to one placeholder, every
  *   literal (string, numeric, bigint, regex, template part) maps to one
  *   placeholder; all other tokens keep their `SyntaxKind`. This detects
@@ -176,10 +178,15 @@ export interface TokenCollectionWork extends SyntaxWork {
 
 function collectTokens(file: FileSyntax, work: TokenCollectionWork): TokenStream {
 	if (file.language === "python") {
-		const tokens = pythonTokens(file.parserTree, file.text ?? "", () => {
-			work.token();
-			work.charge(2 + 2 * Math.ceil(Math.log2(file.lines.total + 1)));
-		});
+		const tokens = pythonTokens(
+			file.parserTree,
+			file.text ?? "",
+			() => {
+				work.token();
+				work.charge(2 + 2 * Math.ceil(Math.log2(file.lines.total + 1)));
+			},
+			file.docstrings,
+		);
 		return {
 			path: file.path,
 			packagePath: file.packagePath,

@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "slice": "P2.1 Python executable size versus documentation",
+  "targetBeforeRevision": "a63d2683f202635b53e29fdc1161b41e75a745a2",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "508353dc5ddc6363dd9108418485ddf3f4f0b9dac148bb268996ab7e10031e63",
+  "sourceAfterSha256": "2396de26a188561780f4daa92e8621f2226de8a94a0a238292f4fe4bb4c91248",
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "afterThreeRunPayloadFingerprints": [
+    "c4a118474928d6aa19ec177979fe78cb095428453464adb338dfb478325e4a7b",
+    "c4a118474928d6aa19ec177979fe78cb095428453464adb338dfb478325e4a7b",
+    "c4a118474928d6aa19ec177979fe78cb095428453464adb338dfb478325e4a7b"
+  ],
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "cb33332ce3eda05a5afbf894a4384c2f157acbb64c0d936e66b66e39a0de26e5",
+      "analyzerVersion": "0.8.0",
+      "scoringVersion": "0.8.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23399.607,
+      "productionCloneDensity": 0.033673,
+      "productionCycleGroups": 1,
+      "executableSloc": null
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "19df2a82edcc288102907899b16e079ca5a1abebc2a8c846d943c353729e06e2",
+      "analyzerVersion": "0.8.0",
+      "scoringVersion": "0.8.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23501.993,
+      "productionCloneDensity": 0.03356,
+      "productionCycleGroups": 1,
+      "executableSloc": null
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "6468d50bf54ba241aa35e26cc6d902008fd2c5cbc7846841b552b0731b3f1aca",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23399.607,
+      "productionCloneDensity": 0.033673,
+      "productionCycleGroups": 1,
+      "executableSloc": 28302
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "1584d6fd0e8d1becde9a91d2bb768559f34c253b6b93e192bf391dbe0395fe3f",
+      "analyzerVersion": "0.9.0",
+      "scoringVersion": "0.9.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 38,
+      "productionErosionMass": 23501.993,
+      "productionCloneDensity": 0.03356,
+      "productionCycleGroups": 1,
+      "executableSloc": 28397
+    }
+  },
+  "comparisons": {
+    "oldAnalyzer": "compare-doc-old-analyzer.md",
+    "newAnalyzer": "compare-doc-new-analyzer.md"
+  },
+  "observation": "Both analyzers measure the old and new Trellis source snapshots at index 39. The new executable-SLOC metric is 28,302 before and 28,397 after; this is a TypeScript-only source delta, not a Python documentation correction. No complexity hotspot in docstrings code is added."
+}

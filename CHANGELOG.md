@@ -11,6 +11,13 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Python first-statement module/class/function docstrings are now excluded
+  from executable function mass and clone tokens, covered-line unions and
+  density denominators. Physical SLOC remains visible; new
+  `complexity.executable-sloc.*` metrics and hotspot `physicalSloc` facts show
+  both populations. Runtime multiline strings remain code. Analyzer 0.9.0
+  and scoring 0.9.0-provisional require fresh baselines for affected Python
+  workspaces; formula weights are unchanged.
 - Binding-confirmed Python literal dynamic imports now resolve to discovered
   targets, including literal relative `importlib.import_module` packages and
   supported one-argument absolute `__import__` calls. Graph evidence retains

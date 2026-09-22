@@ -58,6 +58,8 @@ export interface FunctionMeasurement {
 	 * they occupy (the syntax layer's scanner classification).
 	 */
 	sloc: number;
+	/** Physical code-line count before removing first-statement Python docstrings. */
+	physicalSloc: number;
 	/** `CC × sqrt(SLOC)` (SPEC §5.2), unrounded — round only at emission. */
 	mass: number;
 	/** True when `cc > EROSION_CC_THRESHOLD`. */
@@ -96,6 +98,8 @@ export interface PackageAggregate extends MassAggregate {
 /** One source set's aggregate: repo-level sums plus the per-package breakdown. */
 export interface ScopeAggregate extends MassAggregate {
 	sourceSet: SourceSet;
+	/** Structural code lines after omitting Python first-statement docstrings. */
+	executableSloc: number;
 	/** Files in this scope that produced parse diagnostics (partial measurement). */
 	diagnosticFiles: string[];
 	cc: CcDistribution | null;

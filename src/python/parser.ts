@@ -4,6 +4,7 @@
  */
 import type { Tree } from "@lezer/common";
 import type { LineCounts, LineKind, NormalizedToken, ParseDiagnostic } from "../syntax/types.ts";
+import type { PythonDocstring } from "./docstrings.ts";
 import { parser } from "./grammar/trellis-parser.ts";
 import { pythonIndentationDiagnostics } from "./layout.ts";
 import { lineOf, lineStarts, mark, type Node, nodeFromCursor, range } from "./tree.ts";
@@ -19,11 +20,14 @@ export const PYTHON_PARSER_VERSION = "1.1.18-trellis.2";
 export function pythonLineKinds(
 	tree: Tree,
 	text: string,
+	docstrings: readonly PythonDocstring[] = [],
 ): { kinds: LineKind[]; lines: LineCounts } {
 	const starts = lineStarts(text);
+	const excluded = new Set(docstrings.map((doc) => doc.from));
 	const code = Array.from({ length: starts.length }, () => false);
 	const comments = Array.from({ length: starts.length }, () => false);
 	const visit = (node: Node): void => {
+		if (node.name === "ExpressionStatement" && excluded.has(node.from)) return;
 		if (node.children.length === 0) {
 			if (node.name === "Comment") mark(comments, starts, node.from, node.to);
 			else if (!node.error && node.name !== "⚠") mark(code, starts, node.from, node.to);
@@ -57,20 +61,31 @@ function tokenKind(name: string, text: string): number {
 	return 0x40000000 + ((hash >>> 0) % 0x3fffffff);
 }
 
+function isBody(node: Node): boolean {
+	return node.name === "Body" || node.name === "MatchBody";
+}
+
+function isCodeToken(node: Node): boolean {
+	return node.name !== "Comment" && !node.error && node.name !== "⚠";
+}
+
 /** A disjoint Python token alphabet. Body markers preserve suite boundaries absent from leaf tokens. */
 export function pythonTokens(
 	tree: Tree,
 	text: string,
 	onToken: () => void = () => {},
+	docstrings: readonly PythonDocstring[] = [],
 ): NormalizedToken[] {
 	const starts = lineStarts(text);
+	const excluded = new Set(docstrings.map((doc) => doc.from));
 	const tokens: NormalizedToken[] = [];
 	const emit = (token: NormalizedToken): void => {
 		onToken();
 		tokens.push(token);
 	};
 	const visit = (node: Node): void => {
-		if (node.name === "Body" || node.name === "MatchBody") {
+		if (node.name === "ExpressionStatement" && excluded.has(node.from)) return;
+		if (isBody(node)) {
 			emit({
 				kind: 0x3fffffff,
 				startLine: lineOf(starts, node.from),
@@ -78,7 +93,7 @@ export function pythonTokens(
 			});
 		}
 		if (node.children.length === 0) {
-			if (node.name !== "Comment" && !node.error && node.name !== "⚠") {
+			if (isCodeToken(node)) {
 				emit({
 					kind: tokenKind(node.name, text.slice(node.from, node.to)),
 					startLine: lineOf(starts, node.from),
@@ -88,7 +103,7 @@ export function pythonTokens(
 			return;
 		}
 		for (const child of node.children) visit(child);
-		if (node.name === "Body" || node.name === "MatchBody")
+		if (isBody(node))
 			emit({
 				kind: 0x3ffffffe,
 				startLine: lineOf(starts, node.to),

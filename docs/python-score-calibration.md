@@ -15,6 +15,14 @@ across scoring versions are side-by-side development evidence, not compatible
 baselines or independent quality labels. The table below is the older 0.4.0
 survey and retains its original measurement context.
 
+Analyzer 0.9.0's executable-size correction has its own
+[`16-scope record`](../corpus/index-utility/p21-docstrings/summary.json). The
+scoring population omits actual first-statement docstrings from Python
+function mass and clone numerator/denominator while preserving physical SLOC.
+All scope scores are complete and deterministic. Several Python indexes move
+by one point in either direction; this is a measurement-version change and
+does not establish target-code improvement or an externally calibrated cutoff.
+
 ## Repaired, three-run measurement
 
 The same pinned trees, package scopes and configuration now produce complete

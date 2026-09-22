@@ -266,6 +266,16 @@ Size and nesting are explanatory signals unless the scoring formula
 explicitly includes them (§7). Empty or function-free scopes produce
 documented finite values or `not-applicable`, never crashes or silent zeros.
 
+Analyzer 0.9.0 identifies only first-statement Python string expressions in
+module, class and function suites as docstrings. Physical code-line counts
+remain in source coverage and `complexity.functions.*.detail.sloc`;
+`complexity.executable-sloc.*` counts structural lines after those docstrings
+are omitted. Each function's hotspot facts carry both executable `sloc` and
+`physicalSloc`. Ordinary multiline runtime strings remain code. Python
+function mass uses executable SLOC; documentation-only edits can move source
+ranges and physical counts without changing structural mass. TypeScript
+comment handling is unchanged.
+
 Python analyzer 0.7.0 excludes confirmed `typing.overload` declarations from
 executable function mass, associates them with the following same-container
 implementation and retains orphan declarations as located, unscored
@@ -280,6 +290,8 @@ Erosion weights complexity by size so a huge tangled function outranks a tiny
 tangled one:
 
 - **Function mass** = `CC × sqrt(SLOC)`.
+- For Python, this SLOC is executable structural size after first-statement
+  docstrings are omitted; the physical size remains separately visible above.
 - **Eroded mass share** = the share of total mass belonging to functions with
   `CC > 10`.
 - Aggregation from functions → packages → repo uses **summed masses**, never
@@ -368,6 +380,10 @@ Semantics fixed by this decision:
   overlapping or nested groups never double-count; the denominator is the
   scope’s total code-classified lines, making the density a ratio of
   compatible quantities.
+  From analyzer 0.9.0 onward, Python's numerator and denominator both use
+  executable code lines after actual first-statement docstrings are omitted;
+  the token population omits those same docstrings. Original source ranges
+  remain attached to clone members. TypeScript's population is unchanged.
 - **Production/test boundary**: detection runs **per source set** — token
   streams are never matched across sets, so production and test duplication
   are measured separately (§3.1); `generated`, `vendored`,
@@ -785,7 +801,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.8.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.9.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.

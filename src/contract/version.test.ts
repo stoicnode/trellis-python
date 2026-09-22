@@ -19,7 +19,7 @@ describe("contract version constants", () => {
 	});
 
 	test("pins the provisional scoring version from SPEC §7", () => {
-		expect(SCORING_VERSION).toBe("0.8.0-provisional");
+		expect(SCORING_VERSION).toBe("0.9.0-provisional");
 	});
 
 	test("aliases the analyzer version from the package version", () => {
