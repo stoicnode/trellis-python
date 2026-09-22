@@ -2,7 +2,9 @@
 
 Status: implementation complete for analyzer 0.9.0. Publish and push remain
 operator actions. The scoring formula is still `0.9.0-provisional`; Phase 4
-candidates remain research-only until the independent Phase 5 pilot finishes.
+candidates remain research-only until the
+[public labeled-source validation](research/slopcodebench-labeled-sources.md)
+passes.
 
 ## Semantic change inventory
 

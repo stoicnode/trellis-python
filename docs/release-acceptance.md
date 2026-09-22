@@ -25,7 +25,7 @@ for baseline, policy and history regressions.
 Analyzer 0.9.0's index-correction release inventory, contribution table,
 baseline migration and rollback are in [index-release-a.md](index-release-a.md).
 Formula candidates remain isolated research; promotion requires the
-[independent utility pilot](index-utility-validation-study.md).
+[public labeled-source validation](research/slopcodebench-labeled-sources.md).
 
 The formula remains provisional. Optional providers are advisory and require
 operator-prepared tools; SonarJS is deferred. Audits inspect safeguard

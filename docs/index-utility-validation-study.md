@@ -1,16 +1,25 @@
-# Independent index utility pilot
+# Archived human-review index utility pilot
 
-Status: preregistered and awaiting two independent human reviewers. No labels
-have been collected or inferred. This dependency does not block the Release A
-measurement corrections; it does block any Release B scoring promotion.
+Status: archived on 2026-09-22. The project will not recruit human reviewers for
+this study. The generated 120-sample packet and preregistration remain as a
+reproducibility record and must not be treated as completed validation.
 
-The census and reviewer packet are now generated. The
-[artifact record](../corpus/index-utility/study/generated-artifacts.json)
+The replacement is the
+[public labeled-source validation plan](research/slopcodebench-labeled-sources.md):
+paired code-smell injections and reversals, existing expert labels, maintainer
+rule fixtures, accepted-fix controls and iterative SlopCodeBench trajectories.
+Any Release B scoring promotion must pass that repository-held-out validation;
+the Release A measurement corrections remain independent of it.
+
+## Archived protocol
+
+The census and reviewer packet were generated before the protocol was retired.
+The [artifact record](../corpus/index-utility/study/generated-artifacts.json)
 locates them outside the repository and records their hashes. It contains
 5,920 production function units and a 120-sample blind packet: 20 per
 repository, split into 60 flagged and 60 matched-unflagged units. A repeated
 generation produced identical census, JSON packet, Markdown packet, answer
-key and source-record hashes. Keep the answer key away from reviewers.
+key and source-record hashes. They are retained for auditability only.
 
 The machine-readable [preregistration](../corpus/index-utility/study/preregistration.json)
 pins six repositories that are absent from the development corpus: three

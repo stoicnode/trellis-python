@@ -4,9 +4,13 @@ Status: in progress; Phase 0 evidence and Phase 1 graph/Python repairs are
 implemented. Phase 2's Python executable-size correction, advisory clone
 candidate population and advisory documentation detector are implemented.
 Phase 3.1's executable-scope and nesting evidence and Phase 3.2's reporting
-context are implemented. Phase 4's isolated experiments and Phase 5's
-preregistered sampling/decision protocol are implemented. Phase 6's Release A
-inventory, migration and rollback are implemented; independent human labels
+context are implemented. Phase 4's isolated experiments and Phase 5's original
+sampling/decision protocol are implemented. On 2026-09-22 the project retired
+the human-review route; the 120-sample packet remains an archival reproducibility
+artifact. The replacement
+[public labeled-source validation plan](research/slopcodebench-labeled-sources.md)
+uses existing paired changes, expert labels and rule fixtures. Phase 6's Release A
+inventory, migration and rollback are implemented; this replacement validation
 and any Release B scoring cutover remain pending.
 Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
@@ -67,8 +71,8 @@ bundle.
 | 6 | Release, compatibility, and migration | Each accepted release set | Explicit version transition |
 
 Release A can ship accepted measurement corrections and advisory reporting
-through Phase 6 before the human calibration study finishes. Release B changes
-the formula or clone scoring only after Phase 5. Neither release needs an
+through Phase 6 before the public labeled-source validation finishes. Release B
+changes the formula or clone scoring only after Phase 5. Neither release needs an
 arbitrary new factor or lower Python weights to make familiar libraries score
 better. Select exact version numbers at each release cutover.
 
@@ -333,6 +337,12 @@ candidate selection rules are frozen before examining held-out labels. A
 failed experiment remains an explicit result, not a production change.
 
 ## Phase 5 — Validate utility before promoting a formula
+
+**Amendment, 2026-09-22:** the human-review protocol below is archived. It records
+what was prepared, including the 120-unit packet, but no reviewers will be
+recruited. Execute the replacement
+[public labeled-source validation plan](research/slopcodebench-labeled-sources.md)
+before promoting a score formula.
 
 1. Predeclare a pilot of six additional repositories, balanced across languages
    and code roles, with ten flagged and ten random/matched unflagged units per

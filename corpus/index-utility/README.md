@@ -92,15 +92,16 @@ signals from the same pinned checkouts. The research baseline reproduces all
 rank reversals, language/size slices, saturation and run cost; none changes
 the production score or selects a formula before independent review.
 
-The Phase 5 [study preregistration](study/preregistration.json) pins six new
-repositories, the blinded deterministic sample, primary endpoint and
-regression margins before labels. Its maintenance pairs and external-tool
-versions are pinned beside it. Two independent human reviews remain
-uncollected, so no formula is promoted.
+The archived Phase 5 [study preregistration](study/preregistration.json) pins six
+repositories, the blinded deterministic sample, primary endpoint and regression
+margins. The project retired the human-review route on 2026-09-22 and replaced it
+with the [public labeled-source validation plan](../../docs/research/slopcodebench-labeled-sources.md).
+No formula is promoted until that repository-held-out validation passes.
 The [generated-artifact record](study/generated-artifacts.json) points to the
 5,920-unit census and 120-sample reviewer packet, records source/license
-provenance and confirms an identical second generation. The packet remains
-outside this repository because it contains third-party source excerpts.
+provenance and confirms an identical second generation. The packet remains an
+archived reproducibility artifact outside this repository because it contains
+third-party source excerpts.
 
 The final [Release A self-audit](self-audit/index-release-a/manifest.json)
 compares the P3.2 source to the completed research/study/release additions

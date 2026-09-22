@@ -8,8 +8,8 @@ with a pinned, read-only runner in
 
 ## Frozen experiment rules
 
-These rules were fixed in code before the 16-scope run. No independent human
-labels or held-out maintenance pairs were inspected. Every variant retains
+These rules were fixed in code before the 16-scope run. No independent labels or
+held-out maintenance pairs were inspected. Every variant retains
 the 50/30/20 dimension weights and 50/50 count/density shares. Count
 normalization remains `100 log1p(x / scale) / (1 + log1p(x / scale))`.
 
@@ -77,9 +77,10 @@ burden does not measure the minimum feedback edges needed to break a cycle.
 
 The significant language and size differences, especially the combined
 candidate's 17 rank reversals, are descriptive. No candidate is selected for
-promotion. The Phase 5 blind review must preregister its primary utility
-endpoint, regression margin, held-out repositories and maintenance pairs
-before labels are opened. Existing reviewed examples are development data.
+promotion. The replacement public labeled-source study must preregister its
+primary utility endpoint, regression margin, held-out repositories and
+maintenance pairs before labels are opened. Existing reviewed examples are
+development data.
 
 Reproduce with operator-prepared clean checkouts:
 

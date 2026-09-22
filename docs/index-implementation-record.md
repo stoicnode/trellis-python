@@ -77,7 +77,9 @@ report alone cannot be rescored with facts it never stored.
 P1.2 overload association, P1.3–P3.2 and independent formula calibration remain open in
 [`index-improvement-plan.md`](index-improvement-plan.md). The exploratory
 16-scope baseline is development data, not blinded or held-out validation.
-Phase 5 requires independent human review before any formula promotion.
+Phase 5 requires repository-held-out public labeled-source validation before any
+formula promotion. The archived human-review protocol is retained only as a
+reproducibility record.
 `ml` and `sd` were unavailable on this host, so tracker and memory entries
 could not be created here.
 
@@ -203,6 +205,6 @@ Each slice has a 16-scope three-run record and a Trellis 2-by-2 self-audit
 under `corpus/index-utility/`. The consolidated semantic inventory, fixed
 corpus contribution table, migration commands and rollback are in
 [`index-release-a.md`](index-release-a.md). The isolated Phase 4 experiments
-do not change scoring. Phase 5 has pinned repositories, maintenance pairs,
-sampling and promotion rules; it still requires two independent human
-reviewers, so Release B remains unimplemented.
+do not change scoring. The original Phase 5 human-review packet remains archived;
+the replacement public labeled-source study has pinned source and promotion
+requirements, so Release B remains unimplemented.
