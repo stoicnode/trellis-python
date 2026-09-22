@@ -37,6 +37,36 @@
     "reportedCostUsd": 0.023332302
   },
   "smellBench": {
+    "ratings": {
+      "good": {
+        "samples": 147,
+        "maintenanceMean": 0.9691836734693877,
+        "maintenanceMedian": 0.94,
+        "maintenanceFirstQuartile": 0.635,
+        "maintenanceThirdQuartile": 1.245,
+        "maintenanceMinimum": 0.21,
+        "maintenanceMaximum": 2.05,
+        "dominantMaintenanceLevelCounts": { "0": 47, "1": 63, "2": 37, "3": 0 },
+        "refactorValueMean": 0.3535374149659864,
+        "refactorValueAtLeastHalf": 7,
+        "evidenceSufficiencyMean": 0.2997278911564626,
+        "evidenceSufficiencyAtLeastHalf": 3
+      },
+      "bad": {
+        "samples": 147,
+        "maintenanceMean": 1.3695238095238096,
+        "maintenanceMedian": 1.38,
+        "maintenanceFirstQuartile": 1.0750000000000002,
+        "maintenanceThirdQuartile": 1.725,
+        "maintenanceMinimum": 0.35,
+        "maintenanceMaximum": 2.44,
+        "dominantMaintenanceLevelCounts": { "0": 10, "1": 54, "2": 83, "3": 0 },
+        "refactorValueMean": 0.4417687074829932,
+        "refactorValueAtLeastHalf": 32,
+        "evidenceSufficiencyMean": 0.48639455782312924,
+        "evidenceSufficiencyAtLeastHalf": 81
+      }
+    },
     "meanBadMinusGoodMaintenance": 0.4003401360544218,
     "badHigherMaintenanceRate": 0.8367346938775511,
     "meanBadMinusGoodRefactorValue": 0.08823129251700679,

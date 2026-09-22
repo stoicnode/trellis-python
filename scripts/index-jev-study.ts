@@ -213,7 +213,63 @@ function mean(values: readonly number[]): number | null {
 	return values.length === 0 ? null : values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function quantile(values: readonly number[], probability: number): number | null {
+	if (values.length === 0) return null;
+	const sorted = [...values].sort((left, right) => left - right);
+	const position = (sorted.length - 1) * probability;
+	const lower = Math.floor(position);
+	const upper = Math.ceil(position);
+	const lowerValue = sorted[lower];
+	const upperValue = sorted[upper];
+	if (lowerValue === undefined || upperValue === undefined) return null;
+	return lowerValue + (upperValue - lowerValue) * (position - lower);
+}
+
+function summarizeRatings(selected: readonly Label[]) {
+	const maintenance = selected.map((label) => label.maintenanceCost);
+	const refactor = selected.map((label) => label.refactorValue);
+	const evidence = selected.map((label) => label.evidenceSufficient);
+	const dominantLevels = { "0": 0, "1": 0, "2": 0, "3": 0 };
+	for (const label of selected) {
+		const dominant = Object.entries(label.maintenanceProbabilities).sort(
+			([leftLevel, left], [rightLevel, right]) =>
+				right - left || leftLevel.localeCompare(rightLevel),
+		)[0]?.[0];
+		if (dominant !== undefined && Object.hasOwn(dominantLevels, dominant)) {
+			dominantLevels[dominant as keyof typeof dominantLevels] += 1;
+		}
+	}
+	return {
+		samples: selected.length,
+		maintenanceCost: {
+			mean: mean(maintenance),
+			median: quantile(maintenance, 0.5),
+			firstQuartile: quantile(maintenance, 0.25),
+			thirdQuartile: quantile(maintenance, 0.75),
+			minimum: maintenance.length === 0 ? null : Math.min(...maintenance),
+			maximum: maintenance.length === 0 ? null : Math.max(...maintenance),
+			dominantLevelCounts: dominantLevels,
+		},
+		refactorValue: {
+			mean: mean(refactor),
+			atLeastHalf: refactor.filter((value) => value >= 0.5).length,
+		},
+		evidenceSufficiency: {
+			mean: mean(evidence),
+			atLeastHalf: evidence.filter((value) => value >= 0.5).length,
+		},
+	};
+}
+
 function summarizeSmellBench(pairs: readonly SmellPair[], labels: ReadonlyMap<string, Label>) {
+	const goodLabels = pairs.map((pair) => labels.get(pair.goodId));
+	const badLabels = pairs.map((pair) => labels.get(pair.badId));
+	if (
+		goodLabels.some((label) => label === undefined) ||
+		badLabels.some((label) => label === undefined)
+	) {
+		throw new Error("missing SmellBench pair labels");
+	}
 	function summary(selected: readonly SmellPair[]) {
 		const deltas = selected.map((pair) => {
 			const good = labels.get(pair.goodId);
@@ -238,6 +294,10 @@ function summarizeSmellBench(pairs: readonly SmellPair[], labels: ReadonlyMap<st
 	}
 	const types = [...new Set(pairs.map((pair) => pair.smellType))].sort();
 	return {
+		ratings: {
+			good: summarizeRatings(goodLabels as Label[]),
+			bad: summarizeRatings(badLabels as Label[]),
+		},
 		overall: summary(pairs),
 		bySmellType: Object.fromEntries(
 			types.map((type) => [type, summary(pairs.filter((pair) => pair.smellType === type))]),

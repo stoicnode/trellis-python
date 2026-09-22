@@ -82,6 +82,19 @@ Across all 147 pairs:
 - both sides cleared the preregistered-style 0.5 evidence-sufficiency threshold in
   only **2.0%** of pairs.
 
+The absolute ratings explain what “good” meant in this run. The 147 original
+versions averaged **0.969/3** maintenance cost (median 0.940, interquartile range
+0.635–1.245). Their dominant maintenance levels were 47 at level 0, 63 at level 1,
+37 at level 2, and none at level 3. Mean refactor value was 0.354, with 7/147 at
+or above 0.5. Mean evidence sufficiency was 0.300, with only 3/147 at or above 0.5.
+These are “better side of a controlled pair” labels, not claims of flawless code.
+
+The follow-up [`ast-grep` direction check](ast-grep-smellbench-validation/README.md)
+tested the published 197-rule `scb-check` bundle against the same pairs. Its
+matched-line coverage increased from 4.67% on the original side to 6.57% on the
+injected side, but no individual rule cleared a 0.05 false-discovery threshold
+after correction across the full screen.
+
 Direction varied by smell family. Maintenance direction was strongest for dead
 code elimination and deeply inlined methods (100% each). Data clumps and shotgun
 surgery were weakest (66.7% each). The diff reconstruction therefore supplies a
