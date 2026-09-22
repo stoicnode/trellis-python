@@ -39,12 +39,16 @@ import type {
 	AnalysisResult,
 	DependencyCruiserProviderRequest,
 	ObservedCoverage,
-	SourceSet,
 } from "../../contract/index.ts";
 import type { PinnedToolResolveOptions } from "../resolve.ts";
-import { type StagedRunOutcome, withStagedWorkspaceView } from "../staged-run.ts";
 import {
-	type CleanupStatus,
+	degradeForCleanup,
+	type StagedRunOutcome,
+	stagedSourceSetCounts,
+	stagingDiagnostics,
+	withStagedWorkspaceView,
+} from "../staged-run.ts";
+import {
 	InvalidStagingRequestError,
 	messageOf,
 	type StagedSelectionFile,
@@ -68,23 +72,6 @@ export interface DependencyCruiserAnalysisOptions {
 	resolve?: PinnedToolResolveOptions;
 	/** Wall-time limit for waiting on the staged analysis (the lifecycle's own bound). */
 	timeoutMs?: number;
-}
-
-/** Per-source-set counts of the staged selection (the sets the analysis selected). */
-function stagedBySourceSet(view: StagedWorkspaceView): Partial<Record<SourceSet, number>> {
-	const bySourceSet: Partial<Record<SourceSet, number>> = {};
-	for (const file of view.files) {
-		bySourceSet[file.sourceSet] = (bySourceSet[file.sourceSet] ?? 0) + 1;
-	}
-	return bySourceSet;
-}
-
-/** Staging-level gaps as diagnostics: files the view could not read or refused to stage. */
-function stagingDiagnostics(view: StagedWorkspaceView): AnalysisDiagnostic[] {
-	return [
-		...view.readFailures.map((failure) => ({ path: failure.path, message: failure.reason })),
-		...view.rejected.map((rejection) => ({ path: rejection.path, message: rejection.reason })),
-	];
 }
 
 /** Normalize one validated cruise outcome; throws only on invalid evidence. */
@@ -116,7 +103,7 @@ function observedCoverage(
 ): ObservedCoverage {
 	return {
 		analyzedFiles: [...analyzedFiles].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
-		bySourceSet: stagedBySourceSet(view),
+		bySourceSet: stagedSourceSetCounts(view),
 		diagnostics,
 		unsupported: [],
 	};
@@ -172,7 +159,7 @@ async function foldOutcome(
 			analysis: outcome.analysis,
 			observedCoverage: {
 				analyzedFiles: [...outcome.coverage.representedFiles],
-				bySourceSet: stagedBySourceSet(view),
+				bySourceSet: stagedSourceSetCounts(view),
 				diagnostics: [],
 				unsupported: [],
 			},
@@ -187,34 +174,12 @@ async function foldOutcome(
 			reason: `validated dependency-cruiser evidence failed to normalize over the staged snapshot: ${messageOf(error)}`,
 			observedCoverage: {
 				analyzedFiles: [...outcome.coverage.representedFiles],
-				bySourceSet: stagedBySourceSet(view),
+				bySourceSet: stagedSourceSetCounts(view),
 				diagnostics: [{ message: messageOf(error) }],
 				unsupported: [],
 			},
 		};
 	}
-}
-
-/** Make a failed owned-scratch cleanup visible (§16.4) — never a silently dropped condition. */
-function degradedForCleanup(result: AnalysisResult, cleanup: CleanupStatus): AnalysisResult {
-	if (cleanup.status !== "failed") return result;
-	const note = `owned scratch cleanup failed: ${cleanup.reason}`;
-	const coverage = result.observedCoverage;
-	if (result.state === "complete" && coverage !== undefined) {
-		return {
-			...result,
-			state: "incomplete",
-			reason: note,
-			observedCoverage: {
-				...coverage,
-				diagnostics: [...coverage.diagnostics, { message: note }],
-			},
-		};
-	}
-	return {
-		...result,
-		reason: result.reason === undefined ? note : `${result.reason}; ${note}`,
-	};
 }
 
 /**
@@ -269,9 +234,9 @@ export async function runDependencyCruiserAnalysis(
 	}
 	switch (lifecycle.kind) {
 		case "completed":
-			return degradedForCleanup(lifecycle.value, lifecycle.cleanup);
+			return degradeForCleanup(lifecycle.value, lifecycle.cleanup);
 		case "adapter-failed":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(
 					policy,
 					"unavailable",
@@ -280,7 +245,7 @@ export async function runDependencyCruiserAnalysis(
 				lifecycle.cleanup,
 			);
 		case "cancelled":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(
 					policy,
 					"unavailable",
@@ -289,7 +254,7 @@ export async function runDependencyCruiserAnalysis(
 				lifecycle.cleanup,
 			);
 		case "timeout":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(policy, "unavailable", "the architecture analysis exceeded its wall-time limit"),
 				lifecycle.cleanup,
 			);

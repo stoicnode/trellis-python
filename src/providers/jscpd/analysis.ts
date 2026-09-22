@@ -30,17 +30,16 @@
  *   the native audit untouched.
  */
 import { readFile } from "node:fs/promises";
-import type {
-	AnalysisDiagnostic,
-	AnalysisResult,
-	CloneMatchMode,
-	ObservedCoverage,
-	SourceSet,
-} from "../../contract/index.ts";
+import type { AnalysisResult, CloneMatchMode, ObservedCoverage } from "../../contract/index.ts";
 import type { PinnedToolResolveOptions } from "../resolve.ts";
-import { type StagedRunOutcome, withStagedWorkspaceView } from "../staged-run.ts";
 import {
-	type CleanupStatus,
+	degradeForCleanup,
+	type StagedRunOutcome,
+	stagedSourceSetCounts,
+	stagingDiagnostics,
+	withStagedWorkspaceView,
+} from "../staged-run.ts";
+import {
 	InvalidStagingRequestError,
 	messageOf,
 	type StagedSelectionFile,
@@ -93,15 +92,6 @@ async function accountedFiles(view: StagedWorkspaceView): Promise<JscpdAccounted
 	return accounted;
 }
 
-/** Per-source-set counts of the staged selection (the sets the analysis selected). */
-function stagedBySourceSet(view: StagedWorkspaceView): Partial<Record<SourceSet, number>> {
-	const bySourceSet: Partial<Record<SourceSet, number>> = {};
-	for (const file of view.files) {
-		bySourceSet[file.sourceSet] = (bySourceSet[file.sourceSet] ?? 0) + 1;
-	}
-	return bySourceSet;
-}
-
 /** Normalize one validated raw report over the staged snapshot; throws only on invalid evidence. */
 async function normalizedEvidence(
 	view: StagedWorkspaceView,
@@ -111,14 +101,6 @@ async function normalizedEvidence(
 		throw new Error("the outcome carries no raw report to normalize");
 	}
 	return normalizeJscpdReport(outcome.report, await accountedFiles(view));
-}
-
-/** Staging-level gaps as diagnostics: files the view could not read or refused to stage. */
-function stagingDiagnostics(view: StagedWorkspaceView): AnalysisDiagnostic[] {
-	return [
-		...view.readFailures.map((failure) => ({ path: failure.path, message: failure.reason })),
-		...view.rejected.map((rejection) => ({ path: rejection.path, message: rejection.reason })),
-	];
 }
 
 /**
@@ -201,7 +183,7 @@ async function foldJscpdOutcome(
 			analysis: outcome.analysis,
 			observedCoverage: {
 				analyzedFiles: [...outcome.coverage.analyzedFiles],
-				bySourceSet: stagedBySourceSet(view),
+				bySourceSet: stagedSourceSetCounts(view),
 				diagnostics: [],
 				unsupported: [],
 			},
@@ -217,36 +199,12 @@ async function foldJscpdOutcome(
 			reason: `validated jscpd evidence failed to normalize over the staged snapshot: ${messageOf(error)}`,
 			observedCoverage: {
 				analyzedFiles: [],
-				bySourceSet: stagedBySourceSet(view),
+				bySourceSet: stagedSourceSetCounts(view),
 				diagnostics: [{ message: messageOf(error) }],
 				unsupported: [],
 			},
 		};
 	}
-}
-
-/** Make a failed owned-scratch cleanup visible (§16.4) — never a silently dropped condition. */
-function degradedForCleanup(result: AnalysisResult, cleanup: CleanupStatus): AnalysisResult {
-	if (cleanup.status !== "failed") return result;
-	const note = `owned scratch cleanup failed: ${cleanup.reason}`;
-	const coverage = result.observedCoverage;
-	if (result.state === "complete" && coverage !== undefined) {
-		// A cleanup failure is never a clean result: the complete evidence stays
-		// attached, degraded to incomplete with the failure as its located gap.
-		return {
-			...result,
-			state: "incomplete",
-			reason: note,
-			observedCoverage: {
-				...coverage,
-				diagnostics: [...coverage.diagnostics, { message: note }],
-			},
-		};
-	}
-	return {
-		...result,
-		reason: result.reason === undefined ? note : `${result.reason}; ${note}`,
-	};
 }
 
 /**
@@ -297,14 +255,14 @@ export async function runJscpdAnalysis(
 	}
 	switch (lifecycle.kind) {
 		case "completed":
-			return degradedForCleanup(lifecycle.value, lifecycle.cleanup);
+			return degradeForCleanup(lifecycle.value, lifecycle.cleanup);
 		case "adapter-failed":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(mode, "unavailable", `the jscpd adapter failed: ${messageOf(lifecycle.error)}`),
 				lifecycle.cleanup,
 			);
 		case "cancelled":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(
 					mode,
 					"unavailable",
@@ -313,7 +271,7 @@ export async function runJscpdAnalysis(
 				lifecycle.cleanup,
 			);
 		case "timeout":
-			return degradedForCleanup(
+			return degradeForCleanup(
 				neverRan(mode, "unavailable", "the jscpd analysis exceeded its wall-time limit"),
 				lifecycle.cleanup,
 			);

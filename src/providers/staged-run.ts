@@ -25,6 +25,7 @@
  * downstream evidence.
  */
 
+import type { AnalysisDiagnostic, AnalysisResult, SourceSet } from "../contract/index.ts";
 import { type CleanupStatus, InvalidStagingRequestError, type StagingRequest } from "./staging.ts";
 import type { StagedWorkspaceView } from "./workspace.ts";
 import { stageWorkspaceView } from "./workspace.ts";
@@ -43,6 +44,47 @@ export type StagedRunOutcome<T> =
 	| { kind: "adapter-failed"; error: unknown; cleanup: CleanupStatus }
 	| { kind: "timeout"; cleanup: CleanupStatus }
 	| { kind: "cancelled"; cleanup: CleanupStatus };
+
+/** Count the files in a staged selection by their already-classified source set. */
+export function stagedSourceSetCounts(
+	view: StagedWorkspaceView,
+): Partial<Record<SourceSet, number>> {
+	const bySourceSet: Partial<Record<SourceSet, number>> = {};
+	for (const file of view.files) {
+		bySourceSet[file.sourceSet] = (bySourceSet[file.sourceSet] ?? 0) + 1;
+	}
+	return bySourceSet;
+}
+
+/** Locate files the staged view could not read or refused to include. */
+export function stagingDiagnostics(view: StagedWorkspaceView): AnalysisDiagnostic[] {
+	return [
+		...view.readFailures.map((failure) => ({ path: failure.path, message: failure.reason })),
+		...view.rejected.map((rejection) => ({ path: rejection.path, message: rejection.reason })),
+	];
+}
+
+/** Keep completed evidence but mark its coverage incomplete when owned cleanup fails. */
+export function degradeForCleanup(result: AnalysisResult, cleanup: CleanupStatus): AnalysisResult {
+	if (cleanup.status !== "failed") return result;
+	const note = `owned scratch cleanup failed: ${cleanup.reason}`;
+	const coverage = result.observedCoverage;
+	if (result.state === "complete" && coverage !== undefined) {
+		return {
+			...result,
+			state: "incomplete",
+			reason: note,
+			observedCoverage: {
+				...coverage,
+				diagnostics: [...coverage.diagnostics, { message: note }],
+			},
+		};
+	}
+	return {
+		...result,
+		reason: result.reason === undefined ? note : `${result.reason}; ${note}`,
+	};
+}
 
 /** Settled adapter result — errors are carried, never rethrown here. */
 type RunResult<T> = { ok: true; value: T } | { ok: false; error: unknown };
