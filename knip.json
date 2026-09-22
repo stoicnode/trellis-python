@@ -3,6 +3,7 @@
 	"ignore": [".bun/**", "data/**", "dist/**", "coverage/**", "test-results/**"],
 	"ignoreUnresolved": ["bun-types"],
 	"ignoreDependencies": ["jscpd", "dependency-cruiser"],
+	"ignoreBinaries": ["python3"],
 	"workspaces": {
 		".": {
 			"entry": ["src/**/main.ts", "scripts/**/*.ts", "**/*.test.ts"],

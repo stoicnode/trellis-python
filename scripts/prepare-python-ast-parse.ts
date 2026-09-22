@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
-/** Explicit preparation-only comparison; never imported by the audit or tests. */
+/**
+ * Explicit preparation-only comparison; never imported by the audit or tests.
+ * `python3` is intentionally listed in Knip's ignoreBinaries for this script.
+ */
 import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
