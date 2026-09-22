@@ -45,6 +45,7 @@ import {
 import { measureCandidateScope } from "./duplication-candidate.ts";
 import { roundTo } from "./erosion.ts";
 import { cloneLineOverlap } from "./line-overlap.ts";
+import { metric } from "./metric-value.ts";
 
 /** The source sets duplication measurement covers (SPEC §3.1: scored sets, separately). */
 const MEASURED_SETS = ["production", "test"] as const;
@@ -128,30 +129,6 @@ function scopeReason(scope: DuplicationScope): string | undefined {
 	return n === 0
 		? undefined
 		: `${n} ${scope.sourceSet} file(s) produced parse diagnostics; values are partial`;
-}
-
-/** One metric's state + optional value under the documented state rules. */
-function stateAndValue(
-	value: number | null,
-	reason: string | undefined,
-): Pick<MetricValue, "state" | "value" | "reason"> {
-	if (reason !== undefined) {
-		return value === null
-			? { state: "incomplete", reason }
-			: { state: "incomplete", value, reason };
-	}
-	return value === null ? { state: "not-applicable" } : { state: "complete", value };
-}
-
-/** Build one contract metric from a computed (nullable) value. */
-function metric(
-	id: string,
-	unit: string,
-	value: number | null,
-	reason: string | undefined,
-	extra?: Partial<Pick<MetricValue, "numerator" | "denominator" | "detail">>,
-): MetricValue {
-	return { id, unit, ...stateAndValue(value, reason), ...extra };
 }
 
 /** Known compatible numerator/denominator, absent for unmeasured or empty scopes. */
