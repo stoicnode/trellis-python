@@ -10,7 +10,7 @@ import { execFileSync } from "node:child_process";
  * executes target-project code.
  */
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { lstatSync, readFileSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
 import { z } from "zod";
@@ -54,6 +54,7 @@ export interface FixtureRecord {
 	id: string;
 	snapshot: { expected: string; actual: string; matches: boolean };
 	completeness: AuditReport["completeness"];
+	sourceCoverage: AuditReport["sourceCoverage"];
 	metrics: Record<string, { state: string; reason?: string }>;
 	scoreContributions: AuditReport["score"]["contributions"];
 	unresolvedReasons: Record<string, number>;
@@ -79,6 +80,8 @@ async function files(root: string, current = root): Promise<string[]> {
 	const nested = await Promise.all(
 		entries.map(async (entry) => {
 			const path = resolve(current, entry.name);
+			if (lstatSync(path).isSymbolicLink())
+				throw new Error(`fixture snapshot rejects symlink: ${path}`);
 			if (entry.isDirectory()) return files(root, path);
 			return entry.isFile() ? [relative(root, path)] : [];
 		}),
@@ -171,6 +174,7 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 			id: fixture.id,
 			snapshot: { expected: fixture.snapshot, actual, matches: fixture.snapshot === actual },
 			completeness: result.report.completeness,
+			sourceCoverage: result.report.sourceCoverage,
 			metrics,
 			scoreContributions: result.report.score.contributions,
 			unresolvedReasons: unresolvedReasons(result.report),
@@ -306,4 +310,43 @@ export async function auditPinnedRepositories(
 		}
 	}
 	return failures;
+}
+
+/** Explicit preparation entry point; normal tests never call it or need Python/external inputs. */
+export async function main(
+	args: string[],
+	write: (text: string) => void = console.log,
+): Promise<number> {
+	const preparedIndex = args.indexOf("--prepared-root");
+	const artifactIndex = args.indexOf("--artifact-root");
+	if (preparedIndex < 0 || artifactIndex < 0) {
+		throw new Error("usage: --prepared-root <repos> --artifact-root <artifacts> [--reaudit]");
+	}
+	const preparedRoot = args[preparedIndex + 1];
+	const artifactRoot = args[artifactIndex + 1];
+	if (preparedRoot === undefined || artifactRoot === undefined)
+		throw new Error("prepared roots need values");
+	const root = resolve(import.meta.dir, "../corpus/oss-benchmark");
+	const integrity = verifyPinnedRepositories(root, preparedRoot);
+	const artifactMismatches = await verifyBaselineArtifacts(root, artifactRoot);
+	const reAuditMismatches = args.includes("--reaudit")
+		? await auditPinnedRepositories(root, preparedRoot)
+		: undefined;
+	write(
+		`${JSON.stringify({
+			repositories: loadOssBenchmarkManifest(root).baselines,
+			integrity,
+			artifactMismatches,
+			...(reAuditMismatches === undefined ? {} : { reAuditMismatches }),
+		})}\n`,
+	);
+	return integrity.length === 0 &&
+		artifactMismatches.length === 0 &&
+		(reAuditMismatches?.length ?? 0) === 0
+		? 0
+		: 1;
+}
+
+if (import.meta.main) {
+	main(process.argv.slice(2)).then((code) => (process.exitCode = code));
 }
