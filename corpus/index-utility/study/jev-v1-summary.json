@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "status": "exploratory-model-assisted-evidence",
+  "executionBoundary": "research-only; never part of audit, SDK, fleet, CI, or scoring",
+  "rubricVersion": "trellis-maintenance-jev-v1",
+  "endpoint": "https://openrouter.ai/api/alpha/decisions",
+  "modelRequested": "typesafe/jev-1.13",
+  "modelResolved": "typesafe/jev-1.13-20260917",
+  "artifactDirectory": "/Users/bbr/.codex/visualizations/2026/09/22/01a0c970-f40d-7991-9cbf-d481c02012f9/index-study-v1/jev-v1",
+  "artifacts": {
+    "summary": {
+      "path": "summary.json",
+      "bytes": 3621,
+      "sha256": "fe2f3a75a845bc9cd741aaf4de2a785de1b093c4f9f8ffe492d995b7b2d6b5b5"
+    },
+    "smellBenchLabels": {
+      "path": "smellbench-labels.json",
+      "bytes": 86647,
+      "sha256": "3374685cda25bd389aa24470408744ac9beccedbaff33f0e5ece3548e049bd8f"
+    },
+    "packetLabels": {
+      "path": "packet-labels.json",
+      "bytes": 35168,
+      "sha256": "b2adfd127c99ee6c7146cae9498cc3ac6f20b8ef1400510e6a89d1feafc4d9ff"
+    }
+  },
+  "inputs": {
+    "packetSha256": "bf3d2a7b4295723575b1f73bd82439d8caf65a1e42e3884c3cf3b97ac6a9c423",
+    "answerKeySha256": "c945af3839af68b647fc8d89270d94c13a61da8f884979c939c905b94e0e2bac",
+    "smellBenchDataset": "critical88/SmellBench train",
+    "smellBenchRevision": "12604372b4a89a54b39645b6c82557b3b9e68eca",
+    "smellBenchPairs": 147
+  },
+  "usage": {
+    "inputTokens": 555531,
+    "outputTokens": 42590,
+    "reportedCostUsd": 0.023332302
+  },
+  "smellBench": {
+    "meanBadMinusGoodMaintenance": 0.4003401360544218,
+    "badHigherMaintenanceRate": 0.8367346938775511,
+    "meanBadMinusGoodRefactorValue": 0.08823129251700679,
+    "badHigherRefactorValueRate": 0.8843537414965986,
+    "bothSidesEvidenceSufficientRate": 0.02040816326530612
+  },
+  "packet": {
+    "allSamples": {
+      "flaggedMeanMaintenance": 0.7961666666666667,
+      "controlMeanMaintenance": 0.808,
+      "maintenanceAuc": 0.5083333333333333,
+      "flaggedMeanRefactorValue": 0.3318333333333333,
+      "controlMeanRefactorValue": 0.3366666666666666,
+      "refactorValueAuc": 0.48083333333333333
+    },
+    "evidenceSufficientAtHalf": {
+      "flagged": 23,
+      "matchedUnflagged": 15,
+      "total": 38
+    },
+    "meanMaintenanceByFlag": {
+      "complexity.hotspot": { "samples": 20, "mean": 1.276 },
+      "duplication.candidate.independent-executable": { "samples": 8, "mean": 1.011 },
+      "duplication.clone-group": { "samples": 21, "mean": 0.4 },
+      "executable.nesting": { "samples": 34, "mean": 1.021 }
+    }
+  },
+  "repeatObservation": {
+    "scope": "The packet request was repeated unchanged while the SmellBench record-order bug was corrected.",
+    "maintenanceAuc": [0.5093055555555556, 0.5083333333333333],
+    "refactorValueAuc": [0.4790277777777778, 0.48083333333333333],
+    "evidenceSufficientCount": [42, 38],
+    "interpretation": "Aggregate discrimination was stable at chance; individual probabilities and threshold coverage were not byte-deterministic."
+  },
+  "decision": "Jev separates SmellBench injected and reversed snippets overall, but the isolated 120-sample excerpts do not separate Trellis flagged units from controls. Retain ast-grep and Jev evidence outside scoring. Re-run with full units and relationship context, especially clone peers, before any promotion decision."
+}

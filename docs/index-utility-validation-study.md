@@ -11,6 +11,12 @@ rule fixtures, accepted-fix controls and iterative SlopCodeBench trajectories.
 Any Release B scoring promotion must pass that repository-held-out validation;
 the Release A measurement corrections remain independent of it.
 
+The first [Jev model-assisted run](research/jev-index-study.md) applied one frozen
+rubric to all 147 SmellBench pairs and the archived 120-sample packet. Jev separated
+the SmellBench direction overall, while the isolated Trellis excerpts produced
+chance-level flagged/control separation and insufficient context. It remains
+triangulation and does not promote a formula.
+
 ## Archived protocol
 
 The census and reviewer packet were generated before the protocol was retired.

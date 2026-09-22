@@ -360,3 +360,9 @@ parser, detector, and rule-bundle identities match.
 This design uses existing public labels, preserves Trellis's deterministic and
 offline audit contract, and produces evidence about both sensitivity and false
 positives without starting a new manual review program.
+
+The first execution of this design is documented in the
+[Jev model-assisted index study](jev-index-study.md). It uses the same frozen
+rubric on all 147 SmellBench pairs and the archived 120-sample packet. The model
+separates SmellBench direction overall, while the isolated packet excerpts do not
+separate Trellis flags from controls.

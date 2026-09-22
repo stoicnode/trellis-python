@@ -103,6 +103,12 @@ provenance and confirms an identical second generation. The packet remains an
 archived reproducibility artifact outside this repository because it contains
 third-party source excerpts.
 
+The research-only [Jev study](../../docs/research/jev-index-study.md) reuses the
+blinded packet beside all 147 SmellBench pairs. Its committed
+[summary record](study/jev-v1-summary.json) pins input/output hashes, model
+identity, usage and the non-promotion decision; source-derived model outputs remain
+outside the repository.
+
 The final [Release A self-audit](self-audit/index-release-a/manifest.json)
 compares the P3.2 source to the completed research/study/release additions
 under analyzer 0.9.0. The index and eroded-function count remain 38 and 41;
