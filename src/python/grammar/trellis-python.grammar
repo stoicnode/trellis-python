@@ -365,7 +365,7 @@ nestedFormatReplacement[isolate,@name=FormatReplacement,@export] { formatReplace
   formatStringSpecChars { ![{}]+ }
 
   Number {
-    (@digit ("_" | @digit)* ("." @digit ("_" | @digit)*)? | "." @digit ("_" | @digit)*)
+    (@digit ("_" | @digit)* ("." (@digit ("_" | @digit)*)?)? | "." @digit ("_" | @digit)*)
       ($[eE] $[+\-]? @digit ("_" | @digit)*)? $[jJ]? |
     "0" $[bB] $[_01]+ |
     "0" $[oO] $[_0-7]+ |

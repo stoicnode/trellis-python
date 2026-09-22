@@ -76,6 +76,9 @@ describe("Python structural adapter", () => {
 			"def generator():\n    yield\n",
 			"with connect() as (host, port):\n    use(host, port)\n",
 			"values = [code for code, *parameters in controls]\n",
+			"trailing = 3.",
+			"power = 10.**2",
+			"exponent = 1.e2",
 			[
 				"match command:",
 				"    case {'kind': 'copy', 'items': [first, *rest]}:",
@@ -94,6 +97,7 @@ describe("Python structural adapter", () => {
 			"def generator():\n    yield from\n",
 			"with connect() as (1, port):\n    use(port)\n",
 			"values = [code for code, * in controls]\n",
+			"invalid_member = 1.foo",
 			"from module import (\n    value\n",
 		];
 
