@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
-import { loadOssBenchmarkManifest, runOssBenchmark } from "./validate-oss-benchmarks.ts";
+import {
+	loadOssBenchmarkManifest,
+	measureFixtureInChildProcess,
+	runOssBenchmark,
+} from "./validate-oss-benchmarks.ts";
 
 const ROOT = resolve(import.meta.dir, "../corpus/oss-benchmark");
 
@@ -57,5 +61,12 @@ describe("open-source benchmark baseline", () => {
 				reason: expect.stringContaining("match-work budget"),
 			});
 		}
+	});
+
+	test("measures each fixture in a fresh audit process", () => {
+		const measured = measureFixtureInChildProcess(ROOT, "static-import-uncertainty");
+		expect(measured.id).toBe("static-import-uncertainty");
+		expect(measured.measurement.peakRssMb).toBeGreaterThan(0);
+		expect(measured.snapshot.matches).toBe(true);
 	});
 });
