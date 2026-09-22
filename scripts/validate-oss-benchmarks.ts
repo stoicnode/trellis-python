@@ -18,7 +18,14 @@ import { runWorkspaceAudit } from "../src/audit/index.ts";
 import type { AuditReport } from "../src/contract/index.ts";
 import { parsePython } from "../src/python/parser.ts";
 import { auditPinnedAcceptance } from "./oss-benchmark-acceptance.ts";
+import {
+	differsFromFrozenBaseline,
+	type FrozenArtifact,
+	observeBaselineArtifact,
+} from "./oss-benchmark-baseline.ts";
 import { readPreparationArgs } from "./oss-benchmark-cli.ts";
+
+export { equalReasonCounts } from "./oss-benchmark-baseline.ts";
 
 const MEASUREMENT_SCRIPT = resolve(import.meta.dir, "oss-benchmark-measure.ts");
 
@@ -155,14 +162,6 @@ export function measureFixtureInChildProcess(root: string, id: string): FixtureR
 	return JSON.parse(result.stdout) as FixtureRecord;
 }
 
-export function equalReasonCounts(
-	left: Record<string, number>,
-	right: Record<string, number>,
-): boolean {
-	const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].sort();
-	return keys.every((key) => left[key] === right[key]);
-}
-
 /** Audit the committed fixtures with the same service folded by CLI and SDK. */
 export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord> {
 	const manifest = loadOssBenchmarkManifest(root);
@@ -211,45 +210,13 @@ export async function verifyBaselineArtifacts(
 	artifactRoot: string,
 ): Promise<string[]> {
 	const manifest = loadOssBenchmarkManifest(root);
-	const names: Record<string, string> = { "tanstack-query": "tanstack-query" };
 	const failures: string[] = [];
 	for (const baseline of manifest.baselines) {
 		const artifact = JSON.parse(
-			await readFile(resolve(artifactRoot, `${names[baseline.id] ?? baseline.id}.json`), "utf8"),
-		) as {
-			completeness?: string;
-			score?: { index?: number };
-			sourceCoverage?: { production?: { files?: number; sloc?: number } };
-			languageCoverage?: Array<{ parseFailureFiles?: number }>;
-			findings?: Array<{ kind?: string; facts?: { reason?: string } }>;
-		};
-		const reasons: Record<string, number> = {};
-		for (const finding of artifact.findings ?? []) {
-			if (finding.kind === "graph.unresolved-import" && typeof finding.facts?.reason === "string") {
-				const reason = finding.facts.reason;
-				reasons[reason] = (reasons[reason] ?? 0) + 1;
-			}
-		}
-		const parseFailures = (artifact.languageCoverage ?? []).reduce(
-			(sum, row) => sum + (row.parseFailureFiles ?? 0),
-			0,
-		);
-		const observed = {
-			index: artifact.score?.index,
-			completeness: artifact.completeness,
-			files: artifact.sourceCoverage?.production?.files,
-			sloc: artifact.sourceCoverage?.production?.sloc,
-			parseFailures,
-			reasons,
-		};
-		if (
-			observed.index !== baseline.index ||
-			observed.completeness !== baseline.completeness ||
-			observed.files !== baseline.production.files ||
-			observed.sloc !== baseline.production.sloc ||
-			observed.parseFailures !== baseline.parseFailures ||
-			!equalReasonCounts(observed.reasons, baseline.unresolvedReasons)
-		) {
+			await readFile(resolve(artifactRoot, `${baseline.id}.json`), "utf8"),
+		) as FrozenArtifact;
+		const observed = observeBaselineArtifact(artifact);
+		if (differsFromFrozenBaseline(baseline, observed)) {
 			failures.push(`${baseline.id}: baseline revision mismatch ${JSON.stringify(observed)}`);
 		}
 	}
