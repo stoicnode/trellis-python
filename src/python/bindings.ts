@@ -155,13 +155,16 @@ function dynamicCall(node: Node, text: string, environment: Environment): Dynami
 
 function isOverloadDecorator(node: Node, text: string, environment: Environment): boolean {
 	const parts = leaves(node).filter((part) => part.name !== "At");
-	const name = parts.find((part) => part.name === "VariableName");
-	if (name === undefined) return false;
-	const property = parts.find((part) => part.name === "PropertyName");
-	return property === undefined
-		? environment.get(spelling(name, text)) === "overload"
-		: environment.get(spelling(name, text)) === "typing-module" &&
-				spelling(property, text) === "overload";
+	const [name, dot, property] = parts;
+	if (name?.name !== "VariableName") return false;
+	if (parts.length === 1) return environment.get(spelling(name, text)) === "overload";
+	return (
+		parts.length === 3 &&
+		dot?.name === "." &&
+		property?.name === "VariableName" &&
+		environment.get(spelling(name, text)) === "typing-module" &&
+		spelling(property, text) === "overload"
+	);
 }
 
 /** Targets of an assignment; a rebinding invalidates an imported alias. */

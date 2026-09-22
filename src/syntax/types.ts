@@ -147,6 +147,13 @@ export interface TypeScriptFunctionFacts extends NormalizedFunctionFacts {
 /** Python's parser-private tree does not escape its adapter; only normalized facts do. */
 export type PythonFunctionFacts = NormalizedFunctionFacts;
 
+/** Confirmed Python overload declaration with no same-container implementation. */
+export interface OrphanOverload {
+	name: string;
+	range: Range;
+	scope: string;
+}
+
 /** Backward-compatible TypeScript function inventory type. */
 export type FunctionFacts = TypeScriptFunctionFacts;
 
@@ -191,6 +198,8 @@ export interface PythonFileSyntax extends BaseFileSyntax {
 	language: "python";
 	parserTree: Tree;
 	functions: PythonFunctionFacts[];
+	/** Confirmed overload declarations lacking a same-container implementation. */
+	orphanOverloads: OrphanOverload[];
 }
 
 /** One normalized adapter result, deliberately free of cross-language AST assumptions. */

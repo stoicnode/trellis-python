@@ -266,6 +266,14 @@ Size and nesting are explanatory signals unless the scoring formula
 explicitly includes them (§7). Empty or function-free scopes produce
 documented finite values or `not-applicable`, never crashes or silent zeros.
 
+Python analyzer 0.7.0 excludes confirmed `typing.overload` declarations from
+executable function mass, associates them with the following same-container
+implementation and retains orphan declarations as located, unscored
+`python.orphan-overload` findings. Rebound decorators do not imply overloads;
+conditional same-named implementations remain distinct ambiguous identities.
+This scored population change is scoring 0.7.0-provisional, with the same
+formula weights and a required fresh baseline.
+
 ### 5.2 Structural erosion
 
 Erosion weights complexity by size so a huge tangled function outranks a tiny
@@ -759,7 +767,7 @@ older reports without the area remain valid, and its absence reads as
 ## 7. Scoring — the provisional formula
 
 Scoring is a **pure function** of structural raw metrics. The initial formula
-is **provisional** (`scoringVersion: 0.6.0-provisional`) pending calibration
+is **provisional** (`scoringVersion: 0.7.0-provisional`) pending calibration
 against the fixed corpus (§14); normalization thresholds and weights are
 documented in §7.1 (landed with `trellis-00d5`) and recalibrated only with a
 scoring-version bump.

@@ -20,13 +20,9 @@ import { join } from "node:path";
 import ts from "typescript";
 import type { Range } from "../contract/index.ts";
 import type { ClassifiedFile, SourceInventory } from "../discovery/index.ts";
+import { pythonFunctionInventory } from "../python/function-inventory.ts";
 import { collectPythonImportSites } from "../python/imports.ts";
-import {
-	PYTHON_PARSER_VERSION,
-	parsePython,
-	pythonFunctions,
-	pythonLineKinds,
-} from "../python/parser.ts";
+import { PYTHON_PARSER_VERSION, parsePython, pythonLineKinds } from "../python/parser.ts";
 import { collectFunctions } from "./functions.ts";
 import { collectImportSites } from "./import-sites.ts";
 import { parseSource } from "./parse.ts";
@@ -63,6 +59,7 @@ async function parseTypeScriptFile(file: ClassifiedFile, text: string): Promise<
 async function parsePythonFile(file: ClassifiedFile, text: string): Promise<FileSyntax> {
 	const parsed = parsePython(file.path, text);
 	const lineFacts = pythonLineKinds(parsed.tree, text);
+	const functions = pythonFunctionInventory(parsed.tree, text, file.sourceSet, lineFacts.kinds);
 	return {
 		path: file.path,
 		packagePath: file.packagePath,
@@ -70,11 +67,12 @@ async function parsePythonFile(file: ClassifiedFile, text: string): Promise<File
 		language: "python",
 		text,
 		parserTree: parsed.tree,
-		functions: pythonFunctions(parsed.tree, text, file.sourceSet, lineFacts.kinds),
+		functions: functions.functions,
+		orphanOverloads: functions.orphanOverloads,
 		lines: lineFacts.lines,
 		lineKinds: lineFacts.kinds,
 		imports: collectPythonImportSites(parsed.tree, text, file.path),
-		signatureCount: 0,
+		signatureCount: functions.signatureCount,
 		diagnostics: [...parsed.diagnostics],
 	};
 }

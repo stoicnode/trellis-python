@@ -76,9 +76,9 @@ describe("native duplication cutover", () => {
 		expect(ran.code).toBe(0);
 		const report = auditReportSchema.parse(JSON.parse(ran.stdout));
 		expect(measurementPayload(report)).toEqual(measurementPayload(sdk.report));
-		expect(report.analyzerVersion).toBe("0.6.0");
+		expect(report.analyzerVersion).toBe("0.7.0");
 		expect(report.schemaVersion).toBe("1.5.0");
-		expect(report.scoringVersion).toBe("0.6.0-provisional");
+		expect(report.scoringVersion).toBe("0.7.0-provisional");
 		expect(report.metrics["duplication.groups.production"]).toMatchObject({
 			state: "complete",
 			value: 1,

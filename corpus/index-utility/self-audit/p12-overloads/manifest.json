@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "slice": "P1.2 Python overload association",
+  "targetBeforeRevision": "f2e76131adb4bb7d5bf73863dd3ba3256235bb73",
+  "sourceFingerprintAlgorithm": "SHA-256 of sorted src/ and scripts/ regular paths, each path + NUL + file SHA-256 + LF",
+  "sourceBeforeSha256": "5b1e41e2ee6dcf74c53e283881523f071704c554218c651f10839fe09b37c253",
+  "sourceAfterSha256": "a5b8d9ac3fe93e1160b2b902cac522ecd0c8ed3148e94eed4c88f807c8ecd907",
+  "configurationSha256": "683767b1067eb84150f8020fc6a12e4620561ec0bfd8aadebba107f6d0b874fa",
+  "bunVersion": "1.2.22",
+  "afterThreeRunPayloadFingerprints": [
+    "aa23087415faf74876aded3fbbde3547ad2076eed34633ecd381019d6956d24f",
+    "aa23087415faf74876aded3fbbde3547ad2076eed34633ecd381019d6956d24f",
+    "aa23087415faf74876aded3fbbde3547ad2076eed34633ecd381019d6956d24f"
+  ],
+  "reports": {
+    "before-old-analyzer": {
+      "compressedPath": "before-old-analyzer.json.gz",
+      "sha256": "888f8c231880f554f85e49887fd15ebe19062a66a7508069636943eacad0ceee",
+      "analyzerVersion": "0.6.0",
+      "scoringVersion": "0.6.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22883.109,
+      "productionCloneDensity": 0.034131,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013575
+    },
+    "after-old-analyzer": {
+      "compressedPath": "after-old-analyzer.json.gz",
+      "sha256": "82b63e2cab9f816bd72390df284a02bb16d4f0115697a4c4a3e0a80a20aeee08",
+      "analyzerVersion": "0.6.0",
+      "scoringVersion": "0.6.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22977.996,
+      "productionCloneDensity": 0.03401,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013453
+    },
+    "before-new-analyzer": {
+      "compressedPath": "before-new-analyzer.json.gz",
+      "sha256": "091ac5cf2f9f798e037204aa0334bf0796c253412ddfb4003e73b16d18e9b986",
+      "analyzerVersion": "0.7.0",
+      "scoringVersion": "0.7.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22883.109,
+      "productionCloneDensity": 0.034131,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013575
+    },
+    "after-new-analyzer": {
+      "compressedPath": "after-new-analyzer.json.gz",
+      "sha256": "04a5d0d439f43b0ee3c94e357cfff3a7a13fc53cbf9202abb47941d9f389a57e",
+      "analyzerVersion": "0.7.0",
+      "scoringVersion": "0.7.0-provisional",
+      "schemaVersion": "1.5.0",
+      "index": 39,
+      "completeness": "complete",
+      "productionErodedCount": 37,
+      "productionErosionMass": 22977.996,
+      "productionCloneDensity": 0.03401,
+      "productionCycleGroups": 1,
+      "productionCycleDensity": 0.013453
+    }
+  },
+  "comparisons": {
+    "oldAnalyzer": "compare-overload-old-analyzer.md",
+    "newAnalyzer": "compare-overload-new-analyzer.md"
+  }
+}

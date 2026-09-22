@@ -211,6 +211,21 @@ function hotspotFindings(functions: readonly FunctionMeasurement[]): Finding[] {
 		}));
 }
 
+/** Confirmed Python declarations without a matching executable implementation stay visible. */
+function orphanOverloadFindings(files: readonly FileSyntax[]): Finding[] {
+	return files.flatMap((file) =>
+		file.language === "python"
+			? file.orphanOverloads.map((orphan) => ({
+					kind: "python.orphan-overload",
+					path: file.path,
+					range: orphan.range,
+					summary: `overload declaration '${orphan.name}' has no matching implementation`,
+					facts: { name: orphan.name, scope: orphan.scope, sourceSet: file.sourceSet },
+				}))
+			: [],
+	);
+}
+
 /**
  * Measure complexity and structural erosion over the shared syntax
  * inventory (see the module docblock for states and outputs). Pure and
@@ -236,5 +251,10 @@ export function analyzeComplexity(inventory: SyntaxInventory): ComplexityAnalysi
 	const metrics = [...scopeMetrics(scopes.production), ...scopeMetrics(scopes.test)].sort((a, b) =>
 		a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
 	);
-	return { functions, scopes, metrics, findings: hotspotFindings(functions) };
+	return {
+		functions,
+		scopes,
+		metrics,
+		findings: [...hotspotFindings(functions), ...orphanOverloadFindings(measuredFiles)],
+	};
 }

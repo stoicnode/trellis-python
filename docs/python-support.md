@@ -1,6 +1,6 @@
 # Python analysis in Trellis
 
-Trellis 0.6.0 audits `.py` files alongside TypeScript and TSX with the same
+Trellis 0.7.0 audits `.py` files alongside TypeScript and TSX with the same
 scoring, reporting, comparison, policy, history and fleet pipeline. Python is
 parsed in process with pinned `@lezer/python` 1.1.18; no Python interpreter,
 project import, install or subprocess is needed for the native audit. The
@@ -27,6 +27,16 @@ and hotspot ranking as TypeScript. Clone detection shares the bounded native
 engine and its 100-token / 3-line thresholds, with Python-specific lexical
 normalization and suite boundaries. Python and TypeScript tokens cannot clone
 across languages.
+
+Confirmed `typing.overload` declarations, including imported aliases and
+qualified decorators on methods and async methods, count as signatures rather
+than executable functions. Their following implementation retains its scoped
+identity and records the signature count. A declaration without a matching
+implementation produces an unscored `python.orphan-overload` finding. Rebound
+decorator names do not receive overload treatment, and genuinely repeated
+implementations retain ambiguous identities. Analyzer 0.7.0 and scoring
+0.7.0-provisional mark this corrected function population; re-audit saved
+baselines before using regression policy.
 
 Static imports resolve only against discovered local Python files. Trellis
 supports dotted absolute imports, package `__init__.py`, `src/` module roots,
@@ -57,7 +67,7 @@ import remains visible even when its absent or runtime-selected target cannot
 join the declared-source graph. Parser recovery and ambiguous local targets
 still make required dimensions incomplete.
 Schema 1.5.0 carries production-only cycle metrics beside workspace cycle
-evidence. Analyzer 0.6.0 and scoring 0.6.0-provisional score cycles only over
+evidence. Analyzer 0.7.0 and scoring 0.7.0-provisional score cycles only over
 production modules and their imports; unrelated test files cannot dilute the
 cycle density or withhold its score. Recreate baselines
 made by older analyzer versions before using regression policy. Historical

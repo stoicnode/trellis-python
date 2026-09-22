@@ -11,6 +11,12 @@ While pre-1.0, breaking changes go in MINOR and additive changes go in PATCH.
 
 ### Changed
 
+- Confirmed Python `typing.overload` declarations now count as signatures
+  attached to one executable implementation; orphan declarations are located
+  unscored findings. Rebound decorators and conditional implementations retain
+  conservative identities. Analyzer 0.7.0 and scoring 0.7.0-provisional
+  require fresh baselines for affected Python workspaces; formula weights are
+  unchanged.
 - Confirmed Python `typing.TYPE_CHECKING` guards now retain type-only import
   identity across aliases, qualified names, nesting and negation. Rebound or
   shadowed names remain runtime/unknown. Analyzer 0.6.0, graph policy 1.4.0

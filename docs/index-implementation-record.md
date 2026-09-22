@@ -143,3 +143,45 @@ counts both classes' groups. Whether the two classes deserve equal weight is
 the planned Phase 4 experiment. Cross-version scores are displayed for
 inspection only; the comparison service correctly refuses to create deltas
 between these scoring versions.
+
+## Python overload association (P1.2, second slice)
+
+Confirmed `typing.overload` decorators now contribute signature facts and
+attach to the next executable implementation in the same lexical scope.
+Conditional signature branches can attach to a common following
+implementation. Distinct conditional implementations remain separate and
+same-named duplicates remain ambiguous. A declaration with no matching
+implementation is visible as an unscored `python.orphan-overload` finding.
+The binding scanner rejects rebound decorator aliases. The score formula is
+unchanged, but Python function mass can change; analyzer 0.7.0 and scoring
+0.7.0-provisional require a fresh baseline. The report schema stays 1.5.0
+because its finding contract already supports new dotted kinds.
+
+The before source revision is `f2e7613` (full revision in the
+[self-audit manifest](../corpus/index-utility/self-audit/p12-overloads/manifest.json)).
+All four self-audit reports are complete; the same-analyzer pairs both score
+39 → 39, with production eroded functions 37 → 37 and cycle groups 1 → 1.
+Production erosion mass rises 22883.109 → 22977.996 as this implementation
+adds code; clone density falls 0.034131 → 0.034010 as the denominator grows.
+No new Python function reaches the CC 11 hotspot threshold. The manifest
+retains 2×2 report hashes, source/configuration fingerprints, same-analyzer
+comparisons and three equal fixed-clock payload fingerprints. Trellis's own
+TypeScript source contains no Python overloads, so its unchanged index does
+not validate the Python correction by itself.
+
+The [16-scope corpus summary](../corpus/index-utility/p12-overloads/summary.json)
+records three complete, deterministic runs per scope against the pinned
+checkouts. Eight Python scopes lose declaration-only function counts without
+changing their rounded indexes: Click 15, Requests 20, Flask 12, Rich 14,
+SQLAlchemy 573, Pydantic 74, Jinja 10 and Packaging 8. The other four Python
+and four TypeScript scopes retain their counts. Pydantic's two remaining
+declaration-only findings are overloads on a `Protocol` callable inside a
+`TYPE_CHECKING` branch; no runtime implementation is expected there, so they
+are an intentional tradeoff in the advisory evidence, not a cleanup demand.
+The raw three-run artifact is compressed alongside the summary; the prior
+0.6.0 artifact remains under `p12-typing/`. Cross-version score columns are
+inspection context only.
+
+To migrate, audit the target with 0.7.0 and save a new baseline. Keep 0.6.0
+reports and history unchanged; use 0.6.0 with its matching baseline to roll
+back. No formula or historical report is silently recalculated.
