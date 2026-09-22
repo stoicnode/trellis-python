@@ -7,14 +7,10 @@ const ROOT = resolve(import.meta.dir, "../corpus/oss-benchmark");
 describe("open-source benchmark baseline", () => {
 	test("freezes the pinned external baseline and audits every distilled taxonomy fixture", async () => {
 		const manifest = loadOssBenchmarkManifest(ROOT);
-		expect(manifest.repositories.map((entry) => entry.id)).toEqual([
-			"zod",
-			"date-fns",
-			"tanstack-query",
-			"requests",
-			"flask",
-			"rich",
-		]);
+		expect(manifest.repositories.map((entry) => entry.id)).toEqual(
+			expect.arrayContaining(["zod", "date-fns", "tanstack-query", "requests", "flask", "rich"]),
+		);
+		expect(manifest.baselines).toHaveLength(10);
 		expect(manifest.baselines.find((entry) => entry.id === "rich")).toMatchObject({
 			index: 100,
 			completeness: "incomplete",

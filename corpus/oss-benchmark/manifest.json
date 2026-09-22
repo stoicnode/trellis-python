@@ -7,6 +7,9 @@
     {"id":"requests","commit":"611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60","tree":"10caa09e09cd366febe74c2afa345939ffd5691f"},
     {"id":"flask","commit":"d73fa1cdcbd8b1465c151db8924ba58b1dd14e35","tree":"d46b1a2a2cc4219b0ad5060ab618e9f5ae635680"},
     {"id":"rich","commit":"9d8f9a372cc5916fd4781fec207ced7ddac2f08f","tree":"93aa807db25b745b28e18bf7f96f8173b564016e"}
+    ,{"id":"zustand","commit":"b57db4f86ef179285da216eeb291266da82c361c","tree":"b6e553438d47e555433acce49e55bd96f5881d10"}
+    ,{"id":"ts-pattern","commit":"c92ca435c7e1827e0fd55c539080ef1bfd6fe3f0","tree":"33a0d368912976a831621e8b17c2e53a8261ba4e"}
+    ,{"id":"ky","commit":"0d59458a0a58e1c3d7c6db0ab17ed5c7cd671e47","tree":"42acc7a566e812c5533f7992a95d02ff4b55395f"}
   ],
   "baselines": [
     {"id":"zod","index":89,"completeness":"incomplete","production":{"files":311,"sloc":46651},"parseFailures":0,"unresolvedReasons":{"no-target":108,"non-literal-dynamic":2}},
@@ -15,6 +18,10 @@
     {"id":"requests","index":100,"completeness":"incomplete","production":{"files":22,"sloc":5095},"parseFailures":25,"unresolvedReasons":{"no-target":175,"non-literal-dynamic":2}},
     {"id":"flask","index":100,"completeness":"incomplete","production":{"files":35,"sloc":8074},"parseFailures":40,"unresolvedReasons":{"no-target":158,"non-literal-dynamic":2}},
     {"id":"rich","index":100,"completeness":"incomplete","production":{"files":146,"sloc":36846},"parseFailures":104,"unresolvedReasons":{"no-target":578,"non-literal-dynamic":3}}
+    ,{"id":"zustand-source","repository":"zustand","path":"src","index":27,"completeness":"complete","production":{"files":15,"sloc":1225},"parseFailures":0,"unresolvedReasons":{}}
+    ,{"id":"ts-pattern-source","repository":"ts-pattern","path":"src","index":39,"completeness":"complete","production":{"files":18,"sloc":3238},"parseFailures":0,"unresolvedReasons":{}}
+    ,{"id":"ky-source","repository":"ky","path":"source","index":45,"completeness":"complete","production":{"files":31,"sloc":2527},"parseFailures":0,"unresolvedReasons":{}}
+    ,{"id":"query-core","repository":"tanstack-query","path":"packages/query-core","index":47,"completeness":"complete","production":{"files":25,"sloc":5946},"parseFailures":0,"unresolvedReasons":{}}
   ],
   "fixtures": [
     {"id":"parser-recovery","path":"fixtures/parser-recovery","snapshot":"0b66d79dbe81d0de127ab9afeb22ec32cf1ddb9f6a19dd7c789a0d1568211559"},

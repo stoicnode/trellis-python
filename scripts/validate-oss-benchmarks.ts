@@ -27,6 +27,8 @@ const fixtureSchema = z.strictObject({
 });
 const baselineSchema = z.strictObject({
 	id: z.string().min(1),
+	repository: z.string().min(1).optional(),
+	path: z.string().min(1).optional(),
 	index: z.number().int().min(0).max(100),
 	completeness: z.enum(["complete", "incomplete"]),
 	production: z.strictObject({
@@ -284,9 +286,12 @@ export async function auditPinnedRepositories(
 	const records: unknown[] = [];
 	for (const baseline of manifest.baselines) {
 		const startedAt = performance.now();
-		const result = await runWorkspaceAudit(resolve(externalRoot, baseline.id), {
-			now: new Date("2026-09-22T00:00:00.000Z"),
-		});
+		const result = await runWorkspaceAudit(
+			resolve(externalRoot, baseline.repository ?? baseline.id, baseline.path ?? "."),
+			{
+				now: new Date("2026-09-22T00:00:00.000Z"),
+			},
+		);
 		const measurement = { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() };
 		const report = result.report;
 		const parseFailures = (report.languageCoverage ?? []).reduce(
