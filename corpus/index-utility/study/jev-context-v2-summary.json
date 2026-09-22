@@ -1,0 +1,259 @@
+{
+  "version": 2,
+  "status": "exploratory-model-assisted-evidence",
+  "executionBoundary": "research-only; never part of audit, SDK, fleet, CI, or scoring",
+  "studyMode": "complete-unit-and-relationships",
+  "artifactDirectory": "/Users/bbr/.codex/visualizations/2026/09/22/01a0c970-f40d-7991-9cbf-d481c02012f9/index-study-v1/jev-context-v2",
+  "artifacts": {
+    "contextPacket": {
+      "path": "context-packet.json",
+      "bytes": 820936,
+      "sha256": "3589f2701562805d378b8495a93d59a2f3ac140ee814a605fc21d6fea1cee116"
+    },
+    "packetLabels": {
+      "path": "packet-labels.json",
+      "bytes": 35237,
+      "sha256": "4325eae2c5daca6a5147aa639efeb5ea7fad0829cf00b123ba11b90ae63d862c"
+    },
+    "summary": {
+      "path": "summary.json",
+      "bytes": 3389,
+      "sha256": "d14537b11ca4cc9625880117be3072ef498333ef77763b058fad76bc33b161da"
+    }
+  },
+  "inputs": {
+    "packetSha256": "3589f2701562805d378b8495a93d59a2f3ac140ee814a605fc21d6fea1cee116",
+    "answerKeySha256": "c945af3839af68b647fc8d89270d94c13a61da8f884979c939c905b94e0e2bac"
+  },
+  "model": {
+    "rubricVersion": "trellis-maintenance-jev-v1",
+    "requested": "typesafe/jev-1.13",
+    "resolved": "typesafe/jev-1.13-20260917",
+    "endpoint": "https://openrouter.ai/api/alpha/decisions"
+  },
+  "successfulRunUsage": {
+    "inputTokens": 287412,
+    "outputTokens": 12419,
+    "reportedCostUsd": 0.012071304
+  },
+  "abortedPacketExperiments": {
+    "count": 2,
+    "reason": "one oversized clone-context record exceeded the model request token limit",
+    "costAccounting": "The successful-run cost excludes any provider charges from the two aborted experiments; those responses supplied no complete study artifact."
+  },
+  "packet": {
+    "overall": {
+      "flagged": {
+        "samples": 60,
+        "evaluable": 59,
+        "evidenceCoverage": 0.9833333333333333,
+        "meanMaintenanceCost": 1.1096666666666666,
+        "meanRefactorValue": 0.335,
+        "evaluableMeanMaintenanceCost": 1.1203389830508477,
+        "evaluableMeanRefactorValue": 0.3369491525423729,
+        "actionableRate": 0
+      },
+      "matchedUnflagged": {
+        "samples": 60,
+        "evaluable": 58,
+        "evidenceCoverage": 0.9666666666666667,
+        "meanMaintenanceCost": 0.7858333333333337,
+        "meanRefactorValue": 0.30016666666666664,
+        "evaluableMeanMaintenanceCost": 0.7993103448275866,
+        "evaluableMeanRefactorValue": 0.3025862068965517,
+        "actionableRate": 0.017241379310344827
+      },
+      "discrimination": {
+        "maintenanceAuc": 0.7030555555555555,
+        "refactorValueAuc": 0.6172222222222222
+      }
+    },
+    "byLanguage": {
+      "python": {
+        "flagged": {
+          "samples": 30,
+          "evaluable": 30,
+          "evidenceCoverage": 1,
+          "meanMaintenanceCost": 0.9850000000000004,
+          "meanRefactorValue": 0.3276666666666667,
+          "evaluableMeanMaintenanceCost": 0.9850000000000004,
+          "evaluableMeanRefactorValue": 0.3276666666666667,
+          "actionableRate": 0
+        },
+        "matchedUnflagged": {
+          "samples": 30,
+          "evaluable": 30,
+          "evidenceCoverage": 1,
+          "meanMaintenanceCost": 0.6123333333333333,
+          "meanRefactorValue": 0.2756666666666667,
+          "evaluableMeanMaintenanceCost": 0.6123333333333333,
+          "evaluableMeanRefactorValue": 0.2756666666666667,
+          "actionableRate": 0
+        },
+        "discrimination": {
+          "maintenanceAuc": 0.7477777777777778,
+          "refactorValueAuc": 0.6772222222222222
+        }
+      },
+      "typescript": {
+        "flagged": {
+          "samples": 30,
+          "evaluable": 29,
+          "evidenceCoverage": 0.9666666666666667,
+          "meanMaintenanceCost": 1.234333333333333,
+          "meanRefactorValue": 0.3423333333333334,
+          "evaluableMeanMaintenanceCost": 1.2603448275862068,
+          "evaluableMeanRefactorValue": 0.34655172413793106,
+          "actionableRate": 0
+        },
+        "matchedUnflagged": {
+          "samples": 30,
+          "evaluable": 28,
+          "evidenceCoverage": 0.9333333333333333,
+          "meanMaintenanceCost": 0.9593333333333334,
+          "meanRefactorValue": 0.3246666666666667,
+          "evaluableMeanMaintenanceCost": 0.9996428571428572,
+          "evaluableMeanRefactorValue": 0.33142857142857146,
+          "actionableRate": 0.03571428571428571
+        },
+        "discrimination": {
+          "maintenanceAuc": 0.665,
+          "refactorValueAuc": 0.5627777777777778
+        }
+      }
+    }
+  },
+  "byFlagKind": {
+    "complexity.hotspot": {
+      "samples": 20,
+      "evaluable": 20,
+      "meanMaintenanceCost": 1.3085,
+      "meanRefactorValue": 0.3915,
+      "maintenanceAucVsAllControls": 0.8054166666666667,
+      "refactorValueAucVsAllControls": 0.8183333333333334
+    },
+    "duplication.candidate.independent-executable": {
+      "samples": 8,
+      "evaluable": 8,
+      "meanMaintenanceCost": 1.37375,
+      "meanRefactorValue": 0.3474999999999999,
+      "maintenanceAucVsAllControls": 0.8145833333333333,
+      "refactorValueAucVsAllControls": 0.6583333333333333
+    },
+    "duplication.clone-group": {
+      "samples": 21,
+      "evaluable": 20,
+      "meanMaintenanceCost": 1.1300000000000001,
+      "meanRefactorValue": 0.30333333333333323,
+      "maintenanceAucVsAllControls": 0.719047619047619,
+      "refactorValueAucVsAllControls": 0.5007936507936508
+    },
+    "executable.nesting": {
+      "samples": 34,
+      "evaluable": 34,
+      "meanMaintenanceCost": 1.0994117647058825,
+      "meanRefactorValue": 0.35588235294117654,
+      "maintenanceAucVsAllControls": 0.6973039215686274,
+      "refactorValueAucVsAllControls": 0.6955882352941176
+    }
+  },
+  "byRepository": {
+    "black": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.813,
+        "meanRefactorValue": 0.324
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.4950000000000001,
+        "meanRefactorValue": 0.25
+      },
+      "maintenanceAuc": 0.725,
+      "refactorValueAuc": 0.775
+    },
+    "hono": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 1.342,
+        "meanRefactorValue": 0.393
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 1.349,
+        "meanRefactorValue": 0.384
+      },
+      "maintenanceAuc": 0.51,
+      "refactorValueAuc": 0.565
+    },
+    "httpx": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 1.235,
+        "meanRefactorValue": 0.356
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.667,
+        "meanRefactorValue": 0.30100000000000005
+      },
+      "maintenanceAuc": 0.87,
+      "refactorValueAuc": 0.685
+    },
+    "tsx": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 9,
+        "meanMaintenanceCost": 1.2060000000000002,
+        "meanRefactorValue": 0.34600000000000003
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.9270000000000002,
+        "meanRefactorValue": 0.33999999999999997
+      },
+      "maintenanceAuc": 0.695,
+      "refactorValueAuc": 0.51
+    },
+    "werkzeug": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.907,
+        "meanRefactorValue": 0.30300000000000005
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 0.675,
+        "meanRefactorValue": 0.27599999999999997
+      },
+      "maintenanceAuc": 0.68,
+      "refactorValueAuc": 0.605
+    },
+    "zod": {
+      "flagged": {
+        "samples": 10,
+        "evaluable": 10,
+        "meanMaintenanceCost": 1.1549999999999998,
+        "meanRefactorValue": 0.288
+      },
+      "matchedUnflagged": {
+        "samples": 10,
+        "evaluable": 8,
+        "meanMaintenanceCost": 0.6020000000000001,
+        "meanRefactorValue": 0.25
+      },
+      "maintenanceAuc": 0.79,
+      "refactorValueAuc": 0.665
+    }
+  },
+  "decision": "Full context raised evidence coverage and separated flagged units from controls, especially for Python, but the frozen actionable threshold selected no flagged units and one control. Keep Jev outside scoring; use the result to prioritize deterministic validation rather than as a production label source."
+}

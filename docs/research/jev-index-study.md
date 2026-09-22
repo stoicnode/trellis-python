@@ -139,3 +139,13 @@ context for each signal. Clone cases need all matching members; cross-file signa
 need the relevant files or graph facts. Python and TypeScript results must be
 reported separately because SmellBench calibrates Python only. The resulting model
 labels remain triangulation beside public source labels and deterministic metrics.
+
+## Completed follow-up
+
+The [full-context follow-up](jev-context-study.md) supplied complete units,
+neighboring source, possible callers, every clone-member location and import graph
+context. Context sufficiency rose from 38/120 to 117/120. Maintenance AUC rose from
+0.508 to 0.703 overall, with separate AUCs of 0.748 for Python and 0.665 for
+TypeScript. The result supports the need for relationship context, while its
+actionable threshold and repository variation still do not support a scoring
+change.

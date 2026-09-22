@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
-/** Research-only Jev validation over SmellBench pairs and the blinded index packet. */
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { summarizeJevPacket } from "../src/research/jev-packet-summary.ts";
 import {
 	buildSmellPairs,
 	fetchSmellBenchRows,
@@ -16,7 +16,6 @@ const ENDPOINT = "https://openrouter.ai/api/alpha/decisions";
 const MODEL = "typesafe/jev-1.13";
 const RUBRIC_VERSION = "trellis-maintenance-jev-v1";
 const BATCH_SOURCE_CHARS = 48_000;
-
 const QUESTIONS = {
 	maintenanceCost: {
 		type: "score",
@@ -49,7 +48,6 @@ const QUESTIONS = {
 		},
 	},
 } as const;
-
 interface Label {
 	id: string;
 	maintenanceCost: number;
@@ -58,11 +56,9 @@ interface Label {
 	refactorValue: number;
 	evidenceSufficient: number;
 }
-
 function sha256(value: string): string {
 	return createHash("sha256").update(value).digest("hex");
 }
-
 function requireObject(value: unknown, description: string): Record<string, unknown> {
 	if (typeof value !== "object" || value === null || Array.isArray(value))
 		throw new Error(`${description} must be an object`);
@@ -94,7 +90,13 @@ function packetRecords(value: unknown): StudyRecord[] {
 		const language = requireString(unit.language, `packet[${index}].language`);
 		if (language !== "python" && language !== "typescript")
 			throw new Error(`packet[${index}].language is unsupported`);
-		const source = truncateStudySource(requireString(unit.excerpt, `packet[${index}].excerpt`));
+		const hasFullContext = typeof unit.contextSource === "string";
+		const source = hasFullContext
+			? {
+					source: requireString(unit.contextSource, `packet[${index}].contextSource`),
+					truncated: false,
+				}
+			: truncateStudySource(requireString(unit.excerpt, `packet[${index}].excerpt`));
 		return {
 			id: requireString(unit.blindId, `packet[${index}].blindId`),
 			language,
@@ -103,6 +105,7 @@ function packetRecords(value: unknown): StudyRecord[] {
 				role: requireString(unit.role, `packet[${index}].role`),
 				path: requireString(unit.path, `packet[${index}].path`),
 				unitKind: requireString(unit.kind, `packet[${index}].kind`),
+				contextMode: hasFullContext ? "complete-unit-and-relationships" : "isolated-excerpt",
 				truncated: source.truncated || unit.excerptTruncated === true,
 			},
 			source: source.source,
@@ -305,10 +308,14 @@ function summarizeSmellBench(pairs: readonly SmellPair[], labels: ReadonlyMap<st
 	};
 }
 
-function summarizePacket(labels: readonly Label[], answerKeyValue: unknown) {
-	if (!Array.isArray(answerKeyValue)) throw new Error("answer key must be an array");
+function summarizePacket(
+	labels: readonly Label[],
+	keyValue: unknown,
+	records: readonly StudyRecord[],
+) {
+	if (!Array.isArray(keyValue)) throw new Error("answer key must be an array");
 	const strata = new Map(
-		answerKeyValue.map((entry, index) => {
+		keyValue.map((entry, index) => {
 			const key = requireObject(entry, `answerKey[${index}]`);
 			return [
 				requireString(key.blindId, `answerKey[${index}].blindId`),
@@ -316,24 +323,11 @@ function summarizePacket(labels: readonly Label[], answerKeyValue: unknown) {
 			];
 		}),
 	);
-	function group(stratum: string) {
-		const selected = labels.filter((label) => strata.get(label.id) === stratum);
-		const evaluable = selected.filter((label) => label.evidenceSufficient >= 0.5);
-		const actionable = evaluable.filter((label) => {
-			const material =
-				(label.maintenanceProbabilities["2"] ?? 0) + (label.maintenanceProbabilities["3"] ?? 0);
-			return material >= 0.5 && label.refactorValue >= 0.5;
-		});
-		return {
-			samples: selected.length,
-			evaluable: evaluable.length,
-			evidenceCoverage: evaluable.length / selected.length,
-			meanMaintenanceCost: mean(evaluable.map((label) => label.maintenanceCost)),
-			meanRefactorValue: mean(evaluable.map((label) => label.refactorValue)),
-			actionableRate: evaluable.length === 0 ? null : actionable.length / evaluable.length,
-		};
-	}
-	return { flagged: group("flagged"), matchedUnflagged: group("matched-unflagged") };
+	return summarizeJevPacket(
+		labels,
+		strata,
+		new Map(records.map((record) => [record.id, record.language])),
+	);
 }
 
 async function main(): Promise<void> {
@@ -347,40 +341,51 @@ async function main(): Promise<void> {
 	mkdirSync(outDir, { recursive: true });
 	const packetText = readFileSync(packetPath, "utf8");
 	const answerKeyText = readFileSync(answerKeyPath, "utf8");
-	const pairs = buildSmellPairs(await fetchSmellBenchRows());
+	const packetStudyRecords = packetRecords(JSON.parse(packetText));
+	const packetRun = await labelRecords(packetStudyRecords, apiKey);
+	const packetOnly = args.includes("--packet-only");
+	const pairs = packetOnly ? [] : buildSmellPairs(await fetchSmellBenchRows());
 	const smellRecords = pairs
 		.flatMap((pair) => [pair.good, pair.bad])
 		.sort((left, right) =>
 			sha256(`record-order\0${left.id}`).localeCompare(sha256(`record-order\0${right.id}`)),
 		);
-	const smellRun = await labelRecords(smellRecords, apiKey);
-	const packetRun = await labelRecords(packetRecords(JSON.parse(packetText)), apiKey);
-	const smellLabels = new Map(smellRun.labels.map((label) => [label.id, label]));
+	const smellRun = packetOnly ? null : await labelRecords(smellRecords, apiKey);
+	const smellLabels = new Map(smellRun?.labels.map((label) => [label.id, label]) ?? []);
+	const isFullContext = packetStudyRecords.every(
+		(record) => record.context.contextMode === "complete-unit-and-relationships",
+	);
 	const summary = {
-		version: 1,
+		version: isFullContext ? 2 : 1,
+		studyMode: isFullContext ? "complete-unit-and-relationships" : "isolated-excerpt",
 		rubricVersion: RUBRIC_VERSION,
 		modelRequested: MODEL,
-		modelResolved: smellRun.resolvedModel,
+		modelResolved: packetRun.resolvedModel,
 		endpoint: ENDPOINT,
 		inputs: {
 			packetSha256: sha256(packetText),
 			answerKeySha256: sha256(answerKeyText),
-			smellBenchDataset: "critical88/SmellBench train",
-			smellBenchRevision: SMELLBENCH_REVISION,
-			smellBenchRows: pairs.length,
+			...(packetOnly
+				? {}
+				: {
+						smellBenchDataset: "critical88/SmellBench train",
+						smellBenchRevision: SMELLBENCH_REVISION,
+						smellBenchRows: pairs.length,
+					}),
 		},
 		usage: {
-			inputTokens: smellRun.usage.inputTokens + packetRun.usage.inputTokens,
-			outputTokens: smellRun.usage.outputTokens + packetRun.usage.outputTokens,
-			cost: smellRun.usage.cost + packetRun.usage.cost,
+			inputTokens: (smellRun?.usage.inputTokens ?? 0) + packetRun.usage.inputTokens,
+			outputTokens: (smellRun?.usage.outputTokens ?? 0) + packetRun.usage.outputTokens,
+			cost: (smellRun?.usage.cost ?? 0) + packetRun.usage.cost,
 		},
-		smellBench: summarizeSmellBench(pairs, smellLabels),
-		packet: summarizePacket(packetRun.labels, JSON.parse(answerKeyText)),
+		...(smellRun === null ? {} : { smellBench: summarizeSmellBench(pairs, smellLabels) }),
+		packet: summarizePacket(packetRun.labels, JSON.parse(answerKeyText), packetStudyRecords),
 	};
-	writeFileSync(
-		resolve(outDir, "smellbench-labels.json"),
-		`${JSON.stringify(smellRun, null, 2)}\n`,
-	);
+	if (smellRun !== null)
+		writeFileSync(
+			resolve(outDir, "smellbench-labels.json"),
+			`${JSON.stringify(smellRun, null, 2)}\n`,
+		);
 	writeFileSync(resolve(outDir, "packet-labels.json"), `${JSON.stringify(packetRun, null, 2)}\n`);
 	writeFileSync(resolve(outDir, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`);
 	process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);

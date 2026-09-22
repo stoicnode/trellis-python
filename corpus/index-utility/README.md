@@ -109,6 +109,13 @@ blinded packet beside all 147 SmellBench pairs. Its committed
 identity, usage and the non-promotion decision; source-derived model outputs remain
 outside the repository.
 
+The [full-context follow-up](../../docs/research/jev-context-study.md) rebuilds
+the same 120 samples with complete units, neighboring source, lexical references,
+clone relationships and import graph context. Its
+[summary record](study/jev-context-v2-summary.json) pins the new packet and output
+hashes and reports Python and TypeScript separately. Context improves relative
+discrimination, but the result remains research-only and does not change scoring.
+
 The final [Release A self-audit](self-audit/index-release-a/manifest.json)
 compares the P3.2 source to the completed research/study/release additions
 under analyzer 0.9.0. The index and eroded-function count remain 38 and 41;

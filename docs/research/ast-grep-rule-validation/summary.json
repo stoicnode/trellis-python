@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "tool": {
+    "astGrep": "ast-grep 0.42.1",
+    "scbCheckRevision": "a8618228939def726c2ec48b354693e5aa1999d5"
+  },
+  "labels": {
+    "ruffRevision": "caf021af3e5cb9c1480bc42e0981d65908be5f23"
+  },
+  "fixtures": [
+    {
+      "rule": "redundant-return-none",
+      "fixtureSha256": "437474eb2979891a4d583c8d57c78a0f04cb9f16b8fbfccdd3346e4a27d95ae2",
+      "snapshotSha256": "6908dca3fa4c97a3badb6fd824ebee27eb69ab710b31d4cb6bfe7695e7d65942",
+      "labels": 3,
+      "matches": 8,
+      "truePositives": 2,
+      "falsePositives": 6,
+      "falseNegatives": 1,
+      "precision": 0.25,
+      "recall": 0.6666666666666666,
+      "falseNegativeLines": [
+        59
+      ],
+      "falsePositiveRanges": [
+        {
+          "startLine": 10,
+          "endLine": 10
+        },
+        {
+          "startLine": 19,
+          "endLine": 19
+        },
+        {
+          "startLine": 29,
+          "endLine": 29
+        },
+        {
+          "startLine": 41,
+          "endLine": 41
+        },
+        {
+          "startLine": 46,
+          "endLine": 46
+        },
+        {
+          "startLine": 51,
+          "endLine": 51
+        }
+      ]
+    },
+    {
+      "rule": "except-pass-silence",
+      "fixtureSha256": "7ae701e3f1ab8a54370bc6f1a2e575c04af86d21076e5d7afa615f8bbd7404a1",
+      "snapshotSha256": "149aa52c538dcd7cd133b70232bb33a34e6cadee8adfc53ac6f93db32f7d3569",
+      "labels": 3,
+      "matches": 3,
+      "truePositives": 3,
+      "falsePositives": 0,
+      "falseNegatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "falseNegativeLines": [],
+      "falsePositiveRanges": []
+    },
+    {
+      "rule": "verbose-list-append-loop",
+      "fixtureSha256": "e3911aa78232f2eaa4757fe68286b0197226a764c618cf1a6a8f3d4645528d1d",
+      "snapshotSha256": "924da0b97f45ebd7b1cc17a06735f0eef00be4186ad08897ad21d25715289a77",
+      "labels": 29,
+      "matches": 37,
+      "truePositives": 25,
+      "falsePositives": 12,
+      "falseNegatives": 4,
+      "precision": 0.6756756756756757,
+      "recall": 0.8620689655172413,
+      "falseNegativeLines": [
+        111,
+        119,
+        210,
+        286
+      ],
+      "falsePositiveRanges": [
+        {
+          "startLine": 19,
+          "endLine": 25
+        },
+        {
+          "startLine": 31,
+          "endLine": 32
+        },
+        {
+          "startLine": 38,
+          "endLine": 39
+        },
+        {
+          "startLine": 45,
+          "endLine": 47
+        },
+        {
+          "startLine": 52,
+          "endLine": 53
+        },
+        {
+          "startLine": 60,
+          "endLine": 61
+        },
+        {
+          "startLine": 73,
+          "endLine": 74
+        },
+        {
+          "startLine": 175,
+          "endLine": 176
+        },
+        {
+          "startLine": 181,
+          "endLine": 182
+        },
+        {
+          "startLine": 251,
+          "endLine": 252
+        },
+        {
+          "startLine": 298,
+          "endLine": 299
+        },
+        {
+          "startLine": 306,
+          "endLine": 307
+        }
+      ]
+    },
+    {
+      "rule": "verbose-dict-update",
+      "fixtureSha256": "bff4e8097b697406161769ba02cb8d4d2323344892ed9dd931bfec5e71b97a72",
+      "snapshotSha256": "98da63f0fe7bf683e76c844a49ae11b4eae4f4902e2ab2149178a47fb8717418",
+      "labels": 22,
+      "matches": 28,
+      "truePositives": 21,
+      "falsePositives": 7,
+      "falseNegatives": 1,
+      "precision": 0.75,
+      "recall": 0.9545454545454546,
+      "falseNegativeLines": [
+        106
+      ],
+      "falsePositiveRanges": [
+        {
+          "startLine": 19,
+          "endLine": 25
+        },
+        {
+          "startLine": 39,
+          "endLine": 43
+        },
+        {
+          "startLine": 49,
+          "endLine": 55
+        },
+        {
+          "startLine": 69,
+          "endLine": 71
+        },
+        {
+          "startLine": 179,
+          "endLine": 180
+        },
+        {
+          "startLine": 186,
+          "endLine": 187
+        },
+        {
+          "startLine": 193,
+          "endLine": 194
+        }
+      ]
+    }
+  ],
+  "reviewDirection": {
+    "pairs": [
+      {
+        "project": "numpy",
+        "path": "numpy/_core/code_generators/genapi.py",
+        "beforeCommit": "96cf781e226900ba88592f3a20145d6af63e863a",
+        "afterCommit": "e8d5153caceed246c378de72e5ebde15b1fc0996",
+        "beforeSha256": "f89646fe21ad88c1b109a7640071d90de510a376b8260b2cc0264fcdf86762a0",
+        "afterSha256": "cdf3362b5899f91a03666c70a09e106299fe2776b00b164354448c6f0d33c82a",
+        "changedHunks": 1,
+        "beforeTargetMatches": 1,
+        "afterTargetMatches": 0
+      },
+      {
+        "project": "numpy",
+        "path": "numpy/lib/introspect.py",
+        "beforeCommit": "96cf781e226900ba88592f3a20145d6af63e863a",
+        "afterCommit": "e8d5153caceed246c378de72e5ebde15b1fc0996",
+        "beforeSha256": "7152ca2f0bd30a3e74195d62bb23b4a6a6717a298ae2a9167853c557b0fb7cf6",
+        "afterSha256": "38bb37027724091567d5d2769b41de54ea3e2c8cf36856c44f9188c566457d6d",
+        "changedHunks": 2,
+        "beforeTargetMatches": 1,
+        "afterTargetMatches": 0
+      },
+      {
+        "project": "cirq",
+        "path": "cirq-core/cirq/ops/pauli_string_test.py",
+        "beforeCommit": "ecffd22e9b6da79493fb7ae2a6136ef11053e92b",
+        "afterCommit": "11b5233093a1a3bb683b4262f4cd07e7a553a63b",
+        "beforeSha256": "ed9e385daed73fdef9300c18a9bd05db48deb4ab4ccad5ed3b2c43e1c3702c24",
+        "afterSha256": "4453090da467c0c629ad3323ae1754012d3f9e35f63d0c55d60d20917bd8ca0a",
+        "changedHunks": 1,
+        "beforeTargetMatches": 1,
+        "afterTargetMatches": 0
+      },
+      {
+        "project": "cirq",
+        "path": "cirq-core/cirq/transformers/dynamical_decoupling.py",
+        "beforeCommit": "ecffd22e9b6da79493fb7ae2a6136ef11053e92b",
+        "afterCommit": "11b5233093a1a3bb683b4262f4cd07e7a553a63b",
+        "beforeSha256": "f73b681adf1cbda31ac601bf7bce307976b3cf7a1a3a253326529ba668c888fc",
+        "afterSha256": "1d379c0cd3306c036d8a6e3c40965835e9946fd62e0bf0f3459e4a237b899251",
+        "changedHunks": 1,
+        "beforeTargetMatches": 1,
+        "afterTargetMatches": 0
+      }
+    ],
+    "beforeMatched": 4,
+    "afterClean": 4
+  }
+}
