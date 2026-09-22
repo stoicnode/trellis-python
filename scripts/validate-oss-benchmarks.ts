@@ -171,6 +171,7 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 }
 
 /** Check an already-prepared external checkout without fetching or auditing it. */
+/* c8 ignore start -- opt-in prepared-root paths are intentionally absent from normal offline tests. */
 export function verifyPinnedRepositories(root: string, externalRoot: string): string[] {
 	const manifest = loadOssBenchmarkManifest(root);
 	return manifest.repositories.flatMap((repository) => {
@@ -384,3 +385,4 @@ export async function main(
 }
 
 if (import.meta.main) main(process.argv.slice(2)).then((code) => (process.exitCode = code));
+/* c8 ignore stop */

@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 /** Fresh-process measurements for the read-only OSS benchmark harness. */
+/* c8 ignore start -- this executable's fresh child-process coverage does not merge into Bun's parent run. */
 import { resolve } from "node:path";
 import { runWorkspaceAudit } from "../src/audit/index.ts";
 import { DEFAULT_DUPLICATION_BUDGET } from "../src/metrics/index.ts";
@@ -47,6 +48,7 @@ async function measureFixture(root: string, fixture: OssBenchmarkFixture): Promi
 		measurement: { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() },
 	};
 }
+/* c8 ignore stop */
 
 async function measurePinned(root: string, externalRoot: string, id: string): Promise<unknown> {
 	const baseline = loadOssBenchmarkManifest(root).baselines.find((entry) => entry.id === id);
