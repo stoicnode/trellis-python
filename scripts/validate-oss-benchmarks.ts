@@ -276,15 +276,18 @@ export async function verifyBaselineArtifacts(
 export async function auditPinnedRepositories(
 	root: string,
 	externalRoot: string,
-): Promise<string[]> {
+): Promise<{ records: unknown[]; mismatches: string[] }> {
 	const integrity = verifyPinnedRepositories(root, externalRoot);
-	if (integrity.length > 0) return integrity;
+	if (integrity.length > 0) return { records: [], mismatches: integrity };
 	const manifest = loadOssBenchmarkManifest(root);
 	const failures: string[] = [];
+	const records: unknown[] = [];
 	for (const baseline of manifest.baselines) {
+		const startedAt = performance.now();
 		const result = await runWorkspaceAudit(resolve(externalRoot, baseline.id), {
 			now: new Date("2026-09-22T00:00:00.000Z"),
 		});
+		const measurement = { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() };
 		const report = result.report;
 		const parseFailures = (report.languageCoverage ?? []).reduce(
 			(sum, row) => sum + row.parseFailureFiles,
@@ -308,8 +311,22 @@ export async function auditPinnedRepositories(
 		) {
 			failures.push(`${baseline.id}: re-audit revision mismatch ${JSON.stringify(observed)}`);
 		}
+		records.push({
+			id: baseline.id,
+			matches: !failures.some((failure) => failure.startsWith(`${baseline.id}:`)),
+			observed,
+			sourceCoverage: report.sourceCoverage,
+			metrics: Object.fromEntries(
+				Object.values(report.metrics).map((metric) => [
+					metric.id,
+					{ state: metric.state, reason: metric.reason },
+				]),
+			),
+			scoreContributions: report.score.contributions,
+			measurement,
+		});
 	}
-	return failures;
+	return { records, mismatches: failures };
 }
 
 /** Explicit preparation entry point; normal tests never call it or need Python/external inputs. */
@@ -329,7 +346,7 @@ export async function main(
 	const root = resolve(import.meta.dir, "../corpus/oss-benchmark");
 	const integrity = verifyPinnedRepositories(root, preparedRoot);
 	const artifactMismatches = await verifyBaselineArtifacts(root, artifactRoot);
-	const reAuditMismatches = args.includes("--reaudit")
+	const reAudit = args.includes("--reaudit")
 		? await auditPinnedRepositories(root, preparedRoot)
 		: undefined;
 	write(
@@ -337,12 +354,12 @@ export async function main(
 			repositories: loadOssBenchmarkManifest(root).baselines,
 			integrity,
 			artifactMismatches,
-			...(reAuditMismatches === undefined ? {} : { reAuditMismatches }),
+			...(reAudit === undefined ? {} : { reAudit }),
 		})}\n`,
 	);
 	return integrity.length === 0 &&
 		artifactMismatches.length === 0 &&
-		(reAuditMismatches?.length ?? 0) === 0
+		(reAudit?.mismatches.length ?? 0) === 0
 		? 0
 		: 1;
 }

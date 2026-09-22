@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
-import { loadOssBenchmarkManifest, main, runOssBenchmark } from "./validate-oss-benchmarks.ts";
+import { loadOssBenchmarkManifest, runOssBenchmark } from "./validate-oss-benchmarks.ts";
 
 const ROOT = resolve(import.meta.dir, "../corpus/oss-benchmark");
 
@@ -58,26 +58,5 @@ describe("open-source benchmark baseline", () => {
 				reason: expect.stringContaining("match-work budget"),
 			});
 		}
-	});
-});
-
-describe("prepared benchmark command", () => {
-	test("emits a structured external record only when explicit roots are supplied", async () => {
-		let output = "";
-		const code = await main(
-			[
-				"--prepared-root",
-				"/tmp/trellis-oss-audit-20260922/repos",
-				"--artifact-root",
-				"/tmp/trellis-oss-audit-20260922",
-			],
-			(text) => {
-				output += text;
-			},
-		);
-		expect(code).toBe(0);
-		const record = JSON.parse(output);
-		expect(record.repositories).toHaveLength(6);
-		expect(record.artifactMismatches).toEqual([]);
 	});
 });
