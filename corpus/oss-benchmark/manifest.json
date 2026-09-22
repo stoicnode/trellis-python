@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "repositories": [
+    {"id":"zod","commit":"10dda3a3a4bc76ed0bf83e994de194587e489ef8","tree":"3abaad7a283d1bb41072d083251f95d8a6c37f77"},
+    {"id":"date-fns","commit":"766dea98b704f119e221b8365909b44301500ae4","tree":"80a6568a710697afc1461c54075148b4f7949618"},
+    {"id":"tanstack-query","commit":"129955c8fd8e96b61b8cb8b40e1dac3828b4cbee","tree":"b82a77f46b162d7eacfad56488f9202a8cf3cde9"},
+    {"id":"requests","commit":"611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60","tree":"10caa09e09cd366febe74c2afa345939ffd5691f"},
+    {"id":"flask","commit":"d73fa1cdcbd8b1465c151db8924ba58b1dd14e35","tree":"d46b1a2a2cc4219b0ad5060ab618e9f5ae635680"},
+    {"id":"rich","commit":"9d8f9a372cc5916fd4781fec207ced7ddac2f08f","tree":"93aa807db25b745b28e18bf7f96f8173b564016e"}
+  ],
+  "baselines": [
+    {"id":"zod","index":89,"completeness":"incomplete","production":{"files":311,"sloc":46651},"parseFailures":0,"unresolvedReasons":{"no-target":108,"non-literal-dynamic":2}},
+    {"id":"date-fns","index":79,"completeness":"incomplete","production":{"files":1652,"sloc":83344},"parseFailures":0,"unresolvedReasons":{"no-target":3,"non-literal-dynamic":1}},
+    {"id":"tanstack-query","index":81,"completeness":"incomplete","production":{"files":664,"sloc":46718},"parseFailures":0,"unresolvedReasons":{"unsupported-exports":567,"exports-encapsulation":60,"no-target":62,"non-literal-dynamic":1}},
+    {"id":"requests","index":100,"completeness":"incomplete","production":{"files":22,"sloc":5095},"parseFailures":25,"unresolvedReasons":{"no-target":175,"non-literal-dynamic":2}},
+    {"id":"flask","index":100,"completeness":"incomplete","production":{"files":35,"sloc":8074},"parseFailures":40,"unresolvedReasons":{"no-target":158,"non-literal-dynamic":2}},
+    {"id":"rich","index":100,"completeness":"incomplete","production":{"files":146,"sloc":36846},"parseFailures":104,"unresolvedReasons":{"no-target":578,"non-literal-dynamic":3}}
+  ],
+  "fixtures": [
+    {"id":"parser-recovery","path":"fixtures/parser-recovery","snapshot":"0b66d79dbe81d0de127ab9afeb22ec32cf1ddb9f6a19dd7c789a0d1568211559"},
+    {"id":"indentation","path":"fixtures/indentation","snapshot":"944e533260b72e97cb82cabf44789186ddad06bfa75f329f1260116aea1bf918"},
+    {"id":"static-import-uncertainty","path":"fixtures/static-import-uncertainty","snapshot":"88cd6cae42564fe165e3ccdf99d39239bc29e989e2d931e762a2ed49f58cbe43"},
+    {"id":"unsupported-exports","path":"fixtures/unsupported-exports","snapshot":"19ee38efe46cadcdcee6ae4cecf51d85cbf209a209c89ebf083e0b31dc2c65aa"},
+    {"id":"resource-exhaustion","path":"fixtures/resource-exhaustion","snapshot":"04983d644e931e5ba8a42a5165a04d70c2a0b69e3b3b26bdefb69593d9dc52d6","maxMatchWork":1}
+  ]
+}
