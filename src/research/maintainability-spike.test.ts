@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { runInNewContext } from "node:vm";
 import pairs from "../../docs/research/maintainability-pairs.json";
 import { auditWorkspace } from "../audit/audit.ts";
 import type { CloneGroup } from "../metrics/duplication.ts";
@@ -50,6 +51,15 @@ function totals(source: string) {
 	};
 }
 
+/** Execute only the committed, dependency-free research fixture in an isolated context. */
+function fixtureRun(source: string): (x: number) => number {
+	const transformed = source.replace("export function run", "function run");
+	if (transformed === source) throw new Error("research fixture must export run");
+	const evaluated: unknown = runInNewContext(`${transformed}\nrun`, Object.create(null));
+	if (typeof evaluated !== "function") throw new Error("research fixture run is not callable");
+	return evaluated as (x: number) => number;
+}
+
 describe("maintainabilityPairs", () => {
 	test("reproduces all eight pairs and exposes the shared-rule generalization ambiguity", () => {
 		const results = measureMaintainabilityPairs();
@@ -62,13 +72,9 @@ describe("maintainabilityPairs", () => {
 	for (const pair of pairs) {
 		test(`checks bounded behavioral equivalence and the metric response for ${pair.id}`, async () => {
 			// Trusted, committed JavaScript fixtures only; never execute audited source.
-			const before: { run: (x: number) => number } = await import(
-				`data:text/javascript,${encodeURIComponent(pair.before)}`
-			);
-			const after: { run: (x: number) => number } = await import(
-				`data:text/javascript,${encodeURIComponent(pair.after)}`
-			);
-			for (let x = -20; x <= 40; x++) expect(after.run(x)).toBe(before.run(x));
+			const before = fixtureRun(pair.before);
+			const after = fixtureRun(pair.after);
+			for (let x = -20; x <= 40; x++) expect(after(x)).toBe(before(x));
 			const a = totals(pair.before);
 			const b = totals(pair.after);
 			if (pair.prediction.startsWith("flow-decreases")) expect(b.flow).toBeLessThan(a.flow);
