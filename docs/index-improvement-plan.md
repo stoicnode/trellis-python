@@ -12,6 +12,8 @@ artifact. The replacement
 uses existing paired changes, expert labels and rule fixtures. Phase 6's Release A
 inventory, migration and rollback are implemented; this replacement validation
 and any Release B scoring cutover remain pending.
+The [signal contender register](research/signal-contenders.md) is the running
+status and next-gate summary for formula, measurement and syntax-rule candidates.
 Recorded 2026-09-22 against
 `63e71bba0da5ca761898ff03ebec936ffffa668c`, analyzer `0.4.0`, scoring
 `0.4.0-provisional`.
