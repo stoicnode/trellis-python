@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { parseSource } from "../syntax/index.ts";
-import { collectImportSites } from "./graph-imports.ts";
+import { collectImportSites } from "./import-sites.ts";
+import { parseSource } from "./index.ts";
 
 /** Extract the import sites of `text` (parsed as `src/a.ts`). */
 function sites(text: string) {
