@@ -171,7 +171,6 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 }
 
 /** Check an already-prepared external checkout without fetching or auditing it. */
-/* c8 ignore start -- opt-in prepared-root paths are intentionally absent from normal offline tests. */
 export function verifyPinnedRepositories(root: string, externalRoot: string): string[] {
 	const manifest = loadOssBenchmarkManifest(root);
 	return manifest.repositories.flatMap((repository) => {
@@ -348,6 +347,7 @@ export async function auditPostFixPython(root: string, externalRoot: string): Pr
 export async function main(
 	args: string[],
 	write: (text: string) => void = console.log,
+	root = resolve(import.meta.dir, "../corpus/oss-benchmark"),
 ): Promise<number> {
 	const preparedIndex = args.indexOf("--prepared-root");
 	const artifactIndex = args.indexOf("--artifact-root");
@@ -358,7 +358,6 @@ export async function main(
 	const artifactRoot = args[artifactIndex + 1];
 	if (preparedRoot === undefined || artifactRoot === undefined)
 		throw new Error("prepared roots need values");
-	const root = resolve(import.meta.dir, "../corpus/oss-benchmark");
 	const integrity = verifyPinnedRepositories(root, preparedRoot);
 	const artifactMismatches = await verifyBaselineArtifacts(root, artifactRoot);
 	const reAudit = args.includes("--reaudit")
@@ -385,4 +384,3 @@ export async function main(
 }
 
 if (import.meta.main) main(process.argv.slice(2)).then((code) => (process.exitCode = code));
-/* c8 ignore stop */

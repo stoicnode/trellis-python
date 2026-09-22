@@ -58,8 +58,7 @@ export function pythonAstEvidenceMismatches(
 	return failures;
 }
 
-/* c8 ignore start -- preparation invokes external Git and Python by contract. */
-function pythonFiles(root: string, current = root): string[] {
+export function pythonFiles(root: string, current = root): string[] {
 	return readdirSync(current, { withFileTypes: true }).flatMap((entry) => {
 		const path = resolve(current, entry.name);
 		if (entry.isSymbolicLink()) throw new Error(`prepared checkout rejects symlink: ${path}`);
@@ -140,4 +139,3 @@ if (import.meta.main) {
 		),
 	);
 }
-/* c8 ignore stop */

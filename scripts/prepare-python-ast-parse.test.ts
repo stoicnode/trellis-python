@@ -1,15 +1,26 @@
 import { describe, expect, test } from "bun:test";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import {
 	loadCommittedPythonAstEvidence,
 	parsePythonAstEvidence,
+	preparePythonAstEvidence,
 	pythonAstEvidenceMismatches,
+	pythonFiles,
 } from "./prepare-python-ast-parse.ts";
 import { loadOssBenchmarkManifest } from "./validate-oss-benchmarks.ts";
 
 const ROOT = resolve(import.meta.dir, "../corpus/oss-benchmark");
 
 describe("Python ast preparation evidence", () => {
+	test("collects nested Python inputs without reading or executing them", () => {
+		const root = resolve(ROOT, "fixtures/parser-recovery");
+		expect(
+			pythonFiles(root)
+				.map((path) => relative(root, path))
+				.sort(),
+		).toEqual(["src/recovery.py", "src/session.py"]);
+	});
+
 	test("maps committed evidence to the manifest's pinned Python repositories", () => {
 		const manifest = loadOssBenchmarkManifest(ROOT);
 		const evidence = loadCommittedPythonAstEvidence(ROOT);
@@ -37,5 +48,19 @@ describe("Python ast preparation evidence", () => {
 		expect(
 			pythonAstEvidenceMismatches(manifest, { ...evidence, entries: evidence.entries.slice(1) }),
 		).toContain("evidence must contain exactly flask, requests, and rich");
+	});
+
+	test("refuses stale preparation evidence before launching Python or reading a checkout", () => {
+		const manifest = loadOssBenchmarkManifest(ROOT);
+		const evidence = loadCommittedPythonAstEvidence(ROOT);
+		const stale = {
+			...evidence,
+			entries: evidence.entries.map((entry) =>
+				entry.id === "requests" ? { ...entry, revision: "0".repeat(40) } : entry,
+			),
+		};
+		expect(() => preparePythonAstEvidence("/no-prepared-checkout", manifest, stale)).toThrow(
+			"evidence revision/tree differs from manifest pin",
+		);
 	});
 });
