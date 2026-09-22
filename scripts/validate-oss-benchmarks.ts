@@ -120,12 +120,18 @@ function unresolvedReasons(report: AuditReport): Record<string, number> {
 	return reasons;
 }
 
+/**
+ * Process-wide peak RSS in MiB. Fixtures run sequentially in one process, so
+ * this is cumulative evidence rather than an isolated per-fixture maximum.
+ */
 function peakRssMb(): number {
+	const resourceUsage = process.resourceUsage?.();
+	if (resourceUsage?.maxRSS !== undefined) return resourceUsage.maxRSS / 1024;
 	try {
 		const match = readFileSync("/proc/self/status", "utf8").match(/^VmHWM:\s+(\d+)\s*kB$/m);
 		if (match?.[1] !== undefined) return Number.parseInt(match[1], 10) / 1024;
 	} catch {
-		// Non-Linux hosts expose no VmHWM; current RSS remains useful evidence.
+		// Hosts without resourceUsage or VmHWM fall back to current RSS below.
 	}
 	return process.memoryUsage().rss / (1024 * 1024);
 }
@@ -154,6 +160,7 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 						},
 					}),
 		});
+		const measurement = { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() };
 		const metrics = Object.fromEntries(
 			Object.values(result.report.metrics).map((metric) => [
 				metric.id,
@@ -168,7 +175,7 @@ export async function runOssBenchmark(root: string): Promise<OssBenchmarkRecord>
 			scoreContributions: result.report.score.contributions,
 			unresolvedReasons: unresolvedReasons(result.report),
 			diagnosticCodes: await pythonDiagnosticCodes(fixtureRoot),
-			measurement: { durationMs: performance.now() - startedAt, peakRssMb: peakRssMb() },
+			measurement,
 		});
 	}
 	return { fixtures, ok: fixtures.every((fixture) => fixture.snapshot.matches) };
